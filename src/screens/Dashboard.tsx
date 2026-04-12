@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { LogOut, CheckCircle, AlertTriangle, HelpCircle, Video, History, Users, Settings } from "lucide-react";
+import { LogOut, CheckCircle, AlertTriangle, HelpCircle, Video, History, Users, Settings, Home } from "lucide-react";
 import { motion } from "motion/react";
 import Navigation from "../components/Navigation";
 
@@ -19,17 +19,19 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-24 flex flex-col bg-dg-bg">
       <header className="sticky top-0 z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between w-full">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="w-6 h-6 text-dg-accent" />
-            <h1 className="text-xl font-bold tracking-tight font-headline">Inicio</h1>
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between px-4 py-4">
+            <div className="flex items-center gap-2">
+              <Home className="w-6 h-6 text-dg-accent" />
+              <h1 className="text-xl font-bold tracking-tight font-headline">Inicio</h1>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="p-4 space-y-6 max-w-7xl mx-auto w-full">
+      <main className="flex-1 px-4 py-6 space-y-6 max-w-7xl mx-auto w-full">
         {/* Summary Cards */}
         <div className="grid grid-cols-3 gap-4">
           {stats.map((stat, i) => (

@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, Search, SlidersHorizontal, CheckCircle, AlertTriangle, HelpCircle, ChevronRight } from "lucide-react";
+import { Shield, Search, SlidersHorizontal, CheckCircle, AlertTriangle, HelpCircle, ChevronRight, History as HistoryIcon } from "lucide-react";
 import { motion } from "motion/react";
 import Navigation from "../components/Navigation";
 
@@ -36,7 +36,7 @@ export default function History() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between px-4 py-4">
             <div className="flex items-center gap-3">
-              <Shield className="w-6 h-6 text-dg-accent" />
+              <HistoryIcon className="w-6 h-6 text-dg-accent" />
               <h1 className="text-xl font-bold tracking-tight font-headline">Historial</h1>
             </div>
           </div>

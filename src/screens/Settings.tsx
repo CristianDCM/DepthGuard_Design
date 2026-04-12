@@ -65,7 +65,7 @@ export default function Settings() {
                 <Shield className="w-12 h-12 text-dg-accent fill-dg-accent/10" />
               </div>
               <div>
-                <h3 className="text-2xl font-black text-dg-accent tracking-tighter uppercase font-headline">DepthGuard</h3>
+                <h3 className="text-2xl font-black text-dg-accent tracking-tighter font-headline">DepthGuard</h3>
                 <p className="text-sm font-medium mt-1">Proyecto de Grado 2026</p>
                 <p className="text-xs text-dg-text-muted mt-1">Institución Universitaria de Colombia</p>
               </div>
