@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Edit2, Save, X } from "lucide-react";
 import { motion } from "motion/react";
 
 export default function EditUserModal() {
   const navigate = useNavigate();
+  const [isActive, setIsActive] = useState(true);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -24,10 +26,13 @@ export default function EditUserModal() {
           <div className="space-y-3">
             <label className="block text-[10px] font-bold tracking-widest text-dg-text-muted uppercase font-display">ESTADO DEL USUARIO</label>
             <div className="flex items-center justify-between bg-dg-bg p-4 rounded-xl border border-dg-border">
-              <span className="text-white font-medium">Activo</span>
-              <div className="relative inline-flex items-center cursor-pointer">
-                <div className="w-12 h-6 bg-dg-accent rounded-full transition-colors" />
-                <div className="absolute right-0.5 w-5 h-5 bg-dg-bg rounded-full shadow-sm" />
+              <span className="text-white font-medium">{isActive ? "Activo" : "Inactivo"}</span>
+              <div 
+                className="relative inline-flex items-center cursor-pointer"
+                onClick={() => setIsActive(!isActive)}
+              >
+                <div className={`w-12 h-6 rounded-full transition-colors ${isActive ? 'bg-dg-accent' : 'bg-dg-border'}`} />
+                <div className={`absolute w-5 h-5 bg-dg-bg rounded-full shadow-sm transition-transform ${isActive ? 'right-0.5' : 'left-0.5'}`} />
               </div>
             </div>
             <p className="text-[10px] text-dg-text-muted leading-relaxed px-1">

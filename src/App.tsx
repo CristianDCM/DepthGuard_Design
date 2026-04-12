@@ -10,8 +10,6 @@ import UnknownDetail from "./screens/UnknownDetail";
 import UserProfile from "./screens/UserProfile";
 import EditUserModal from "./screens/EditUserModal";
 import RegisterStart from "./screens/RegisterStart";
-import RegisterStep3 from "./screens/RegisterStep3";
-import RegisterSuccess from "./screens/RegisterSuccess";
 import Settings from "./screens/Settings";
 import DeleteConfirmModal from "./screens/DeleteConfirmModal";
 
@@ -31,8 +29,6 @@ export default function App() {
         <Route path="/users/edit" element={<EditUserModal />} />
         <Route path="/users/delete/confirm" element={<DeleteConfirmModal />} />
         <Route path="/register/start" element={<RegisterStart />} />
-        <Route path="/register/step3" element={<RegisterStep3 />} />
-        <Route path="/register/success" element={<RegisterSuccess />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>
     </Router>
