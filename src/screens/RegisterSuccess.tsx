@@ -9,9 +9,7 @@ export default function RegisterSuccess() {
     <div className="min-h-screen bg-dg-bg overflow-hidden relative">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm z-40" />
 
-      <motion.div 
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
+      <div 
         className="fixed bottom-0 inset-x-0 z-50 bg-dg-bg border-t border-x border-dg-border rounded-t-[32px] w-full max-w-lg mx-auto"
       >
         <div className="flex justify-center pt-4 pb-6">
@@ -79,7 +77,7 @@ export default function RegisterSuccess() {
             <span>Volver a Usuarios</span>
           </button>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

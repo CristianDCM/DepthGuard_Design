@@ -9,9 +9,7 @@ export default function RegisterStep3() {
     <div className="min-h-screen bg-dg-bg overflow-hidden relative">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm z-40" />
 
-      <motion.div 
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
+      <div 
         className="fixed bottom-0 left-0 right-0 z-50 bg-dg-bg rounded-t-2xl border-t border-x border-dg-border p-6 shadow-[0px_-24px_48px_rgba(0,0,0,0.6)] max-h-[92vh] overflow-y-auto"
       >
         <div className="w-12 h-1 bg-dg-border rounded-full mx-auto mb-8 shrink-0" />
@@ -67,7 +65,7 @@ export default function RegisterStep3() {
             </button>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
