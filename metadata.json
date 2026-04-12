@@ -1,0 +1,7 @@
+{
+  "name": "DepthGuard",
+  "description": "Sistema de Control de Acceso 3D con monitoreo en vivo, historial de eventos y gestión de usuarios.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
