@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Settings as SettingsIcon, Server, Video, Bell, Database, Shield, LogOut, Info } from "lucide-react";
 import { motion } from "motion/react";
@@ -108,12 +109,17 @@ function StatusRow({ label, icon: Icon, status }: { label: string, icon: any, st
   );
 }
 
-function ToggleRow({ label, checked }: { label: string, checked?: boolean }) {
+function ToggleRow({ label, checked: initialChecked }: { label: string, checked?: boolean }) {
+  const [isChecked, setIsChecked] = useState(initialChecked || false);
+
   return (
     <div className="flex justify-between items-center">
       <span className="text-sm font-medium">{label}</span>
-      <div className={`w-11 h-6 rounded-full transition-colors flex items-center px-0.5 cursor-pointer ${checked ? 'bg-dg-accent' : 'bg-slate-800'}`}>
-        <div className={`w-5 h-5 rounded-full transition-transform shadow-sm ${checked ? 'translate-x-5 bg-dg-bg' : 'bg-dg-text-muted'}`} />
+      <div 
+        onClick={() => setIsChecked(!isChecked)}
+        className={`w-11 h-6 rounded-full transition-colors flex items-center px-0.5 cursor-pointer ${isChecked ? 'bg-dg-accent' : 'bg-slate-800'}`}
+      >
+        <div className={`w-5 h-5 rounded-full transition-transform shadow-sm ${isChecked ? 'translate-x-5 bg-dg-bg' : 'bg-dg-text-muted'}`} />
       </div>
     </div>
   );

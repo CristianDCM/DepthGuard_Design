@@ -6,7 +6,7 @@ export default function LiveMonitor() {
   return (
     <div className="min-h-screen pb-24 flex flex-col">
       <header className="sticky top-0 z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
-        <div className="flex items-center justify-between px-4 py-4">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between w-full">
           <div className="flex items-center gap-3">
             <Video className="w-6 h-6 text-dg-accent" />
             <h1 className="text-xl font-bold tracking-tight font-headline">Vivo</h1>
