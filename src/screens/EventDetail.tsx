@@ -1,17 +1,54 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Video, ExternalLink, Fingerprint, ShieldAlert, UserSearch, Plus, FileText } from "lucide-react";
 import { motion } from "motion/react";
 import Navigation from "../components/Navigation";
+import { getEventoPorId, type Evento } from "../lib/supabase";
 
 export default function EventDetail() {
-  const { type } = useParams<{ type: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [evento, setEvento] = useState<Evento | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const isAuthorized = type === "authorized";
-  const isFraud = type === "fraud";
-  const isUnknown = type === "unknown";
+  useEffect(() => {
+    async function cargar() {
+      if (!id) return;
+      try {
+        const data = await getEventoPorId(id);
+        setEvento(data);
+      } catch (err) {
+        console.error("Error cargando evento:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    cargar();
+  }, [id]);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-dg-bg">
+        <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!evento) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-dg-bg">
+        <p className="text-dg-text-muted">Evento no encontrado</p>
+      </div>
+    );
+  }
+
+  const isAuthorized = evento.estado === "ACCESO_PERMITIDO";
+  const isFraud = evento.estado === "FRAUDE";
+  const isUnknown = evento.estado === "DESCONOCIDO";
+  const metricas = evento.metricas_json;
+  const confianzaPct = evento.confianza != null ? Math.round(evento.confianza * 100) : null;
   const headerTitle = isFraud ? "Detalle de Fraude" : "Detalle del Evento";
+  const timestamp = new Date(evento.timestamp).toLocaleString("es", { dateStyle: "short", timeStyle: "medium" });
 
   return (
     <div className="min-h-screen pb-24 flex flex-col">
@@ -58,70 +95,44 @@ export default function EventDetail() {
 
             <div className={`relative rounded-xl overflow-hidden cyber-card shadow-2xl border border-dg-border ${isUnknown ? 'aspect-video' : 'aspect-[4/3]'}`}>
               {isFraud && <div className="absolute inset-0 bg-dg-error/20 mix-blend-overlay z-10 pointer-events-none" />}
-              <img 
-                className={`w-full h-full object-cover opacity-80 ${!isAuthorized ? 'grayscale' : ''}`} 
-                src={`https://picsum.photos/seed/${isFraud ? 'fraud' : isUnknown ? 'unknown' : 'face'}-scan/800/600`} 
-                alt="Scan"
-                referrerPolicy="no-referrer"
-              />
-              
-              {isAuthorized && (
-                <>
-                  <div className="absolute inset-0 bg-gradient-to-t from-dg-bg via-transparent to-transparent" />
-                  <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
-                    <div className="flex items-center gap-2 text-dg-accent">
-                      <Video className="w-4 h-4 fill-dg-accent" />
-                      <span className="text-xs font-bold font-headline uppercase tracking-tighter">Cámara</span>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-dg-text-muted text-[10px] uppercase font-bold tracking-widest">Timestamp</p>
-                      <p className="text-white text-xs font-mono">2026-10-27 14:32:05</p>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {isFraud && (
-                <div className="absolute bottom-4 left-4 z-20">
-                  <div className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg">
-                    <p className="font-mono text-xs text-white/90 tracking-tighter">2026-04-11 14:35:12</p>
-                  </div>
+              {evento.foto_url ? (
+                <img 
+                  className={`w-full h-full object-cover opacity-80 ${!isAuthorized ? 'grayscale' : ''}`} 
+                  src={evento.foto_url} 
+                  alt="Captura"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-dg-bg text-dg-text-muted">
+                  <Video className="w-16 h-16 opacity-20" />
                 </div>
               )}
-
-              {isUnknown && (
-                <>
-                  <div className="absolute bottom-4 right-4 bg-dg-bg/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-dg-border">
-                    <code className="text-[10px] text-dg-text-muted font-mono">2026-10-27 14:32:05</code>
-                  </div>
-                  <div className="absolute top-4 left-4">
-                    <div className="w-12 h-12 border-t-2 border-l-2 border-yellow-500/40 rounded-tl-lg" />
-                  </div>
-                  <div className="absolute bottom-4 left-4">
-                    <div className="w-12 h-12 border-b-2 border-l-2 border-yellow-500/40 rounded-bl-lg" />
-                  </div>
-                </>
-              )}
+              
+              <div className="absolute inset-0 bg-gradient-to-t from-dg-bg via-transparent to-transparent" />
+              <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg">
+                <p className="font-mono text-xs text-white/90 tracking-tighter">{timestamp}</p>
+              </div>
             </div>
           </div>
 
           {/* Right Column: Details and Actions */}
           <div className="lg:col-span-5 space-y-6">
-            {isAuthorized && (
+            {isAuthorized && evento.nombre && (
               <div className="cyber-card p-5 flex items-center gap-4">
                 <div className="w-16 h-16 rounded-full bg-dg-accent/20 border-2 border-dg-accent flex items-center justify-center text-dg-accent font-headline font-bold text-xl">
-                  JP
+                  {evento.nombre.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-grow">
-                  <h3 className="text-white font-headline font-bold text-lg">Juan Pérez</h3>
-                  <p className="text-dg-text-muted text-xs font-mono">ID: #1</p>
+                  <h3 className="text-white font-headline font-bold text-lg">{evento.nombre}</h3>
+                  <p className="text-dg-text-muted text-xs font-mono">ID: #{evento.usuario_id?.substring(0, 8) ?? "—"}</p>
                 </div>
-                <button 
-                  onClick={() => navigate("/profile/juan")}
-                  className="text-dg-accent text-xs font-bold font-headline flex items-center gap-1 hover:opacity-70 transition-all"
-                >
-                  Ver Perfil <ExternalLink className="w-4 h-4" />
-                </button>
+                {evento.usuario_id && (
+                  <button 
+                    onClick={() => navigate(`/profile/${evento.usuario_id}`)}
+                    className="text-dg-accent text-xs font-bold font-headline flex items-center gap-1 hover:opacity-70 transition-all"
+                  >
+                    Ver Perfil <ExternalLink className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             )}
 
@@ -140,7 +151,7 @@ export default function EventDetail() {
                 <div className="bg-dg-card p-6 rounded-2xl border-l-4 border-dg-error border-y border-r border-dg-border">
                   <h4 className="font-headline font-bold text-xs tracking-widest text-dg-error mb-3 uppercase">Motivo de Detección</h4>
                   <p className="text-white text-base leading-relaxed">
-                    Superficie plana detectada — Varianza de profundidad insuficiente para rostro real
+                    {evento.motivo ?? "Superficie plana detectada — Varianza de profundidad insuficiente para rostro real"}
                   </p>
                 </div>
               </div>
@@ -173,37 +184,34 @@ export default function EventDetail() {
                 <Fingerprint className={`w-6 h-6 ${isFraud ? 'text-dg-error' : isUnknown ? 'text-yellow-500' : 'text-dg-accent'}`} />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {isAuthorized && (
-                  <>
-                    <MetricItem label="Confianza" value="94%" progress={94} />
-                    <MetricItem label="Varianza de Profundidad" value="1.2" progress={40} />
-                    <MetricItem label="Rango 3D" value="6.5cm" progress={65} />
-                    <MetricItem label="Distancia" value="45cm" progress={45} color="bg-blue-400" />
-                  </>
-                )}
-                {isFraud && (
-                  <>
-                    <MetricItem label="Confianza" value="N/A" progress={0} color="bg-dg-error" />
-                    <MetricItem label="Varianza de Profundidad" value="0.3" progress={15} color="bg-dg-error" />
-                    <MetricItem label="Rango 3D" value="0.8 cm" progress={10} color="bg-dg-error" />
-                    <MetricItem label="Distancia" value="70 cm" progress={60} color="bg-blue-400" />
-                  </>
-                )}
-                {isUnknown && (
-                  <>
-                    <MetricItem label="Confianza" value="0% / Sin match" progress={0} color="bg-yellow-500" />
-                    <MetricItem label="Varianza de Profundidad" value="1.8" progress={75} color="bg-dg-success" />
-                    <MetricItem label="Rango 3D" value="5.2 cm" progress={85} color="bg-dg-success" />
-                    <MetricItem label="Distancia" value="55 cm" progress={50} color="bg-blue-400" />
-                  </>
-                )}
+                <MetricItem 
+                  label="Confianza" 
+                  value={confianzaPct != null ? `${confianzaPct}%` : "N/A"} 
+                  progress={confianzaPct ?? 0} 
+                  color={isFraud ? "bg-dg-error" : isUnknown ? "bg-yellow-500" : "bg-dg-accent"}
+                />
+                <MetricItem 
+                  label="Varianza de Profundidad" 
+                  value={metricas?.varianza?.toFixed(1) ?? "—"} 
+                  progress={Math.min((metricas?.varianza ?? 0) / 3 * 100, 100)} 
+                  color={isFraud ? "bg-dg-error" : "bg-dg-accent"}
+                />
+                <MetricItem 
+                  label="Rango 3D" 
+                  value={metricas?.rango_3d ? `${metricas.rango_3d.toFixed(1)} cm` : "—"} 
+                  progress={Math.min((metricas?.rango_3d ?? 0) / 10 * 100, 100)} 
+                  color={isFraud ? "bg-dg-error" : "bg-dg-accent"}
+                />
+                <MetricItem 
+                  label="Distancia" 
+                  value={metricas?.distancia ? `${metricas.distancia} cm` : "—"} 
+                  progress={Math.min((metricas?.distancia ?? 0) / 150 * 100, 100)} 
+                  color="bg-blue-400"
+                />
               </div>
             </div>
 
             <div className="flex flex-col gap-3 pt-4">
-              <button className="btn-primary w-full py-4 flex items-center justify-center gap-2">
-                <FileText className="w-5 h-5" /> Descargar Informe
-              </button>
               <button 
                 onClick={() => navigate(-1)}
                 className="btn-secondary w-full py-4"
