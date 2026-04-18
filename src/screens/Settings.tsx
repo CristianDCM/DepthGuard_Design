@@ -1,11 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Settings as SettingsIcon, Server, Video, Bell, Database, Shield, LogOut, Info } from "lucide-react";
-import { motion } from "motion/react";
+import { Settings as SettingsIcon, Server, Video, Bell, Database, Shield, LogOut } from "lucide-react";
 import Navigation from "../components/Navigation";
+import { getEstadoSistema, type EstadoSistema } from "../lib/supabase";
 
 export default function Settings() {
   const navigate = useNavigate();
+  const [estado, setEstado] = useState<EstadoSistema | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function cargar() {
+      try {
+        const data = await getEstadoSistema();
+        setEstado(data);
+      } catch (err) {
+        console.error("Error cargando estado:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    cargar();
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("dg_admin");
+    navigate("/");
+  };
+
+  // Verificar si el heartbeat es reciente (menos de 30 segundos)
+  const servidorConectado = estado?.ultimo_heartbeat 
+    ? (Date.now() - new Date(estado.ultimo_heartbeat).getTime()) < 30000
+    : false;
 
   return (
     <div className="min-h-screen pb-24 flex flex-col bg-dg-bg">
@@ -19,69 +45,75 @@ export default function Settings() {
       </header>
 
       <main className="flex-1 px-4 py-6 space-y-6 max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-6">
-            <section className="cyber-card p-5 space-y-4">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-dg-accent">Estado del Sistema</h2>
-              <div className="space-y-4">
-                <StatusRow label="Servidor" icon={Server} status="Conectado" />
-                <StatusRow label="Cámara" icon={Video} status="Activa" />
-                <StatusRow label="Push" icon={Bell} status="Configurado" />
-                <StatusRow label="Base de Datos" icon={Database} status="OK" />
-              </div>
-            </section>
-
-            <section className="cyber-card p-5 space-y-5">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-dg-accent">Notificaciones</h2>
-              <div className="space-y-6">
-                <ToggleRow label="Alertas de fraude" checked />
-                <ToggleRow label="Accesos permitidos" />
-                <ToggleRow label="Desconocidos" checked />
-                <button className="w-full py-3 bg-dg-accent/10 border border-dg-accent/20 rounded-lg text-[10px] font-bold uppercase tracking-widest text-dg-accent hover:bg-dg-accent/20 transition-all active:scale-95">
-                  Enviar notificación de prueba
-                </button>
-              </div>
-            </section>
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
           </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
+              <section className="cyber-card p-5 space-y-4">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-dg-accent">Estado del Sistema</h2>
+                <div className="space-y-4">
+                  <StatusRow label="Servidor" icon={Server} connected={servidorConectado} />
+                  <StatusRow label="Cámara" icon={Video} connected={estado?.camara_activa ?? false} />
+                  <StatusRow label="Push" icon={Bell} connected={true} />
+                  <StatusRow label="Base de Datos" icon={Database} connected={true} />
+                </div>
+              </section>
 
-          <div className="space-y-6">
-            <section className="cyber-card overflow-hidden p-5 space-y-4">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-dg-accent">Información Técnica</h2>
-              <div className="rounded-lg overflow-hidden border border-dg-border">
-                <table className="w-full text-left text-xs">
-                  <tbody className="divide-y divide-dg-border">
-                    <TechRow label="Modo cámara" value="simulada" />
-                    <TechRow label="Anti-spoofing" value="ACTIVO" highlight />
-                    <TechRow label="Tolerancia facial" value="0.55" />
-                    <TechRow label="Umbral varianza" value="1.0" />
-                    <TechRow label="Cooldown eventos" value="5s" />
-                  </tbody>
-                </table>
-              </div>
-            </section>
+              <section className="cyber-card p-5 space-y-5">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-dg-accent">Notificaciones</h2>
+                <div className="space-y-6">
+                  <ToggleRow label="Alertas de fraude" checked />
+                  <ToggleRow label="Accesos permitidos" />
+                  <ToggleRow label="Desconocidos" checked />
+                  <button className="w-full py-3 bg-dg-accent/10 border border-dg-accent/20 rounded-lg text-[10px] font-bold uppercase tracking-widest text-dg-accent hover:bg-dg-accent/20 transition-all active:scale-95">
+                    Enviar notificación de prueba
+                  </button>
+                </div>
+              </section>
+            </div>
 
-            <section className="cyber-card p-8 text-center space-y-6">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-dg-bg rounded-2xl shadow-inner border border-dg-accent/10">
-                <Shield className="w-12 h-12 text-dg-accent fill-dg-accent/10" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-black text-dg-accent tracking-tighter font-headline">DepthGuard</h3>
-                <p className="text-sm font-medium mt-1">Proyecto de Grado 2026</p>
-                <p className="text-xs text-dg-text-muted mt-1">Institución Universitaria de Colombia</p>
-              </div>
-              <div className="flex flex-wrap justify-center gap-2">
-                {["FastAPI", "MediaPipe", "dlib", "Tailwind"].map((tag) => (
-                  <span key={tag} className="px-3 py-1 bg-dg-bg text-[10px] font-bold text-dg-accent rounded-full border border-dg-accent/10">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </section>
+            <div className="space-y-6">
+              <section className="cyber-card overflow-hidden p-5 space-y-4">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-dg-accent">Información Técnica</h2>
+                <div className="rounded-lg overflow-hidden border border-dg-border">
+                  <table className="w-full text-left text-xs">
+                    <tbody className="divide-y divide-dg-border">
+                      <TechRow label="Modo cámara" value={estado?.modo_camara ?? "—"} />
+                      <TechRow label="Anti-spoofing" value={estado?.antispoofing_activo ? "ACTIVO" : "INACTIVO"} highlight={estado?.antispoofing_activo} />
+                      <TechRow label="Tolerancia facial" value={String(estado?.tolerancia_facial ?? "—")} />
+                      <TechRow label="Umbral varianza" value={String(estado?.umbral_varianza ?? "—")} />
+                      <TechRow label="Cooldown eventos" value={`${estado?.cooldown_eventos ?? "—"}s`} />
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section className="cyber-card p-8 text-center space-y-6">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-dg-bg rounded-2xl shadow-inner border border-dg-accent/10">
+                  <Shield className="w-12 h-12 text-dg-accent fill-dg-accent/10" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black text-dg-accent tracking-tighter font-headline">DepthGuard</h3>
+                  <p className="text-sm font-medium mt-1">Proyecto de Grado 2026</p>
+                  <p className="text-xs text-dg-text-muted mt-1">Institución Universitaria de Colombia</p>
+                </div>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {["FastAPI", "MediaPipe", "dlib", "Supabase"].map((tag) => (
+                    <span key={tag} className="px-3 py-1 bg-dg-bg text-[10px] font-bold text-dg-accent rounded-full border border-dg-accent/10">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            </div>
           </div>
-        </div>
+        )}
 
         <button 
-          onClick={() => navigate("/")}
+          onClick={handleLogout}
           className="w-full py-4 rounded-xl border border-dg-error/30 bg-dg-error/5 flex items-center justify-center gap-3 group hover:bg-dg-error/10 transition-colors active:scale-95 max-w-md mx-auto"
         >
           <LogOut className="w-5 h-5 text-dg-error" />
@@ -94,16 +126,18 @@ export default function Settings() {
   );
 }
 
-function StatusRow({ label, icon: Icon, status }: { label: string, icon: any, status: string }) {
+function StatusRow({ label, icon: Icon, connected }: { label: string, icon: any, connected: boolean }) {
   return (
     <div className="flex justify-between items-center">
       <div className="flex items-center gap-3">
         <Icon className="w-5 h-5 text-dg-text-muted" />
         <span className="text-sm font-medium">{label}</span>
       </div>
-      <div className="flex items-center gap-2 px-2 py-1 bg-dg-success/10 rounded-full">
-        <span className="w-1.5 h-1.5 rounded-full bg-dg-success animate-pulse" />
-        <span className="text-[10px] font-bold text-dg-success uppercase">{status}</span>
+      <div className={`flex items-center gap-2 px-2 py-1 rounded-full ${connected ? 'bg-dg-success/10' : 'bg-dg-error/10'}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-dg-success animate-pulse' : 'bg-dg-error'}`} />
+        <span className={`text-[10px] font-bold uppercase ${connected ? 'text-dg-success' : 'text-dg-error'}`}>
+          {connected ? "Conectado" : "Desconectado"}
+        </span>
       </div>
     </div>
   );
@@ -133,4 +167,3 @@ function TechRow({ label, value, highlight }: { label: string, value: string, hi
     </tr>
   );
 }
-
