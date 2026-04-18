@@ -1,34 +1,73 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, Search, SlidersHorizontal, CheckCircle, AlertTriangle, HelpCircle, ChevronRight, History as HistoryIcon } from "lucide-react";
+import { Search, CheckCircle, AlertTriangle, HelpCircle, ChevronRight, History as HistoryIcon } from "lucide-react";
 import { motion } from "motion/react";
 import Navigation from "../components/Navigation";
+import { getHistorial, type Evento, type EstadoEvento } from "../lib/supabase";
 
 export default function History() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState("Todos");
+  const [activeFilter, setActiveFilter] = useState<"Todos" | "Autorizados" | "Fraude" | "Desconocido">("Todos");
+  const [events, setEvents] = useState<Evento[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const events = [
-    { id: 1, type: "authorized", title: "Juan Pérez", sub: "Confianza: 98%", time: "10:45 AM", icon: CheckCircle, color: "text-dg-success", path: "/event/authorized" },
-    { id: 2, type: "fraud", title: "Intento de Fraude", sub: "Superficie plana detectada", time: "09:12 AM", icon: AlertTriangle, color: "text-dg-error", path: "/event/fraud", highlight: true },
-    { id: 3, type: "unknown", title: "Desconocido", sub: "Sin coincidencia en base de datos", time: "08:30 AM", icon: HelpCircle, color: "text-yellow-500", path: "/event/unknown" },
-    { id: 4, type: "authorized", title: "María García", sub: "Confianza: 94%", time: "07:55 AM", icon: CheckCircle, color: "text-dg-success", path: "/event/authorized" },
-  ];
+  useEffect(() => {
+    async function cargar() {
+      setLoading(true);
+      try {
+        const filtroMap: Record<string, EstadoEvento | undefined> = {
+          Todos: undefined,
+          Autorizados: "ACCESO_PERMITIDO",
+          Fraude: "FRAUDE",
+          Desconocido: "DESCONOCIDO",
+        };
+        const data = await getHistorial(filtroMap[activeFilter], searchQuery || undefined);
+        setEvents(data);
+      } catch (err) {
+        console.error("Error cargando historial:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    // Debounce la búsqueda
+    const timer = setTimeout(cargar, 300);
+    return () => clearTimeout(timer);
+  }, [activeFilter, searchQuery]);
 
-  const filteredEvents = useMemo(() => {
-    return events.filter(event => {
-      const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                           event.sub.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesFilter = activeFilter === "Todos" || 
-                           (activeFilter === "Autorizados" && event.type === "authorized") ||
-                           (activeFilter === "Fraude" && event.type === "fraud") ||
-                           (activeFilter === "Desconocido" && event.type === "unknown");
-      
-      return matchesSearch && matchesFilter;
-    });
-  }, [searchQuery, activeFilter]);
+  function getEventConfig(evento: Evento) {
+    switch (evento.estado) {
+      case "ACCESO_PERMITIDO":
+        return { title: evento.nombre ?? "Usuario", sub: `Confianza: ${Math.round((evento.confianza ?? 0) * 100)}%`, icon: CheckCircle, color: "text-dg-success", highlight: false };
+      case "FRAUDE":
+        return { title: "Intento de Fraude", sub: evento.motivo ?? "Superficie plana detectada", icon: AlertTriangle, color: "text-dg-error", highlight: true };
+      case "DESCONOCIDO":
+        return { title: "Desconocido", sub: evento.motivo ?? "Sin coincidencia en base de datos", icon: HelpCircle, color: "text-yellow-500", highlight: false };
+    }
+  }
+
+  function formatTime(timestamp: string) {
+    return new Date(timestamp).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit", hour12: true });
+  }
+
+  function formatDate(timestamp: string) {
+    const date = new Date(timestamp);
+    const hoy = new Date();
+    const ayer = new Date();
+    ayer.setDate(ayer.getDate() - 1);
+
+    if (date.toDateString() === hoy.toDateString()) return "Hoy";
+    if (date.toDateString() === ayer.toDateString()) return "Ayer";
+    return date.toLocaleDateString("es", { day: "numeric", month: "short", year: "numeric" });
+  }
+
+  // Agrupar eventos por fecha
+  const groupedEvents = events.reduce<Record<string, Evento[]>>((acc, evento) => {
+    const dateKey = formatDate(evento.timestamp);
+    if (!acc[dateKey]) acc[dateKey] = [];
+    acc[dateKey].push(evento);
+    return acc;
+  }, {});
 
   return (
     <div className="min-h-screen pb-24 flex flex-col">
@@ -63,55 +102,45 @@ export default function History() {
       </header>
 
       <main className="flex-1 px-4 py-4 space-y-3 max-w-7xl mx-auto w-full">
-        <div className="text-xs font-bold text-dg-text-muted uppercase tracking-wider mb-2">Hoy - 24 Oct, 2026</div>
-        
-        {filteredEvents.length > 0 ? (
-          filteredEvents.map((event) => (
-            <motion.div
-              key={event.id}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate(event.path)}
-              className={`cyber-card p-4 flex items-center gap-4 shadow-sm cursor-pointer ${event.highlight ? 'border-dg-accent/30 ring-1 ring-dg-accent/10' : ''}`}
-            >
-              <div className={`w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0`}>
-                <event.icon className={`w-8 h-8 ${event.color}`} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-bold text-white truncate">{event.title}</h3>
-                  <span className="text-[10px] font-medium text-dg-text-muted">{event.time}</span>
-                </div>
-                <p className="text-xs text-dg-text-muted truncate">{event.sub}</p>
-                <button className="mt-2 text-xs font-bold text-dg-accent flex items-center gap-1">
-                  Ver detalles <ChevronRight className="w-3 h-3" />
-                </button>
-              </div>
-            </motion.div>
-          ))
-        ) : (
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : events.length === 0 ? (
           <div className="text-center py-12 text-dg-text-muted">
             <p className="text-sm">No se encontraron eventos que coincidan</p>
           </div>
-        )}
-
-        {searchQuery === "" && activeFilter === "Todos" && (
-          <>
-            <div className="text-xs font-bold text-dg-text-muted uppercase tracking-wider mt-6 mb-2">Ayer - 23 Oct, 2026</div>
-            <div className="opacity-60 grayscale-[0.5]">
-              <div className="cyber-card p-4 flex items-center gap-4 mb-3">
-                <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
-                  <CheckCircle className="w-8 h-8 text-dg-success" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-bold text-white truncate">Carlos Ruiz</h3>
-                    <span className="text-[10px] font-medium text-dg-text-muted">11:20 PM</span>
-                  </div>
-                  <p className="text-xs text-dg-text-muted truncate">Confianza: 87%</p>
-                </div>
-              </div>
+        ) : (
+          (Object.entries(groupedEvents) as [string, Evento[]][]).map(([dateLabel, dateEvents]) => (
+            <div key={dateLabel}>
+              <div className="text-xs font-bold text-dg-text-muted uppercase tracking-wider mb-2 mt-4">{dateLabel}</div>
+              {dateEvents.map((evento) => {
+                const config = getEventConfig(evento);
+                return (
+                  <motion.div
+                    key={evento.id}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => navigate(`/event/${evento.id}`)}
+                    className={`cyber-card p-4 flex items-center gap-4 shadow-sm cursor-pointer mb-3 ${config.highlight ? 'border-dg-accent/30 ring-1 ring-dg-accent/10' : ''}`}
+                  >
+                    <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                      <config.icon className={`w-8 h-8 ${config.color}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-bold text-white truncate">{config.title}</h3>
+                        <span className="text-[10px] font-medium text-dg-text-muted">{formatTime(evento.timestamp)}</span>
+                      </div>
+                      <p className="text-xs text-dg-text-muted truncate">{config.sub}</p>
+                      <button className="mt-2 text-xs font-bold text-dg-accent flex items-center gap-1">
+                        Ver detalles <ChevronRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
-          </>
+          ))
         )}
       </main>
 
