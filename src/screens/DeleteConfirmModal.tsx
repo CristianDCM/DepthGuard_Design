@@ -1,9 +1,52 @@
-import { useNavigate } from "react-router-dom";
-import { AlertTriangle, Trash2, X } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { AlertTriangle, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
+import { getUsuarioPorId, eliminarUsuario, type Usuario } from "../lib/supabase";
 
 export default function DeleteConfirmModal() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [user, setUser] = useState<Usuario | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function cargar() {
+      if (!id) return;
+      try {
+        const data = await getUsuarioPorId(id);
+        setUser(data);
+      } catch (err) {
+        console.error("Error cargando usuario:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    cargar();
+  }, [id]);
+
+  const handleDelete = async () => {
+    if (!id) return;
+    setDeleting(true);
+    try {
+      await eliminarUsuario(id);
+      navigate("/users");
+    } catch (err) {
+      console.error("Error eliminando:", err);
+      setDeleting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black/60">
+        <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  const initials = user?.nombre?.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase() ?? "??";
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm relative overflow-hidden">
@@ -34,20 +77,21 @@ export default function DeleteConfirmModal() {
 
           <div className="w-full bg-dg-bg border border-dg-border rounded-xl p-3 flex items-center gap-3 mb-8">
             <div className="w-10 h-10 rounded-full bg-dg-accent/10 border border-dg-accent/20 flex items-center justify-center shrink-0">
-              <span className="text-dg-accent font-bold text-sm">JP</span>
+              <span className="text-dg-accent font-bold text-sm">{initials}</span>
             </div>
             <div className="text-left overflow-hidden">
-              <h3 className="font-bold text-white text-sm truncate">Juan Pérez</h3>
-              <p className="text-[10px] text-dg-text-muted uppercase tracking-wider font-medium">ID #1</p>
+              <h3 className="font-bold text-white text-sm truncate">{user?.nombre ?? "—"}</h3>
+              <p className="text-[10px] text-dg-text-muted uppercase tracking-wider font-medium">ID #{id?.substring(0, 8)}</p>
             </div>
           </div>
 
           <div className="flex flex-col w-full gap-3">
             <button 
-              onClick={() => navigate("/users")}
-              className="w-full py-3.5 bg-dg-error text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all"
+              onClick={handleDelete}
+              disabled={deleting}
+              className="w-full py-3.5 bg-dg-error text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50"
             >
-              <Trash2 className="w-4 h-4" /> Eliminar
+              <Trash2 className="w-4 h-4" /> {deleting ? "Eliminando..." : "Eliminar"}
             </button>
             <button 
               onClick={() => navigate(-1)}
