@@ -20,10 +20,10 @@ export default function App() {
         <Route path="/live" element={<LiveMonitor />} />
         <Route path="/history" element={<History />} />
         <Route path="/users" element={<UserManagement />} />
-        <Route path="/event/:type" element={<EventDetail />} />
-        <Route path="/profile/juan" element={<UserProfile />} />
-        <Route path="/users/edit" element={<EditUserModal />} />
-        <Route path="/users/delete/confirm" element={<DeleteConfirmModal />} />
+        <Route path="/event/:id" element={<EventDetail />} />
+        <Route path="/profile/:id" element={<UserProfile />} />
+        <Route path="/users/edit/:id" element={<EditUserModal />} />
+        <Route path="/users/delete/:id" element={<DeleteConfirmModal />} />
         <Route path="/register/start" element={<RegisterStart />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>
