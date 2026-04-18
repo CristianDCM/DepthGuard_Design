@@ -1,11 +1,54 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Edit2, Save, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Edit2, Save } from "lucide-react";
 import { motion } from "motion/react";
+import { getUsuarioPorId, actualizarUsuario, type Usuario } from "../lib/supabase";
 
 export default function EditUserModal() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [user, setUser] = useState<Usuario | null>(null);
   const [isActive, setIsActive] = useState(true);
+  const [notas, setNotas] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function cargar() {
+      if (!id) return;
+      try {
+        const data = await getUsuarioPorId(id);
+        setUser(data);
+        setIsActive(data.activo);
+        setNotas(data.notas ?? "");
+      } catch (err) {
+        console.error("Error cargando usuario:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    cargar();
+  }, [id]);
+
+  const handleSave = async () => {
+    if (!id) return;
+    setSaving(true);
+    try {
+      await actualizarUsuario(id, { activo: isActive, notas });
+      navigate(`/profile/${id}`);
+    } catch (err) {
+      console.error("Error guardando:", err);
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black/60">
+        <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -19,7 +62,7 @@ export default function EditUserModal() {
             <Edit2 className="w-6 h-6 text-dg-accent" />
           </div>
           <h2 className="text-2xl font-bold font-headline text-white tracking-tight">Editar Usuario</h2>
-          <p className="text-dg-text-muted text-sm mt-1">Juan Pérez — ID #1</p>
+          <p className="text-dg-text-muted text-sm mt-1">{user?.nombre ?? "—"} — ID #{id?.substring(0, 8)}</p>
         </div>
 
         <div className="px-6 pb-8 space-y-8">
@@ -45,19 +88,21 @@ export default function EditUserModal() {
             <textarea 
               className="w-full bg-dg-bg border border-dg-border text-white rounded-xl p-4 min-h-[100px] focus:ring-1 focus:ring-dg-accent focus:border-dg-accent transition-all resize-none text-sm outline-none"
               placeholder="Ingrese notas del usuario..."
-              defaultValue="Empleado piso 3"
+              value={notas}
+              onChange={(e) => setNotas(e.target.value)}
             />
           </div>
 
           <div className="space-y-3 pt-4">
             <button 
-              onClick={() => navigate("/profile/juan")}
-              className="btn-primary w-full py-4 flex items-center justify-center gap-2"
+              onClick={handleSave}
+              disabled={saving}
+              className="btn-primary w-full py-4 flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              <Save className="w-5 h-5" /> Guardar Cambios
+              <Save className="w-5 h-5" /> {saving ? "Guardando..." : "Guardar Cambios"}
             </button>
             <button 
-              onClick={() => navigate("/profile/juan")}
+              onClick={() => navigate(-1)}
               className="btn-secondary w-full py-4"
             >
               Cancelar
