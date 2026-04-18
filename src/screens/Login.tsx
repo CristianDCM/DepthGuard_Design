@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Shield } from "lucide-react";
 import { motion } from "motion/react";
+import { loginAdmin } from "../lib/supabase";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,14 +15,22 @@ export default function Login() {
     setIsLoading(true);
     setError(false);
 
-    // Simulate delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Simple auth simulation
     const formData = new FormData(e.target as HTMLFormElement);
-    if (formData.get("usuario") === "admin" && formData.get("password") === "admin") {
-      navigate("/dashboard");
-    } else {
+    const usuario = formData.get("usuario") as string;
+    const password = formData.get("password") as string;
+
+    try {
+      const admin = await loginAdmin(usuario, password);
+      if (admin) {
+        // Guardar sesión en localStorage
+        localStorage.setItem("dg_admin", JSON.stringify({ usuario: admin.usuario, id: admin.id }));
+        navigate("/dashboard");
+      } else {
+        setError(true);
+        setIsLoading(false);
+      }
+    } catch (err) {
+      console.error("Error de login:", err);
       setError(true);
       setIsLoading(false);
     }
