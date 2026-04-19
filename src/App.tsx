@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./screens/Login";
 import Dashboard from "./screens/Dashboard";
 import LiveMonitor from "./screens/LiveMonitor";
@@ -15,17 +16,20 @@ export default function App() {
   return (
     <Router>
       <Routes>
+        {/* Ruta pública */}
         <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/live" element={<LiveMonitor />} />
-        <Route path="/history" element={<History />} />
-        <Route path="/users" element={<UserManagement />} />
-        <Route path="/event/:id" element={<EventDetail />} />
-        <Route path="/profile/:id" element={<UserProfile />} />
-        <Route path="/users/edit/:id" element={<EditUserModal />} />
-        <Route path="/users/delete/:id" element={<DeleteConfirmModal />} />
-        <Route path="/register/start" element={<RegisterStart />} />
-        <Route path="/settings" element={<Settings />} />
+
+        {/* Rutas protegidas — requieren login */}
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/live" element={<ProtectedRoute><LiveMonitor /></ProtectedRoute>} />
+        <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+        <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+        <Route path="/event/:id" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
+        <Route path="/profile/:id" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+        <Route path="/users/edit/:id" element={<ProtectedRoute><EditUserModal /></ProtectedRoute>} />
+        <Route path="/users/delete/:id" element={<ProtectedRoute><DeleteConfirmModal /></ProtectedRoute>} />
+        <Route path="/register/start" element={<ProtectedRoute><RegisterStart /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       </Routes>
     </Router>
   );
