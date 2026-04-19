@@ -1,16 +1,20 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? "";
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY ?? "";
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    "Faltan variables de entorno VITE_SUPABASE_URL o VITE_SUPABASE_ANON_KEY. " +
-    "Copia .env.example a .env.local y configura tus credenciales de Supabase."
+  console.error(
+    "⚠️ DepthGuard: Faltan variables de entorno VITE_SUPABASE_URL o VITE_SUPABASE_ANON_KEY. " +
+    "La app no podrá conectarse a la base de datos. " +
+    "Configura las variables en Vercel → Settings → Environment Variables."
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(
+  supabaseUrl || "https://placeholder.supabase.co",
+  supabaseAnonKey || "placeholder-key"
+);
 
 // ============================================
 // Tipos basados en el schema de la base de datos
