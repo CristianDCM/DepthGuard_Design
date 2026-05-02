@@ -224,6 +224,31 @@ export async function actualizarUsuario(id: string, cambios: Partial<Pick<Usuari
   return data as Usuario;
 }
 
+/** Crear nuevo usuario (registro biométrico) */
+export async function crearUsuario(nombre: string, notas: string = "") {
+  const { data, error } = await supabase
+    .from("usuarios")
+    .insert({ nombre, notas, activo: true, num_angulos: 0 })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as Usuario;
+}
+
+/** Actualizar progreso de registro (ángulos capturados) */
+export async function actualizarProgresoRegistro(id: string, numAngulos: number) {
+  const { data, error } = await supabase
+    .from("usuarios")
+    .update({ num_angulos: numAngulos })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as Usuario;
+}
+
 /** Eliminar usuario */
 export async function eliminarUsuario(id: string) {
   const { error } = await supabase
