@@ -22,6 +22,12 @@ export const supabase = createClient(
 
 export type EstadoEvento = "ACCESO_PERMITIDO" | "FRAUDE" | "DESCONOCIDO";
 
+/** Identificador de cada cámara en la sede */
+export type CameraId = "entrada_principal" | "entrada_secundaria";
+
+/** Tipo de verificación que realiza cada cámara */
+export type CameraType = "3D" | "2D";
+
 export interface Usuario {
   id: string;
   nombre: string;
@@ -29,6 +35,7 @@ export interface Usuario {
   activo: boolean;
   num_angulos: number;
   embeddings_json: any;
+  foto_perfil: string | null;
   fecha_registro: string;
   created_at: string;
 }
@@ -41,6 +48,10 @@ export interface Evento {
   confianza: number | null;
   foto_url: string | null;
   motivo: string | null;
+  // Campos multicámara (opcionales hasta que se ejecute la migración v3)
+  camera_id?: CameraId;
+  camera_type?: CameraType;
+  verification_level?: "3D_antispoofing" | "2D_recognition";
   metricas_json: {
     varianza: number;
     rango_3d: number;
@@ -50,16 +61,41 @@ export interface Evento {
   timestamp: string;
 }
 
+/** Estado de una cámara individual dentro del nodo edge */
+export interface CamaraEstado {
+  camera_id: CameraId;
+  camera_type: CameraType;
+  activa: boolean;
+  modelo: string;
+}
+
+/** Estado global del nodo edge (PC central) */
 export interface EstadoSistema {
   id: number;
-  camara_activa: boolean;
-  modo_camara: string;
+  // Campos legacy (mantener para retrocompatibilidad con schema actual)
+  camara_activa?: boolean;
+  modo_camara?: string;
+  // Campos nuevos (arquitectura multicámara)
   ultimo_heartbeat: string | null;
   tolerancia_facial: number;
   umbral_varianza: number;
   cooldown_eventos: number;
   antispoofing_activo: boolean;
+  camaras: CamaraEstado[];
   updated_at: string;
+}
+
+// ============================================
+// Constantes de cámaras
+// ============================================
+
+/** Tiempo máximo sin heartbeat para considerar el edge offline (ms) */
+export const EDGE_HEARTBEAT_TIMEOUT_MS = 120_000; // 2 minutos
+
+/** Verifica si el nodo edge está online basándose en el último heartbeat */
+export function isEdgeOnline(ultimoHeartbeat: string | null): boolean {
+  if (!ultimoHeartbeat) return false;
+  return (Date.now() - new Date(ultimoHeartbeat).getTime()) < EDGE_HEARTBEAT_TIMEOUT_MS;
 }
 
 export interface Admin {
@@ -199,7 +235,7 @@ export async function eliminarUsuario(id: string) {
 }
 
 /** Obtener estado del sistema */
-export async function getEstadoSistema() {
+export async function getEstadoSistema(): Promise<EstadoSistema> {
   const { data, error } = await supabase
     .from("estado_sistema")
     .select("*")
@@ -207,7 +243,21 @@ export async function getEstadoSistema() {
     .single();
 
   if (error) throw error;
-  return data as EstadoSistema;
+
+  const raw = data as any;
+
+  // Fallback: si la columna 'camaras' no existe todavía (pre-migración),
+  // construir el array a partir de los campos legacy
+  const camaras: CamaraEstado[] = raw.camaras ?? [
+    {
+      camera_id: "entrada_principal" as CameraId,
+      camera_type: "3D" as CameraType,
+      activa: raw.camara_activa ?? false,
+      modelo: raw.modo_camara === "realsense" ? "Intel RealSense" : "Simulada",
+    },
+  ];
+
+  return { ...raw, camaras } as EstadoSistema;
 }
 
 /** Login de admin (simple, sin hash por ahora) */
@@ -274,4 +324,80 @@ export async function contarTotalAccesos() {
 
   if (error) throw error;
   return count ?? 0;
+}
+
+// ============================================
+// Funciones multicámara
+// ============================================
+
+/** Obtener últimos eventos filtrados por cámara */
+export async function getEventosPorCamara(cameraId: CameraId, limit = 10) {
+  const { data, error } = await supabase
+    .from("historial")
+    .select("*")
+    .eq("camera_id", cameraId)
+    .order("timestamp", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return data as Evento[];
+}
+
+/** Obtener el último evento de cada cámara (para el Split-Screen) */
+export async function getUltimoEventoPorCamara() {
+  const [principal, secundaria] = await Promise.all([
+    supabase
+      .from("historial")
+      .select("*")
+      .eq("camera_id", "entrada_principal")
+      .order("timestamp", { ascending: false })
+      .limit(1)
+      .single(),
+    supabase
+      .from("historial")
+      .select("*")
+      .eq("camera_id", "entrada_secundaria")
+      .order("timestamp", { ascending: false })
+      .limit(1)
+      .single(),
+  ]);
+
+  return {
+    entrada_principal: (principal.data as Evento) ?? null,
+    entrada_secundaria: (secundaria.data as Evento) ?? null,
+  };
+}
+
+/** Obtener estadísticas de hoy filtradas por cámara */
+export async function getEstadisticasHoyPorCamara(cameraId: CameraId) {
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const inicioHoy = hoy.toISOString();
+
+  const [accesos, fraudes, desconocidos] = await Promise.all([
+    supabase
+      .from("historial")
+      .select("id", { count: "exact", head: true })
+      .eq("estado", "ACCESO_PERMITIDO")
+      .eq("camera_id", cameraId)
+      .gte("timestamp", inicioHoy),
+    supabase
+      .from("historial")
+      .select("id", { count: "exact", head: true })
+      .eq("estado", "FRAUDE")
+      .eq("camera_id", cameraId)
+      .gte("timestamp", inicioHoy),
+    supabase
+      .from("historial")
+      .select("id", { count: "exact", head: true })
+      .eq("estado", "DESCONOCIDO")
+      .eq("camera_id", cameraId)
+      .gte("timestamp", inicioHoy),
+  ]);
+
+  return {
+    accesos: accesos.count ?? 0,
+    fraudes: fraudes.count ?? 0,
+    desconocidos: desconocidos.count ?? 0,
+  };
 }

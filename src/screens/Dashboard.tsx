@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, AlertTriangle, HelpCircle, Video, History, Users, Home } from "lucide-react";
+import { CheckCircle, AlertTriangle, HelpCircle, Video, History, Users, Home, Server } from "lucide-react";
 import { motion } from "motion/react";
 import Navigation from "../components/Navigation";
-import { supabase, getEstadisticasHoy, getUltimosEventos, type Evento } from "../lib/supabase";
+import { supabase, getEstadisticasHoy, getUltimosEventos, getEstadoSistema, isEdgeOnline, type Evento, type EstadoSistema } from "../lib/supabase";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState({ accesos: 0, fraudes: 0, desconocidos: 0, totalUsuarios: 0 });
   const [events, setEvents] = useState<Evento[]>([]);
   const [ultimoEvento, setUltimoEvento] = useState<string>("—");
-  const [camaraActiva, setCamaraActiva] = useState(false);
+  const [estado, setEstado] = useState<EstadoSistema | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Cargar datos iniciales
@@ -30,9 +30,9 @@ export default function Dashboard() {
           setUltimoEvento(mins < 1 ? "Ahora" : mins < 60 ? `Hace ${mins} min` : `Hace ${Math.floor(mins / 60)}h`);
         }
 
-        // Estado del sistema
-        const { data: estado } = await supabase.from("estado_sistema").select("camara_activa").eq("id", 1).single();
-        if (estado) setCamaraActiva(estado.camara_activa);
+        // Estado del sistema (edge node + cámaras)
+        const estadoData = await getEstadoSistema();
+        if (estadoData) setEstado(estadoData);
       } catch (err) {
         console.error("Error cargando dashboard:", err);
       } finally {
@@ -65,6 +65,17 @@ export default function Dashboard() {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  // Polling del heartbeat del edge cada 30s
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const estadoData = await getEstadoSistema();
+        if (estadoData) setEstado(estadoData);
+      } catch { /* silenciar */ }
+    }, 30_000);
+    return () => clearInterval(interval);
   }, []);
 
   const statsConfig = [
@@ -136,14 +147,29 @@ export default function Dashboard() {
                   <div className="divide-y divide-dg-border">
                     <div className="flex items-center justify-between p-5">
                       <div className="flex items-center gap-3">
-                        <Video className="w-5 h-5 text-blue-400" />
-                        <span className="text-sm font-medium">Cámara</span>
+                        <Server className="w-5 h-5 text-blue-400" />
+                        <span className="text-sm font-medium">Nodo Edge</span>
                       </div>
-                      <span className={`text-xs font-bold flex items-center gap-1 ${camaraActiva ? 'text-dg-accent' : 'text-dg-error'}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${camaraActiva ? 'bg-dg-accent animate-pulse' : 'bg-dg-error'}`} />
-                        {camaraActiva ? "ACTIVA" : "INACTIVA"}
+                      <span className={`text-xs font-bold flex items-center gap-1 ${isEdgeOnline(estado?.ultimo_heartbeat ?? null) ? 'text-dg-accent' : 'text-dg-error'}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${isEdgeOnline(estado?.ultimo_heartbeat ?? null) ? 'bg-dg-accent animate-pulse' : 'bg-dg-error'}`} />
+                        {isEdgeOnline(estado?.ultimo_heartbeat ?? null) ? "ONLINE" : "OFFLINE"}
                       </span>
                     </div>
+                    {(estado?.camaras ?? []).map((cam) => (
+                      <div key={cam.camera_id} className="flex items-center justify-between p-5">
+                        <div className="flex items-center gap-3">
+                          <Video className="w-5 h-5 text-blue-400" />
+                          <div>
+                            <span className="text-sm font-medium">{cam.camera_id === "entrada_principal" ? "Cámara Principal" : "Cámara Secundaria"}</span>
+                            <span className="text-[9px] ml-2 px-1.5 py-0.5 rounded bg-white/5 text-dg-text-muted font-bold">{cam.camera_type}</span>
+                          </div>
+                        </div>
+                        <span className={`text-xs font-bold flex items-center gap-1 ${cam.activa ? 'text-dg-accent' : 'text-dg-error'}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${cam.activa ? 'bg-dg-accent animate-pulse' : 'bg-dg-error'}`} />
+                          {cam.activa ? "ACTIVA" : "INACTIVA"}
+                        </span>
+                      </div>
+                    ))}
                     <div className="flex items-center justify-between p-5">
                       <div className="flex items-center gap-3">
                         <History className="w-5 h-5 text-blue-400" />
@@ -194,7 +220,18 @@ export default function Dashboard() {
                           <div className="flex-1">
                             <div className="flex justify-between items-start">
                               <p className={`text-base font-semibold ${config.color}`}>{config.title}</p>
-                              <span className="text-[10px] text-dg-text-muted">{formatTime(evento.timestamp)}</span>
+                              <div className="flex items-center gap-2 shrink-0">
+                                {evento.camera_id && (
+                                  <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                                    evento.camera_type === "3D"
+                                      ? "bg-dg-accent/10 text-dg-accent"
+                                      : "bg-blue-500/10 text-blue-400"
+                                  }`}>
+                                    {evento.camera_id === "entrada_principal" ? "CAM-01" : "CAM-02"} · {evento.camera_type}
+                                  </span>
+                                )}
+                                <span className="text-[10px] text-dg-text-muted">{formatTime(evento.timestamp)}</span>
+                              </div>
                             </div>
                             <p className="text-sm text-dg-text-muted">{config.sub}</p>
                           </div>

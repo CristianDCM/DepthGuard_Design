@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Settings as SettingsIcon, Server, Video, Bell, Database, Shield, LogOut } from "lucide-react";
 import Navigation from "../components/Navigation";
-import { getEstadoSistema, type EstadoSistema } from "../lib/supabase";
+import { getEstadoSistema, isEdgeOnline, type EstadoSistema } from "../lib/supabase";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -28,10 +28,8 @@ export default function Settings() {
     navigate("/");
   };
 
-  // Verificar si el heartbeat es reciente (menos de 30 segundos)
-  const servidorConectado = estado?.ultimo_heartbeat 
-    ? (Date.now() - new Date(estado.ultimo_heartbeat).getTime()) < 30000
-    : false;
+  // Verificar si el nodo edge está online basado en heartbeat
+  const servidorConectado = isEdgeOnline(estado?.ultimo_heartbeat ?? null);
 
   return (
     <div className="min-h-screen pb-24 flex flex-col bg-dg-bg">
@@ -55,8 +53,16 @@ export default function Settings() {
               <section className="cyber-card p-5 space-y-4">
                 <h2 className="text-xs font-bold uppercase tracking-widest text-dg-accent">Estado del Sistema</h2>
                 <div className="space-y-4">
-                  <StatusRow label="Servidor" icon={Server} connected={servidorConectado} />
-                  <StatusRow label="Cámara" icon={Video} connected={estado?.camara_activa ?? false} />
+                  <StatusRow label="Nodo Edge" icon={Server} connected={servidorConectado} />
+                  {(estado?.camaras ?? []).map((cam) => (
+                    <div key={cam.camera_id}>
+                      <StatusRow 
+                        label={`${cam.camera_id === "entrada_principal" ? "Cámara Principal" : "Cámara Secundaria"} (${cam.camera_type})`}
+                        icon={Video}
+                        connected={cam.activa}
+                      />
+                    </div>
+                  ))}
                   <StatusRow label="Push" icon={Bell} connected={true} />
                   <StatusRow label="Base de Datos" icon={Database} connected={true} />
                 </div>
@@ -81,11 +87,11 @@ export default function Settings() {
                 <div className="rounded-lg overflow-hidden border border-dg-border">
                   <table className="w-full text-left text-xs">
                     <tbody className="divide-y divide-dg-border">
-                      <TechRow label="Modo cámara" value={estado?.modo_camara ?? "—"} />
                       <TechRow label="Anti-spoofing" value={estado?.antispoofing_activo ? "ACTIVO" : "INACTIVO"} highlight={estado?.antispoofing_activo} />
                       <TechRow label="Tolerancia facial" value={String(estado?.tolerancia_facial ?? "—")} />
                       <TechRow label="Umbral varianza" value={String(estado?.umbral_varianza ?? "—")} />
                       <TechRow label="Cooldown eventos" value={`${estado?.cooldown_eventos ?? "—"}s`} />
+                      <TechRow label="Cámaras" value={`${estado?.camaras?.length ?? 0} conectadas`} />
                     </tbody>
                   </table>
                 </div>
@@ -101,7 +107,7 @@ export default function Settings() {
                   <p className="text-xs text-dg-text-muted mt-1">Institución Universitaria de Colombia</p>
                 </div>
                 <div className="flex flex-wrap justify-center gap-2">
-                  {["FastAPI", "MediaPipe", "dlib", "Supabase"].map((tag) => (
+                  {["Edge Computing", "MediaPipe", "dlib", "Supabase", "pgvector", "FCM"].map((tag) => (
                     <span key={tag} className="px-3 py-1 bg-dg-bg text-[10px] font-bold text-dg-accent rounded-full border border-dg-accent/10">
                       {tag}
                     </span>
