@@ -108,7 +108,7 @@ export default function Settings() {
                   <p className="text-xs text-dg-text-muted mt-1">Institución Universitaria de Colombia</p>
                 </div>
                 <div className="flex flex-wrap justify-center gap-2">
-                  {["Edge Computing", "MediaPipe", "dlib", "Supabase", "pgvector", "FCM"].map((tag) => (
+                  {["Edge Computing", "MediaPipe", "dlib", "Supabase", "Realtime", "Vercel"].map((tag) => (
                     <span key={tag} className="px-3 py-1 bg-dg-bg text-[10px] font-bold text-dg-accent rounded-full border border-dg-accent/10">
                       {tag}
                     </span>

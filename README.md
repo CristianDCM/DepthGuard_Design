@@ -5,7 +5,7 @@
 ## Stack
 
 - **React 19** + **TypeScript** + **Vite**
-- **Supabase** (PostgreSQL + pgvector + Realtime)
+- **Supabase** (PostgreSQL + jsonb + Realtime)
 - **TailwindCSS v4** + **Motion** (Framer Motion)
 - **Lucide React** (iconos)
 - Deployado en **Vercel** (HTTPS automático, CDN global)
@@ -16,7 +16,7 @@
 Nodo Edge (PC Central)         Cloud (Supabase)         Frontend (Vercel)
 ┌────────────────┐        ┌──────────────────┐      ┌──────────────────┐
 │ RealSense 3D   │──JSON──│ PostgreSQL       │──RT──│ React Dashboard  │
-│ Webcam 2D      │        │ pgvector         │      │ Split-Screen     │
+│ Webcam 2D      │        │ jsonb            │      │ Split-Screen     │
 │ Python Service │──FCM──▶│ Realtime         │      │ 5 tabs + modales │
 └────────────────┘        └──────────────────┘      └──────────────────┘
 ```

@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { ArrowLeft, Video, ExternalLink, Fingerprint, ShieldAlert, UserSearch, Plus, FileText } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { ArrowLeft, Video, ExternalLink, Fingerprint, ShieldAlert, UserSearch, Plus, FileText, Download } from "lucide-react";
 import { motion } from "motion/react";
 import Navigation from "../components/Navigation";
 import { getEventoPorId, type Evento } from "../lib/supabase";
@@ -10,6 +10,7 @@ export default function EventDetail() {
   const navigate = useNavigate();
   const [evento, setEvento] = useState<Evento | null>(null);
   const [loading, setLoading] = useState(true);
+  const [generandoPdf, setGenerandoPdf] = useState(false);
 
   useEffect(() => {
     async function cargar() {
@@ -49,6 +50,54 @@ export default function EventDetail() {
   const confianzaPct = evento.confianza != null ? Math.round(evento.confianza * 100) : null;
   const headerTitle = isFraud ? "Detalle de Fraude" : "Detalle del Evento";
   const timestamp = new Date(evento.timestamp).toLocaleString("es", { dateStyle: "short", timeStyle: "medium" });
+
+  // ============================================
+  // Generación de informe PDF
+  // ============================================
+
+  const descargarInforme = async () => {
+    if (!evento) return;
+    setGenerandoPdf(true);
+
+    try {
+      // Convertir foto a base64 si existe
+      let fotoBase64 = "";
+      if (evento.foto_url) {
+        try {
+          const resp = await fetch(evento.foto_url);
+          const blob = await resp.blob();
+          fotoBase64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+        } catch { /* foto no disponible */ }
+      }
+
+      const htmlContent = generarHTMLInforme(evento, fotoBase64);
+
+      // Abrir ventana de impresión
+      const ventana = window.open("", "_blank", "width=800,height=1000");
+      if (!ventana) {
+        alert("Permite las ventanas emergentes para descargar el informe.");
+        return;
+      }
+
+      ventana.document.write(htmlContent);
+      ventana.document.close();
+
+      // Esperar a que la imagen cargue antes de imprimir
+      ventana.onload = () => {
+        setTimeout(() => {
+          ventana.print();
+        }, 500);
+      };
+    } catch (err) {
+      console.error("Error generando informe:", err);
+    } finally {
+      setGenerandoPdf(false);
+    }
+  };
 
   return (
     <div className="min-h-screen pb-24 flex flex-col">
@@ -213,6 +262,23 @@ export default function EventDetail() {
 
             <div className="flex flex-col gap-3 pt-4">
               <button 
+                onClick={descargarInforme}
+                disabled={generandoPdf}
+                className="btn-primary w-full py-4 flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                {generandoPdf ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-dg-bg border-t-transparent rounded-full animate-spin" />
+                    Generando...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-5 h-5" />
+                    Descargar Informe
+                  </>
+                )}
+              </button>
+              <button 
                 onClick={() => navigate(-1)}
                 className="btn-secondary w-full py-4"
               >
@@ -244,4 +310,168 @@ function MetricItem({ label, value, progress, color = "bg-dg-accent" }: { label:
       </div>
     </div>
   );
+}
+
+// ============================================
+// Generación del HTML para el informe PDF
+// ============================================
+
+function generarHTMLInforme(evento: Evento, fotoBase64: string): string {
+  const isAuthorized = evento.estado === "ACCESO_PERMITIDO";
+  const isFraud = evento.estado === "FRAUDE";
+  const isUnknown = evento.estado === "DESCONOCIDO";
+  const metricas = evento.metricas_json;
+  const confianzaPct = evento.confianza != null ? Math.round(evento.confianza * 100) : null;
+  const timestamp = new Date(evento.timestamp).toLocaleString("es", {
+    dateStyle: "long",
+    timeStyle: "medium",
+  });
+
+  const estadoColor = isFraud ? "#ef4444" : isUnknown ? "#eab308" : "#a3ff00";
+  const estadoLabel = isFraud ? "FRAUDE DETECTADO" : isUnknown ? "PERSONA DESCONOCIDA" : "ACCESO PERMITIDO";
+  const estadoBg = isFraud ? "#fef2f2" : isUnknown ? "#fefce8" : "#f0fdf4";
+
+  const metricasHTML = `
+    <table style="width:100%;border-collapse:collapse;margin-top:12px;">
+      <tr>
+        <td style="padding:10px 12px;border:1px solid #e5e7eb;font-size:13px;color:#6b7280;">Confianza</td>
+        <td style="padding:10px 12px;border:1px solid #e5e7eb;font-size:13px;font-weight:700;text-align:right;">${confianzaPct != null ? confianzaPct + "%" : "N/A"}</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 12px;border:1px solid #e5e7eb;font-size:13px;color:#6b7280;">Varianza de Profundidad</td>
+        <td style="padding:10px 12px;border:1px solid #e5e7eb;font-size:13px;font-weight:700;text-align:right;">${metricas?.varianza?.toFixed(2) ?? "—"}</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 12px;border:1px solid #e5e7eb;font-size:13px;color:#6b7280;">Rango 3D</td>
+        <td style="padding:10px 12px;border:1px solid #e5e7eb;font-size:13px;font-weight:700;text-align:right;">${metricas?.rango_3d ? metricas.rango_3d.toFixed(2) + " cm" : "—"}</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 12px;border:1px solid #e5e7eb;font-size:13px;color:#6b7280;">Distancia</td>
+        <td style="padding:10px 12px;border:1px solid #e5e7eb;font-size:13px;font-weight:700;text-align:right;">${metricas?.distancia ? metricas.distancia + " cm" : "—"}</td>
+      </tr>
+    </table>
+  `;
+
+  const fotoHTML = fotoBase64
+    ? `<img src="${fotoBase64}" style="width:100%;max-height:300px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;" />`
+    : `<div style="width:100%;height:200px;background:#f3f4f6;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:14px;">Sin captura disponible</div>`;
+
+  const usuarioHTML = isAuthorized && evento.nombre
+    ? `
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-top:16px;display:flex;align-items:center;gap:16px;">
+        <div style="width:48px;height:48px;border-radius:50%;background:${estadoColor}22;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:${estadoColor};border:2px solid ${estadoColor}44;">
+          ${evento.nombre.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase()}
+        </div>
+        <div>
+          <div style="font-weight:700;font-size:16px;color:#111827;">${evento.nombre}</div>
+          <div style="font-size:11px;color:#6b7280;font-family:monospace;">ID: ${evento.usuario_id?.substring(0, 8) ?? "—"}</div>
+        </div>
+      </div>
+    `
+    : "";
+
+  const motivoHTML = isFraud
+    ? `
+      <div style="background:#fef2f2;border-left:4px solid #ef4444;border-radius:8px;padding:16px;margin-top:16px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#ef4444;margin-bottom:8px;">Motivo de Detección</div>
+        <div style="font-size:14px;color:#1f2937;line-height:1.5;">${evento.motivo ?? "Superficie plana detectada"}</div>
+      </div>
+    `
+    : "";
+
+  const desconocidoHTML = isUnknown
+    ? `
+      <div style="background:#fefce8;border:1px solid #fde68a;border-radius:10px;padding:20px;margin-top:16px;text-align:center;">
+        <div style="font-size:18px;font-weight:700;color:#92400e;">Persona No Registrada</div>
+        <div style="font-size:13px;color:#a16207;margin-top:4px;">No se encontró coincidencia en la base de datos</div>
+      </div>
+    `
+    : "";
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informe DepthGuard — ${evento.id.substring(0, 8)}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #fff; color: #111827; padding: 0; }
+    @media print {
+      body { padding: 0; }
+      .no-print { display: none !important; }
+      @page { margin: 15mm; size: A4; }
+    }
+    .container { max-width: 720px; margin: 0 auto; padding: 32px 24px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #111827;padding-bottom:16px;margin-bottom:24px;">
+      <div>
+        <div style="font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#111827;">🛡️ DepthGuard</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:2px;">Sistema de Control de Acceso Biométrico 3D</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:11px;color:#6b7280;">Informe de Evento</div>
+        <div style="font-size:11px;font-family:monospace;color:#9ca3af;">#${evento.id.substring(0, 8)}</div>
+      </div>
+    </div>
+
+    <!-- Estado -->
+    <div style="background:${estadoBg};border:2px solid ${estadoColor}44;border-radius:10px;padding:14px 20px;display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+      <div style="width:10px;height:10px;border-radius:50%;background:${estadoColor};"></div>
+      <span style="font-weight:800;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:${estadoColor};">${estadoLabel}</span>
+    </div>
+
+    <!-- Info general -->
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+      <tr>
+        <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:12px;color:#6b7280;width:40%;">Fecha y Hora</td>
+        <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:13px;font-weight:600;">${timestamp}</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:12px;color:#6b7280;">Cámara</td>
+        <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:13px;font-weight:600;">${evento.camera_id ?? "entrada_principal"} (${evento.camera_type ?? "3D"})</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:12px;color:#6b7280;">Nivel de Verificación</td>
+        <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:13px;font-weight:600;">${evento.verification_level ?? "3D_antispoofing"}</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:12px;color:#6b7280;">ID del Evento</td>
+        <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:12px;font-family:monospace;">${evento.id}</td>
+      </tr>
+    </table>
+
+    ${usuarioHTML}
+    ${motivoHTML}
+    ${desconocidoHTML}
+
+    <!-- Captura -->
+    <div style="margin-top:24px;">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280;margin-bottom:10px;">Captura del Evento</div>
+      ${fotoHTML}
+    </div>
+
+    <!-- Métricas -->
+    <div style="margin-top:24px;">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280;margin-bottom:4px;">Análisis Biométrico</div>
+      ${metricasHTML}
+    </div>
+
+    <!-- Footer -->
+    <div style="margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:10px;color:#9ca3af;">
+        Generado automáticamente por DepthGuard · ${new Date().toLocaleString("es")}
+      </div>
+      <div style="font-size:10px;color:#9ca3af;">
+        Proyecto de Grado 2026
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
 }
