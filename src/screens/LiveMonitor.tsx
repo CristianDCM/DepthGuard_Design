@@ -358,17 +358,17 @@ function CameraPanel({
               <>
                 <MetricBar
                   label="Varianza de Profundidad"
-                  value={ultimoEvento.metricas_json.varianza.toFixed(1)}
+                  value={(ultimoEvento.metricas_json.varianza ?? 0).toFixed(1)}
                   progress={Math.min(
-                    (ultimoEvento.metricas_json.varianza / 5) * 100,
+                    ((ultimoEvento.metricas_json.varianza ?? 0) / 5) * 100,
                     100
                   )}
                 />
                 <MetricBar
                   label="Rango 3D"
-                  value={`${ultimoEvento.metricas_json.rango_3d.toFixed(1)} cm`}
+                  value={`${(ultimoEvento.metricas_json.rango_3d ?? 0).toFixed(1)} cm`}
                   progress={Math.min(
-                    (ultimoEvento.metricas_json.rango_3d / 15) * 100,
+                    ((ultimoEvento.metricas_json.rango_3d ?? 0) / 15) * 100,
                     100
                   )}
                 />
@@ -376,9 +376,9 @@ function CameraPanel({
             )}
             <MetricBar
               label="Distancia Física"
-              value={`${ultimoEvento.metricas_json.distancia.toFixed(0)} cm`}
+              value={`${(ultimoEvento.metricas_json.distancia ?? 0).toFixed(0)} cm`}
               progress={Math.min(
-                (ultimoEvento.metricas_json.distancia / 150) * 100,
+                ((ultimoEvento.metricas_json.distancia ?? 0) / 150) * 100,
                 100
               )}
               color="bg-blue-500"
@@ -386,8 +386,8 @@ function CameraPanel({
             {cameraType === "3D" && (
               <MetricBar
                 label="Píxeles Válidos"
-                value={`${Math.round(ultimoEvento.metricas_json.pixeles_validos * 100)}%`}
-                progress={ultimoEvento.metricas_json.pixeles_validos * 100}
+                value={`${Math.round((ultimoEvento.metricas_json.pixeles_validos ?? 0) * 100)}%`}
+                progress={(ultimoEvento.metricas_json.pixeles_validos ?? 0) * 100}
                 color="bg-violet-500"
               />
             )}
