@@ -61,6 +61,22 @@ export interface Evento {
   timestamp: string;
 }
 
+/** Estado de un comando enviado al edge */
+export type EstadoComando = "pendiente" | "en_progreso" | "completado" | "error" | "cancelado";
+
+/** Comando enviado al edge vía tabla comandos_edge */
+export interface ComandoEdge {
+  id: string;
+  tipo: "INICIAR_REGISTRO" | "CANCELAR_REGISTRO";
+  usuario_id: string | null;
+  nombre: string | null;
+  estado: EstadoComando;
+  progreso: number;
+  resultado: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
 /** Estado de una cámara individual dentro del nodo edge */
 export interface CamaraEstado {
   camera_id: CameraId;
@@ -424,5 +440,79 @@ export async function getEstadisticasHoyPorCamara(cameraId: CameraId) {
     accesos: accesos.count ?? 0,
     fraudes: fraudes.count ?? 0,
     desconocidos: desconocidos.count ?? 0,
+  };
+}
+
+// ============================================
+// Funciones de comandos al Edge (registro)
+// ============================================
+
+/** Insertar un comando INICIAR_REGISTRO en la tabla comandos_edge */
+export async function insertarComandoRegistro(usuarioId: string, nombre: string): Promise<ComandoEdge> {
+  const { data, error } = await supabase
+    .from("comandos_edge")
+    .insert({
+      tipo: "INICIAR_REGISTRO",
+      usuario_id: usuarioId,
+      nombre: nombre,
+      estado: "pendiente",
+      progreso: 0,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as ComandoEdge;
+}
+
+/** Obtener el estado actual de un comando */
+export async function getComandoEstado(comandoId: string): Promise<ComandoEdge> {
+  const { data, error } = await supabase
+    .from("comandos_edge")
+    .select("*")
+    .eq("id", comandoId)
+    .single();
+
+  if (error) throw error;
+  return data as ComandoEdge;
+}
+
+/** Cancelar un registro en progreso */
+export async function cancelarRegistroEdge(usuarioId: string): Promise<void> {
+  await supabase
+    .from("comandos_edge")
+    .insert({
+      tipo: "CANCELAR_REGISTRO",
+      usuario_id: usuarioId,
+      estado: "pendiente",
+    });
+}
+
+/**
+ * Suscribirse a cambios en un comando específico vía Realtime.
+ * Retorna la función de cleanup para cancelar la suscripción.
+ */
+export function suscribirComandoEstado(
+  comandoId: string,
+  callback: (comando: ComandoEdge) => void
+): () => void {
+  const channel = supabase
+    .channel(`comando-${comandoId}`)
+    .on(
+      "postgres_changes" as any,
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "comandos_edge",
+        filter: `id=eq.${comandoId}`,
+      },
+      (payload: any) => {
+        callback(payload.new as ComandoEdge);
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
   };
 }

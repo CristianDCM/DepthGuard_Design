@@ -11,9 +11,21 @@ import {
   CheckCircle,
   ArrowLeft,
   AlertTriangle,
+  WifiOff,
 } from "lucide-react";
 import { motion } from "motion/react";
-import { crearUsuario, actualizarProgresoRegistro, type Usuario } from "../lib/supabase";
+import {
+  crearUsuario,
+  insertarComandoRegistro,
+  suscribirComandoEstado,
+  getComandoEstado,
+  cancelarRegistroEdge,
+  isEdgeOnline,
+  getEstadoSistema,
+  type Usuario,
+  type ComandoEdge,
+  type EstadoComando,
+} from "../lib/supabase";
 
 // ============================================
 // Configuración de ángulos de captura
@@ -27,23 +39,34 @@ const ANGULOS = [
   { step: 5, label: "Izq. full", instruccion: "Gire más, hasta el ángulo completo a la IZQUIERDA" },
 ];
 
-const TIEMPO_POR_ANGULO = 6; // segundos por ángulo
-
 export default function RegisterStart() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<"form" | "scanning" | "success">("form");
+  const [step, setStep] = useState<"form" | "waiting_edge" | "scanning" | "success" | "error">("form");
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Scanning state
-  const [anguloActual, setAnguloActual] = useState(0); // 0-indexed
-  const [tiempoRestante, setTiempoRestante] = useState(ANGULOS.length * TIEMPO_POR_ANGULO);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Scanning state — driven by real edge progress
+  const [anguloActual, setAnguloActual] = useState(0);
+  const [estadoComando, setEstadoComando] = useState<EstadoComando>("pendiente");
 
   // Resultado
   const [usuarioCreado, setUsuarioCreado] = useState<Usuario | null>(null);
+  const [comandoId, setComandoId] = useState<string | null>(null);
+
+  // Cleanup ref for Realtime subscription
+  const cleanupRef = useRef<(() => void) | null>(null);
+  // Polling fallback interval
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      cleanupRef.current?.();
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, []);
 
   // ============================================
   // Lógica del formulario
@@ -59,16 +82,31 @@ export default function RegisterStart() {
     setIsSubmitting(true);
 
     try {
-      // Crear usuario en Supabase (con 0 ángulos inicialmente)
+      // Verificar que el edge esté online
+      const estado = await getEstadoSistema();
+      if (!isEdgeOnline(estado.ultimo_heartbeat)) {
+        setError("El nodo edge no está activo. Encienda el sistema DepthGuard antes de registrar.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 1. Crear usuario en Supabase (con 0 ángulos)
       const nuevoUsuario = await crearUsuario(name.trim(), notes.trim());
       setUsuarioCreado(nuevoUsuario);
 
-      // Pasar al scanning
-      setAnguloActual(0);
-      setTiempoRestante(ANGULOS.length * TIEMPO_POR_ANGULO);
-      setStep("scanning");
+      // 2. Insertar comando INICIAR_REGISTRO
+      const comando = await insertarComandoRegistro(nuevoUsuario.id, name.trim());
+      setComandoId(comando.id);
+
+      // 3. Pasar a "esperando edge"
+      setStep("waiting_edge");
+      setEstadoComando("pendiente");
+
+      // 4. Suscribirse a cambios del comando vía Realtime + polling fallback
+      _iniciarMonitoreo(comando.id);
+
     } catch (err: any) {
-      console.error("Error creando usuario:", err);
+      console.error("Error iniciando registro:", err);
       setError(err.message ?? "Error al crear el usuario. Intente de nuevo.");
     } finally {
       setIsSubmitting(false);
@@ -76,54 +114,117 @@ export default function RegisterStart() {
   };
 
   // ============================================
-  // Simulación de captura (el edge node real haría esto)
+  // Monitoreo del comando (Realtime + polling)
   // ============================================
 
-  useEffect(() => {
-    if (step !== "scanning") return;
+  const _iniciarMonitoreo = (cmdId: string) => {
+    // Realtime subscription
+    const unsub = suscribirComandoEstado(cmdId, _onComandoActualizado);
+    cleanupRef.current = unsub;
 
-    timerRef.current = setInterval(() => {
-      setTiempoRestante((prev) => {
-        if (prev <= 1) {
-          // Registro completo
-          clearInterval(timerRef.current!);
-          finalizarRegistro();
-          return 0;
-        }
-        return prev - 1;
-      });
-
-      // Avanzar ángulo cada TIEMPO_POR_ANGULO segundos
-      setAnguloActual((prev) => {
-        const tiempoTranscurrido = ANGULOS.length * TIEMPO_POR_ANGULO - tiempoRestante + 1;
-        const nuevoAngulo = Math.min(
-          Math.floor(tiempoTranscurrido / TIEMPO_POR_ANGULO),
-          ANGULOS.length - 1
-        );
-        return nuevoAngulo;
-      });
-    }, 1000);
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [step]);
-
-  const finalizarRegistro = async () => {
-    if (usuarioCreado) {
+    // Polling fallback cada 3s (por si Realtime falla)
+    pollingRef.current = setInterval(async () => {
       try {
-        // Actualizar usuario con 5 ángulos capturados
-        await actualizarProgresoRegistro(usuarioCreado.id, 5);
-        setUsuarioCreado((prev) => prev ? { ...prev, num_angulos: 5 } : null);
-      } catch (err) {
-        console.error("Error actualizando progreso:", err);
-      }
-    }
-    setStep("success");
+        const cmd = await getComandoEstado(cmdId);
+        _onComandoActualizado(cmd);
+      } catch { /* silent */ }
+    }, 3000);
   };
 
-  const handleCancelScanning = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
+  const _onComandoActualizado = (comando: ComandoEdge) => {
+    setEstadoComando(comando.estado);
+    setAnguloActual(comando.progreso);
+
+    if (comando.estado === "en_progreso" && step !== "scanning") {
+      setStep("scanning");
+    }
+
+    if (comando.estado === "completado") {
+      _limpiarMonitoreo();
+      setUsuarioCreado((prev) => prev ? { ...prev, num_angulos: comando.progreso } : null);
+      setStep("success");
+    }
+
+    if (comando.estado === "error") {
+      _limpiarMonitoreo();
+      const msg = comando.resultado?.error ?? "Error desconocido en el edge";
+      setError(msg);
+      setStep("error");
+    }
+
+    if (comando.estado === "cancelado") {
+      _limpiarMonitoreo();
+      setStep("form");
+    }
+  };
+
+  // Fix: allow _onComandoActualizado to read latest `step`
+  const stepRef = useRef(step);
+  stepRef.current = step;
+  // Patch the condition to use ref
+  const _onComandoActualizadoPatched = (comando: ComandoEdge) => {
+    setEstadoComando(comando.estado);
+    setAnguloActual(comando.progreso);
+
+    if (comando.estado === "en_progreso") {
+      setStep("scanning");
+    }
+    if (comando.estado === "completado") {
+      _limpiarMonitoreo();
+      setUsuarioCreado((prev) => prev ? { ...prev, num_angulos: comando.progreso } : null);
+      setStep("success");
+    }
+    if (comando.estado === "error") {
+      _limpiarMonitoreo();
+      const msg = comando.resultado?.error ?? "Error desconocido en el edge";
+      setError(msg);
+      setStep("error");
+    }
+    if (comando.estado === "cancelado") {
+      _limpiarMonitoreo();
+      setStep("form");
+    }
+  };
+
+  // Override to use patched version
+  useEffect(() => {
+    if (!comandoId) return;
+    // Re-subscribe with patched handler
+    cleanupRef.current?.();
+    if (pollingRef.current) clearInterval(pollingRef.current);
+
+    const unsub = suscribirComandoEstado(comandoId, _onComandoActualizadoPatched);
+    cleanupRef.current = unsub;
+
+    pollingRef.current = setInterval(async () => {
+      try {
+        const cmd = await getComandoEstado(comandoId);
+        _onComandoActualizadoPatched(cmd);
+      } catch { /* silent */ }
+    }, 3000);
+
+    return () => {
+      unsub();
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, [comandoId]);
+
+  const _limpiarMonitoreo = () => {
+    cleanupRef.current?.();
+    cleanupRef.current = null;
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  };
+
+  const handleCancelScanning = async () => {
+    _limpiarMonitoreo();
+    if (usuarioCreado) {
+      try {
+        await cancelarRegistroEdge(usuarioCreado.id);
+      } catch { /* best effort */ }
+    }
     setStep("form");
   };
 
@@ -200,7 +301,7 @@ export default function RegisterStart() {
                     La persona debe estar frente a la cámara durante el registro. Se capturarán 5 ángulos faciales en aproximadamente 30 segundos.
                   </p>
                   <p className="text-[11px] text-dg-text-muted">
-                    Asegúrese de buena iluminación y que el rostro sea claramente visible.
+                    Asegúrese de buena iluminación y que el rostro sea claramente visible. El nodo edge debe estar encendido.
                   </p>
                 </div>
               </div>
@@ -249,7 +350,53 @@ export default function RegisterStart() {
           </>
         )}
 
-        {/* ============ SCANNING ============ */}
+        {/* ============ ESPERANDO EDGE ============ */}
+        {step === "waiting_edge" && (
+          <>
+            <div className="flex items-center gap-4 mb-6 shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-dg-accent/10 flex items-center justify-center">
+                <UserPlus className="w-6 h-6 text-dg-accent" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white tracking-tight font-headline">Registrar Nuevo Usuario</h2>
+                {usuarioCreado && (
+                  <p className="text-[10px] text-dg-text-muted font-medium mt-0.5">
+                    {usuarioCreado.nombre} · ID: {usuarioCreado.id.substring(0, 8)}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-6 pb-10">
+              <div className="cyber-card p-8 text-center relative overflow-hidden">
+                <div className="mb-4 flex justify-center">
+                  <WifiOff className="w-12 h-12 text-dg-warning animate-pulse" />
+                </div>
+                <h3 className="text-white font-bold text-lg mb-2">
+                  Esperando respuesta del edge...
+                </h3>
+                <p className="text-dg-text-muted text-xs mb-4">
+                  El comando fue enviado. El pipeline IA lo procesará en los próximos segundos.
+                </p>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-dg-warning/10 border border-dg-warning/20">
+                  <div className="w-2 h-2 rounded-full bg-dg-warning animate-pulse" />
+                  <span className="text-[10px] font-bold text-dg-warning uppercase tracking-wider">
+                    Polling...
+                  </span>
+                </div>
+              </div>
+
+              <button 
+                onClick={handleCancelScanning}
+                className="btn-secondary w-full py-4"
+              >
+                Cancelar
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* ============ SCANNING (REAL) ============ */}
         {step === "scanning" && (
           <>
             <div className="flex items-center gap-4 mb-6 shrink-0">
@@ -273,7 +420,7 @@ export default function RegisterStart() {
                 {/* Progress line filled */}
                 <div
                   className="absolute top-[18px] -translate-y-1/2 left-8 h-[2px] bg-dg-accent z-0 transition-all duration-500"
-                  style={{ width: `${(anguloActual / (ANGULOS.length - 1)) * (100 - 16)}%` }}
+                  style={{ width: `${(anguloActual / (ANGULOS.length)) * (100 - 16)}%` }}
                 />
                 
                 {ANGULOS.map((a, i) => (
@@ -290,10 +437,10 @@ export default function RegisterStart() {
 
               <div className="text-center mt-6 flex flex-col gap-1">
                 <p className="text-dg-text-muted text-[10px] uppercase font-bold tracking-widest">
-                  Paso {anguloActual + 1} de {ANGULOS.length}
+                  Paso {Math.min(anguloActual + 1, ANGULOS.length)} de {ANGULOS.length}
                 </p>
                 <p className="text-dg-text-muted/50 text-[9px] font-medium">
-                  Tiempo restante: {tiempoRestante}s
+                  Captura en progreso — datos reales del pipeline IA
                 </p>
               </div>
 
@@ -302,7 +449,7 @@ export default function RegisterStart() {
                   <RotateCw className="w-12 h-12 text-dg-accent animate-spin-slow" />
                 </div>
                 <h3 className="text-white font-bold text-lg mb-1">
-                  {ANGULOS[anguloActual]?.instruccion ?? "Procesando..."}
+                  {anguloActual < ANGULOS.length ? ANGULOS[anguloActual]?.instruccion : "Finalizando..."}
                 </h3>
                 <p className="text-dg-text-muted text-xs mb-4">
                   Mantenga el rostro visible para la cámara
@@ -310,7 +457,7 @@ export default function RegisterStart() {
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-dg-accent/10 border border-dg-accent/20">
                   <Hourglass className="w-3.5 h-3.5 text-dg-accent animate-pulse" />
                   <span className="text-[10px] font-bold text-dg-accent uppercase tracking-wider">
-                    Capturando ángulo {ANGULOS[anguloActual]?.label ?? ""}...
+                    Capturando ángulo {anguloActual < ANGULOS.length ? ANGULOS[anguloActual]?.label : "..."}
                   </span>
                 </div>
               </div>
@@ -321,7 +468,7 @@ export default function RegisterStart() {
                   className="btn-primary w-full py-4 flex items-center justify-center gap-2 opacity-80"
                 >
                   <div className="w-5 h-5 border-2 border-dg-bg border-t-transparent rounded-full animate-spin" />
-                  Capturando...
+                  Capturando embeddings reales...
                 </button>
                 <button 
                   onClick={handleCancelScanning}
@@ -334,6 +481,37 @@ export default function RegisterStart() {
           </>
         )}
 
+        {/* ============ ERROR ============ */}
+        {step === "error" && (
+          <div className="px-2 pb-10 space-y-8">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="relative">
+                <div className="absolute inset-0 bg-dg-error/20 blur-xl rounded-full" />
+                <AlertTriangle className="w-16 h-16 text-dg-error relative z-10" />
+              </div>
+              <div>
+                <h2 className="text-[20px] font-bold text-white leading-tight font-headline">Error en el Registro</h2>
+                <p className="text-dg-text-muted text-sm mt-1">{error}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <button 
+                onClick={() => { setStep("form"); setError(""); }}
+                className="btn-primary w-full h-14 flex items-center justify-center gap-2"
+              >
+                Intentar de Nuevo
+              </button>
+              <button 
+                onClick={() => navigate("/users")}
+                className="btn-secondary w-full h-14"
+              >
+                Volver a Usuarios
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* ============ ÉXITO ============ */}
         {step === "success" && (
           <div className="px-2 pb-10 space-y-8">
@@ -344,7 +522,7 @@ export default function RegisterStart() {
               </div>
               <div>
                 <h2 className="text-[20px] font-bold text-white leading-tight font-headline">¡Registro Exitoso!</h2>
-                <p className="text-dg-text-muted text-sm mt-1">Usuario registrado correctamente en el sistema</p>
+                <p className="text-dg-text-muted text-sm mt-1">Usuario registrado con embeddings reales del pipeline IA</p>
               </div>
             </div>
 
@@ -390,8 +568,8 @@ export default function RegisterStart() {
                 <span className="text-dg-text-muted text-[10px] uppercase tracking-widest font-semibold">Ángulos</span>
               </div>
               <div className="bg-dg-card p-4 rounded-xl border border-dg-border flex flex-col items-center justify-center">
-                <span className="text-white text-2xl font-bold font-headline">{ANGULOS.length * TIEMPO_POR_ANGULO}s</span>
-                <span className="text-dg-text-muted text-[10px] uppercase tracking-widest font-semibold">Tiempo</span>
+                <span className="text-white text-2xl font-bold font-headline">Real</span>
+                <span className="text-dg-text-muted text-[10px] uppercase tracking-widest font-semibold">Pipeline IA</span>
               </div>
             </div>
 

@@ -1,91 +1,91 @@
--- ============================================
--- DepthGuard v3 — Migración: Arquitectura Multicámara
--- Ejecutar en: Supabase Dashboard → SQL Editor
--- Fecha: 2026-05-02
--- ============================================
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
 
--- 1. HISTORIAL: Agregar campos de identificación de cámara
--- Los valores por defecto permiten que datos existentes sigan funcionando
-ALTER TABLE public.historial 
-  ADD COLUMN IF NOT EXISTS camera_id text DEFAULT 'entrada_principal',
-  ADD COLUMN IF NOT EXISTS camera_type text DEFAULT '3D',
-  ADD COLUMN IF NOT EXISTS verification_level text DEFAULT '3D_antispoofing';
+CREATE TABLE public.estado_sistema (
+  id integer NOT NULL DEFAULT 1 CHECK (id = 1),
+  camara_activa boolean DEFAULT false,
+  modo_camara text DEFAULT 'simulada'::text,
+  ultimo_heartbeat timestamp with time zone,
+  tolerancia_facial real DEFAULT 0.55,
+  umbral_varianza real DEFAULT 1.0,
+  cooldown_eventos integer DEFAULT 5,
+  antispoofing_activo boolean DEFAULT true,
+  updated_at timestamp with time zone DEFAULT now(),
+  camaras jsonb DEFAULT '[{"activa": false, "modelo": "Intel RealSense D435", "camera_id": "entrada_principal", "camera_type": "3D"}, {"activa": false, "modelo": "Webcam IP", "camera_id": "entrada_secundaria", "camera_type": "2D"}]'::jsonb,
+  CONSTRAINT estado_sistema_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.historial (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  estado text NOT NULL CHECK (estado = ANY (ARRAY['ACCESO_PERMITIDO'::text, 'FRAUDE'::text, 'DESCONOCIDO'::text])),
+  nombre text,
+  usuario_id uuid,
+  confianza real,
+  foto_url text,
+  motivo text,
+  metricas_json jsonb,
+  timestamp timestamp with time zone DEFAULT now(),
+  camera_id text DEFAULT 'entrada_principal'::text CHECK (camera_id = ANY (ARRAY['entrada_principal'::text, 'entrada_secundaria'::text])),
+  camera_type text DEFAULT '3D'::text CHECK (camera_type = ANY (ARRAY['3D'::text, '2D'::text])),
+  verification_level text DEFAULT '3D_antispoofing'::text CHECK (verification_level = ANY (ARRAY['3D_antispoofing'::text, '2D_recognition'::text])),
+  CONSTRAINT historial_pkey PRIMARY KEY (id),
+  CONSTRAINT historial_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.usuarios(id)
+);
+CREATE TABLE public.suscripciones_push (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  token_fcm text NOT NULL UNIQUE,
+  dispositivo text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT suscripciones_push_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.usuarios (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  nombre text NOT NULL,
+  notas text DEFAULT ''::text,
+  activo boolean DEFAULT true,
+  num_angulos integer DEFAULT 0,
+  embeddings_json jsonb,
+  fecha_registro timestamp with time zone DEFAULT now(),
+  created_at timestamp with time zone DEFAULT now(),
+  foto_perfil text,
+  CONSTRAINT usuarios_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.comandos_edge (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  tipo text NOT NULL CHECK (tipo = ANY (ARRAY['INICIAR_REGISTRO'::text, 'CANCELAR_REGISTRO'::text])),
+  usuario_id uuid REFERENCES public.usuarios(id) ON DELETE CASCADE,
+  nombre text,
+  estado text NOT NULL DEFAULT 'pendiente' CHECK (estado = ANY (ARRAY['pendiente'::text, 'en_progreso'::text, 'completado'::text, 'error'::text, 'cancelado'::text])),
+  progreso integer DEFAULT 0,
+  resultado jsonb DEFAULT '{}'::jsonb,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT comandos_edge_pkey PRIMARY KEY (id)
+);
 
--- Restricción CHECK para camera_id
-ALTER TABLE public.historial 
-  ADD CONSTRAINT historial_camera_id_check 
-  CHECK (camera_id IN ('entrada_principal', 'entrada_secundaria'));
+-- Índice para el polling del edge (busca pendientes rápido)
+CREATE INDEX IF NOT EXISTS idx_comandos_edge_estado
+  ON public.comandos_edge (estado)
+  WHERE estado = 'pendiente';
 
--- Restricción CHECK para camera_type
-ALTER TABLE public.historial 
-  ADD CONSTRAINT historial_camera_type_check 
-  CHECK (camera_type IN ('3D', '2D'));
+-- Habilitar Realtime para que el frontend pueda suscribirse a cambios
+ALTER PUBLICATION supabase_realtime ADD TABLE public.comandos_edge;
 
--- Restricción CHECK para verification_level
-ALTER TABLE public.historial 
-  ADD CONSTRAINT historial_verification_level_check 
-  CHECK (verification_level IN ('3D_antispoofing', '2D_recognition'));
+-- RLS: Permitir insert desde el frontend (anon/authenticated)
+-- y full access desde service_role (edge)
+ALTER TABLE public.comandos_edge ENABLE ROW LEVEL SECURITY;
 
--- Índice para queries filtradas por cámara (usado por getEventosPorCamara)
-CREATE INDEX IF NOT EXISTS idx_historial_camera_id 
-  ON public.historial(camera_id, timestamp DESC);
+CREATE POLICY "Frontend puede insertar comandos"
+  ON public.comandos_edge FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
 
--- 2. USUARIOS: Agregar foto de perfil
-ALTER TABLE public.usuarios 
-  ADD COLUMN IF NOT EXISTS foto_perfil text;
+CREATE POLICY "Frontend puede leer comandos"
+  ON public.comandos_edge FOR SELECT
+  TO authenticated
+  USING (true);
 
--- 3. ESTADO_SISTEMA: Agregar columna JSONB para cámaras
--- Mantener camara_activa y modo_camara por retrocompatibilidad
-ALTER TABLE public.estado_sistema 
-  ADD COLUMN IF NOT EXISTS camaras jsonb DEFAULT '[
-    {"camera_id": "entrada_principal", "camera_type": "3D", "activa": false, "modelo": "Intel RealSense D435"},
-    {"camera_id": "entrada_secundaria", "camera_type": "2D", "activa": false, "modelo": "Webcam IP"}
-  ]'::jsonb;
-
--- 4. Inicializar los datos existentes del historial
--- Todos los eventos previos se asignan a la cámara principal (era la única)
-UPDATE public.historial 
-  SET camera_id = 'entrada_principal', 
-      camera_type = '3D', 
-      verification_level = '3D_antispoofing'
-  WHERE camera_id IS NULL OR camera_id = 'entrada_principal';
-
--- 5. Actualizar estado_sistema para inicializar cámaras
-UPDATE public.estado_sistema 
-  SET camaras = '[
-    {"camera_id": "entrada_principal", "camera_type": "3D", "activa": false, "modelo": "Intel RealSense D435"},
-    {"camera_id": "entrada_secundaria", "camera_type": "2D", "activa": false, "modelo": "Webcam IP"}
-  ]'::jsonb
-  WHERE id = 1;
-
--- 6. Habilitar Realtime para la tabla historial y estado_sistema de forma segura
-DO $$
-BEGIN
-    -- Verificar y agregar 'historial' si no está en la publicación
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_publication_tables 
-        WHERE pubname = 'supabase_realtime' AND tablename = 'historial'
-    ) THEN
-        ALTER PUBLICATION supabase_realtime ADD TABLE public.historial;
-    END IF;
-
-    -- Verificar y agregar 'estado_sistema' si no está en la publicación
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_publication_tables 
-        WHERE pubname = 'supabase_realtime' AND tablename = 'estado_sistema'
-    ) THEN
-        ALTER PUBLICATION supabase_realtime ADD TABLE public.estado_sistema;
-    END IF;
-END $$;
-
--- ============================================
--- Verificación: Ejecutar después de la migración
--- ============================================
-
--- Ver estructura actualizada de historial
--- SELECT column_name, data_type, column_default 
--- FROM information_schema.columns 
--- WHERE table_name = 'historial' ORDER BY ordinal_position;
-
--- Ver estructura actualizada de estado_sistema
--- SELECT * FROM public.estado_sistema WHERE id = 1;
+CREATE POLICY "Service role tiene acceso completo"
+  ON public.comandos_edge FOR ALL
+  TO service_role
+  USING (true)
+  WITH CHECK (true);
