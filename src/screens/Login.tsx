@@ -16,14 +16,15 @@ export default function Login() {
     setError(false);
 
     const formData = new FormData(e.target as HTMLFormElement);
-    const usuario = formData.get("usuario") as string;
+    const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
     try {
-      const admin = await loginAdmin(usuario, password);
-      if (admin) {
-        // Guardar sesión en localStorage
-        localStorage.setItem("dg_admin", JSON.stringify({ usuario: admin.usuario, id: admin.id }));
+      const user = await loginAdmin(email, password);
+      if (user) {
+        // Supabase Auth maneja la sesión automáticamente (JWT en localStorage)
+        // Guardamos un flag adicional para ProtectedRoute
+        localStorage.setItem("dg_admin", JSON.stringify({ email: user.email, id: user.id }));
         navigate("/dashboard");
       } else {
         setError(true);
@@ -60,11 +61,11 @@ export default function Login() {
         >
           <form className="space-y-6" onSubmit={handleLogin}>
             <div className="space-y-2">
-              <label className="block text-xs font-medium text-dg-text-muted uppercase tracking-wider">Usuario</label>
+              <label className="block text-xs font-medium text-dg-text-muted uppercase tracking-wider">Email</label>
               <input
-                name="usuario"
-                type="text"
-                placeholder="Ingrese su usuario"
+                name="email"
+                type="email"
+                placeholder="admin@depthguard.com"
                 required
                 className="w-full bg-dg-input border-dg-border text-white rounded-dg px-4 py-3 focus:ring-dg-accent focus:border-dg-accent transition-all outline-none"
               />

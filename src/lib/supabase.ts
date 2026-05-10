@@ -98,12 +98,8 @@ export function isEdgeOnline(ultimoHeartbeat: string | null): boolean {
   return (Date.now() - new Date(ultimoHeartbeat).getTime()) < EDGE_HEARTBEAT_TIMEOUT_MS;
 }
 
-export interface Admin {
-  id: string;
-  usuario: string;
-  password_hash: string;
-  created_at: string;
-}
+// Admin type ya no es necesario — Supabase Auth maneja la sesión
+// El tipo de usuario de auth es `import { User } from '@supabase/supabase-js'`
 
 // ============================================
 // Funciones helper para queries frecuentes
@@ -285,22 +281,26 @@ export async function getEstadoSistema(): Promise<EstadoSistema> {
   return { ...raw, camaras } as EstadoSistema;
 }
 
-/** Login de admin (simple, sin hash por ahora) */
-export async function loginAdmin(usuario: string, password: string) {
-  const { data, error } = await supabase
-    .from("admin")
-    .select("*")
-    .eq("usuario", usuario)
-    .single();
+/** Login de admin via Supabase Auth (email/password con bcrypt + JWT) */
+export async function loginAdmin(email: string, password: string) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-  if (error || !data) return null;
-  
-  // TODO: Implementar hash comparison (PBKDF2 o bcrypt)
-  // Por ahora comparación directa para desarrollo
-  if (data.password_hash === password) {
-    return data as Admin;
-  }
-  return null;
+  if (error || !data.user) return null;
+  return data.user;
+}
+
+/** Cerrar sesión via Supabase Auth */
+export async function logoutAdmin() {
+  await supabase.auth.signOut();
+}
+
+/** Obtener sesión actual (para ProtectedRoute) */
+export async function getSessionActual() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session;
 }
 
 /** Contar accesos de un usuario específico */

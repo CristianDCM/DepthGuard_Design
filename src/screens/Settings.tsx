@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Settings as SettingsIcon, Server, Video, Bell, Database, Shield, LogOut } from "lucide-react";
 import Navigation from "../components/Navigation";
-import { getEstadoSistema, isEdgeOnline, type EstadoSistema } from "../lib/supabase";
+import { getEstadoSistema, isEdgeOnline, logoutAdmin, type EstadoSistema } from "../lib/supabase";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -23,7 +23,8 @@ export default function Settings() {
     cargar();
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logoutAdmin();
     localStorage.removeItem("dg_admin");
     navigate("/");
   };
