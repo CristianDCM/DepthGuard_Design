@@ -61,23 +61,21 @@ export default function Login() {
         >
           <form className="space-y-6" onSubmit={handleLogin}>
             <div className="space-y-2">
-              <label className="block text-xs font-medium text-dg-text-muted uppercase tracking-wider">Email</label>
               <input
                 name="email"
                 type="email"
-                placeholder="admin@depthguard.com"
+                placeholder="Correo"
                 required
                 className="w-full bg-dg-input border-dg-border text-white rounded-dg px-4 py-3 focus:ring-dg-accent focus:border-dg-accent transition-all outline-none"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="block text-xs font-medium text-dg-text-muted uppercase tracking-wider">Contraseña</label>
               <div className="relative">
                 <input
                   name="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
+                  placeholder="Contraseña"
                   required
                   className="w-full bg-dg-input border-dg-border text-white rounded-dg px-4 py-3 focus:ring-dg-accent focus:border-dg-accent transition-all outline-none pr-12"
                 />
