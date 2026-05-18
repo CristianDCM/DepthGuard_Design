@@ -1,4 +1,4 @@
-﻿import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { ArrowLeft, Video, ExternalLink, Fingerprint, ShieldAlert, UserSearch, Plus, FileText, Download } from "lucide-react";
 import { motion } from "motion/react";
@@ -220,7 +220,7 @@ export default function EventDetail() {
 
                 <button 
                   onClick={() => navigate("/register/start")}
-                  className="btn-primary w-full py-4 font-headline font-black uppercase tracking-tighter text-lg flex items-center justify-center gap-2"
+                  className="btn-primary w-full py-4 flex items-center justify-center gap-2"
                 >
                   <Plus className="w-6 h-6" /> Registrar esta persona
                 </button>

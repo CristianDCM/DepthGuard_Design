@@ -310,7 +310,7 @@ function CameraPanel({
           <div className="absolute inset-0 bg-dg-error/5 animate-pulse pointer-events-none" />
         )}
 
-        <div className="p-5 relative z-10">
+        <div className="p-4 relative z-10">
           <div className="flex items-start justify-between">
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5" style={{ color: statusConfig.accentColor }}>
@@ -319,7 +319,7 @@ function CameraPanel({
                   Estatus de Seguridad
                 </span>
               </div>
-              <h3 className="font-headline text-xl font-bold text-white uppercase tracking-tight">
+              <h3 className="font-headline text-xl font-bold text-white tracking-tight">
                 {statusConfig.title}
               </h3>
               {ultimoEvento?.nombre && (
