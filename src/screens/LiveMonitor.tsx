@@ -44,46 +44,31 @@ interface CameraPanelData {
 
 export default function LiveMonitor() {
   const [estado, setEstado] = useState<EstadoSistema | null>(null);
-  const [panelPrincipal, setPanelPrincipal] = useState<CameraPanelData>({
-    cameraId: "entrada_principal",
-    cameraType: "3D",
-    label: "Entrada Principal",
-    ultimoEvento: null,
-    eventosRecientes: [],
-  });
-  const [panelSecundario, setPanelSecundario] = useState<CameraPanelData>({
-    cameraId: "entrada_secundaria",
-    cameraType: "2D",
-    label: "Entrada Secundaria",
-    ultimoEvento: null,
-    eventosRecientes: [],
-  });
+  const [panelsPorCamara, setPanelsPorCamara] = useState<Record<string, CameraPanelData>>({});
   const [loading, setLoading] = useState(true);
 
   // Cargar datos iniciales
   useEffect(() => {
     async function cargarDatos() {
       try {
-        const [estadoData, eventosPrincipal, eventosSecundario] =
-          await Promise.all([
-            getEstadoSistema(),
-            getEventosPorCamara("entrada_principal", 5),
-            getEventosPorCamara("entrada_secundaria", 5),
-          ]);
+        const estadoData = await getEstadoSistema();
+        if (estadoData) {
+          setEstado(estadoData);
 
-        if (estadoData) setEstado(estadoData);
-
-        setPanelPrincipal((prev) => ({
-          ...prev,
-          ultimoEvento: eventosPrincipal[0] ?? null,
-          eventosRecientes: eventosPrincipal,
-        }));
-
-        setPanelSecundario((prev) => ({
-          ...prev,
-          ultimoEvento: eventosSecundario[0] ?? null,
-          eventosRecientes: eventosSecundario,
-        }));
+          // Construir paneles dinámicamente desde las cámaras reportadas
+          const panels: Record<string, CameraPanelData> = {};
+          for (const cam of estadoData.camaras) {
+            const eventos = await getEventosPorCamara(cam.camera_id, 5);
+            panels[cam.camera_id] = {
+              cameraId: cam.camera_id,
+              cameraType: cam.camera_type,
+              label: cam.camera_id === "entrada_principal" ? "Entrada Principal" : "Entrada Secundaria",
+              ultimoEvento: eventos[0] ?? null,
+              eventosRecientes: eventos,
+            };
+          }
+          setPanelsPorCamara(panels);
+        }
       } catch (err) {
         console.error("Error cargando monitor:", err);
       } finally {
@@ -102,25 +87,21 @@ export default function LiveMonitor() {
         { event: "INSERT", schema: "public", table: "historial" },
         (payload) => {
           const nuevoEvento = payload.new as Evento;
+          const camId = nuevoEvento.camera_id;
 
-          if (nuevoEvento.camera_id === "entrada_principal") {
-            setPanelPrincipal((prev) => ({
-              ...prev,
-              ultimoEvento: nuevoEvento,
-              eventosRecientes: [nuevoEvento, ...prev.eventosRecientes].slice(
-                0,
-                5
-              ),
-            }));
-          } else if (nuevoEvento.camera_id === "entrada_secundaria") {
-            setPanelSecundario((prev) => ({
-              ...prev,
-              ultimoEvento: nuevoEvento,
-              eventosRecientes: [nuevoEvento, ...prev.eventosRecientes].slice(
-                0,
-                5
-              ),
-            }));
+          if (camId) {
+            setPanelsPorCamara((prev) => {
+              const panel = prev[camId];
+              if (!panel) return prev;
+              return {
+                ...prev,
+                [camId]: {
+                  ...panel,
+                  ultimoEvento: nuevoEvento,
+                  eventosRecientes: [nuevoEvento, ...panel.eventosRecientes].slice(0, 5),
+                },
+              };
+            });
           }
         }
       )
@@ -145,6 +126,7 @@ export default function LiveMonitor() {
   }, []);
 
   const edgeOnline = isEdgeOnline(estado?.ultimo_heartbeat ?? null);
+  const camaras = estado?.camaras ?? [];
 
   return (
     <div className="min-h-screen pb-24 flex flex-col bg-dg-bg">
@@ -188,10 +170,31 @@ export default function LiveMonitor() {
           <div className="flex items-center justify-center py-20">
             <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
           </div>
+        ) : camaras.length === 0 ? (
+          <div className="cyber-card p-8 text-center text-dg-text-muted space-y-2">
+            <Server className="w-8 h-8 mx-auto opacity-40" />
+            <p className="text-sm">No hay cámaras reportadas por el nodo edge</p>
+            <p className="text-xs">Verifica que el sistema esté corriendo y el heartbeat esté activo</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <CameraPanel data={panelPrincipal} edgeOnline={edgeOnline} />
-            <CameraPanel data={panelSecundario} edgeOnline={edgeOnline} />
+          <div className={`grid gap-6 ${camaras.length > 1 ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 max-w-2xl mx-auto"}`}>
+            {camaras.map((cam) => {
+              const panel = panelsPorCamara[cam.camera_id];
+              return (
+                <CameraPanel
+                  key={cam.camera_id}
+                  data={panel ?? {
+                    cameraId: cam.camera_id,
+                    cameraType: cam.camera_type,
+                    label: cam.camera_id === "entrada_principal" ? "Entrada Principal" : "Entrada Secundaria",
+                    ultimoEvento: null,
+                    eventosRecientes: [],
+                  }}
+                  camaraActiva={cam.activa}
+                  edgeOnline={edgeOnline}
+                />
+              );
+            })}
           </div>
         )}
       </main>
@@ -207,15 +210,15 @@ export default function LiveMonitor() {
 
 function CameraPanel({
   data,
+  camaraActiva,
   edgeOnline,
 }: {
   data: CameraPanelData;
+  camaraActiva: boolean;
   edgeOnline: boolean;
 }) {
   const { cameraId, cameraType, label, ultimoEvento, eventosRecientes } = data;
   const statusConfig = getStatusConfig(ultimoEvento);
-  const camaraActiva =
-    edgeOnline; /* Si el edge está online, asumimos cámara activa */
 
   return (
     <motion.div
