@@ -1,4 +1,4 @@
-﻿import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { ArrowLeft, Video, ExternalLink, Fingerprint, ShieldAlert, UserSearch, Plus, FileText, Download } from "lucide-react";
 import { motion } from "motion/react";
@@ -107,7 +107,7 @@ export default function EventDetail() {
             <button onClick={() => navigate(-1)} className="active:scale-95 transition-transform">
               <ArrowLeft className="w-6 h-6 text-dg-accent" />
             </button>
-            <h1 className="font-headline font-bold tracking-tight text-lg text-white">{headerTitle}</h1>
+            <h1 className="font-headline font-bold text-lg text-white">{headerTitle}</h1>
           </div>
         </div>
       </header>
@@ -120,7 +120,7 @@ export default function EventDetail() {
               {isAuthorized && (
                 <div className="px-6 py-3 rounded-full border-2 border-dg-accent/30 bg-dg-accent/10 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-dg-accent animate-pulse" />
-                  <span className="font-headline font-bold text-dg-accent tracking-widest text-sm uppercase">ACCESO PERMITIDO</span>
+                  <span className="font-headline font-bold text-dg-accent text-sm">ACCESO PERMITIDO</span>
                 </div>
               )}
               {isFraud && (
@@ -129,7 +129,7 @@ export default function EventDetail() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-dg-error opacity-75" />
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-dg-error" />
                   </span>
-                  <span className="font-headline font-bold text-xs tracking-widest text-dg-error uppercase">FRAUDE DETECTADO</span>
+                  <span className="font-headline font-bold text-xs text-dg-error">FRAUDE DETECTADO</span>
                 </div>
               )}
               {isUnknown && (
@@ -137,7 +137,7 @@ export default function EventDetail() {
                   <div className="relative flex items-center justify-center">
                     <span className="w-2.5 h-2.5 bg-yellow-500 rounded-full animate-pulse" />
                   </div>
-                  <span className="font-headline font-bold text-yellow-500 text-xs tracking-widest uppercase">PERSONA DESCONOCIDA</span>
+                  <span className="font-headline font-bold text-yellow-500 text-xs">PERSONA DESCONOCIDA</span>
                 </div>
               )}
             </section>
@@ -158,7 +158,7 @@ export default function EventDetail() {
               
               <div className="absolute inset-0 bg-gradient-to-t from-dg-bg via-transparent to-transparent" />
               <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg">
-                <p className="font-mono text-xs text-white/90 tracking-tighter">{timestamp}</p>
+                <p className="font-mono text-xs text-white/90">{timestamp}</p>
               </div>
             </div>
           </div>
@@ -198,7 +198,7 @@ export default function EventDetail() {
                 </div>
 
                 <div className="bg-dg-card p-6 rounded-2xl border border-dg-border">
-                  <h4 className="font-headline font-bold text-xs tracking-widest text-dg-error mb-3 uppercase">Motivo de Detección</h4>
+                  <h4 className="font-headline font-bold text-xs text-dg-error mb-3">Motivo de Detección</h4>
                   <p className="text-white text-base leading-relaxed">
                     {evento.motivo ?? "Superficie plana detectada — Varianza de profundidad insuficiente para rostro real"}
                   </p>
@@ -213,14 +213,14 @@ export default function EventDetail() {
                     <UserSearch className="w-10 h-10" />
                   </div>
                   <div>
-                    <h2 className="font-headline text-2xl font-bold text-white tracking-tight">Persona No Registrada</h2>
+                    <h2 className="font-headline text-2xl font-bold text-white">Persona No Registrada</h2>
                     <p className="text-dg-text-muted text-sm mt-1">No se encontró coincidencia en la base de datos</p>
                   </div>
                 </div>
 
                 <button 
                   onClick={() => navigate("/register/start")}
-                  className="btn-primary w-full py-4 font-headline font-black uppercase tracking-tighter text-lg flex items-center justify-center gap-2"
+                  className="btn-primary w-full py-4 font-headline font-black text-lg flex items-center justify-center gap-2"
                 >
                   <Plus className="w-6 h-6" /> Registrar esta persona
                 </button>
@@ -298,7 +298,7 @@ function MetricItem({ label, value, progress, color = "bg-dg-accent" }: { label:
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-end">
-        <span className="text-dg-text-muted text-xs uppercase tracking-widest font-semibold">{label}</span>
+        <span className="text-dg-text-muted text-xs font-semibold">{label}</span>
         <span className={`${color.replace('bg-', 'text-')} font-bold text-sm`}>{value}</span>
       </div>
       <div className="w-full bg-dg-bg rounded-full h-1.5 overflow-hidden">

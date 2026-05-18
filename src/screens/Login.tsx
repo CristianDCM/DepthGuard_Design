@@ -49,7 +49,7 @@ export default function Login() {
             <Shield className="w-20 h-20 text-dg-accent animate-pulse" />
             <div className="absolute inset-0 bg-dg-accent/20 blur-2xl rounded-full -z-10" />
           </div>
-          <h1 className="text-4xl font-bold text-dg-accent tracking-tight font-headline">DepthGuard</h1>
+          <h1 className="text-4xl font-bold text-dg-accent font-headline">DepthGuard</h1>
           <p className="text-dg-text-muted text-sm mt-1">Sistema de Control de Acceso 3D</p>
         </motion.div>
 

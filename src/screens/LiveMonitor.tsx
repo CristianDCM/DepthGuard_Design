@@ -173,7 +173,7 @@ export default function LiveMonitor() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between w-full">
           <div className="flex items-center gap-3">
             <Video className="w-6 h-6 text-dg-accent" />
-            <h1 className="text-xl font-bold tracking-tight font-headline">
+            <h1 className="text-xl font-bold font-headline">
               Monitor en Vivo
             </h1>
           </div>
@@ -194,7 +194,7 @@ export default function LiveMonitor() {
               }`}
             />
             <span
-              className={`text-[10px] font-bold tracking-widest uppercase ${
+              className={`text-[10px] font-bold ${
                 edgeOnline ? "text-dg-accent" : "text-dg-error"
               }`}
             >
@@ -264,12 +264,12 @@ function CameraPanel({
             )}
           </div>
           <div>
-            <h2 className="font-headline text-base font-bold tracking-tight">
+            <h2 className="font-headline text-base font-bold">
               {label}
             </h2>
             <div className="flex items-center gap-2 mt-0.5">
               <span
-                className={`text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${
+                className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
                   cameraType === "3D"
                     ? "bg-dg-accent/10 text-dg-accent"
                     : "bg-blue-500/10 text-blue-400"
@@ -278,7 +278,7 @@ function CameraPanel({
                 {cameraType === "3D" ? "Anti-spoofing 3D" : "Verificación 2D"}
               </span>
               <span
-                className={`flex items-center gap-1 text-[9px] font-bold uppercase ${
+                className={`flex items-center gap-1 text-[9px] font-bold ${
                   camaraActiva ? "text-dg-success" : "text-dg-error"
                 }`}
               >
@@ -315,11 +315,11 @@ function CameraPanel({
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5" style={{ color: statusConfig.accentColor }}>
                 <statusConfig.icon className="w-4 h-4" />
-                <span className="text-[10px] font-bold tracking-widest uppercase">
+                <span className="text-[10px] font-bold">
                   Estatus de Seguridad
                 </span>
               </div>
-              <h3 className="font-headline text-xl font-bold text-white uppercase tracking-tight">
+              <h3 className="font-headline text-xl font-bold text-white">
                 {statusConfig.title}
               </h3>
               {ultimoEvento?.nombre && (
@@ -328,7 +328,7 @@ function CameraPanel({
                     <User className="w-4 h-4 text-dg-accent" />
                   </div>
                   <div>
-                    <div className="text-[9px] text-dg-text-muted uppercase font-bold tracking-wider">
+                    <div className="text-[9px] text-dg-text-muted font-bold">
                       Sujeto
                     </div>
                     <div className="text-sm font-bold text-white">
@@ -346,7 +346,7 @@ function CameraPanel({
             {/* Confidence Badge */}
             {ultimoEvento?.confianza != null && (
               <div className="bg-dg-bg px-3 py-2 rounded-lg border border-dg-border flex flex-col items-end shrink-0">
-                <span className="text-[9px] text-dg-text-muted font-bold uppercase">
+                <span className="text-[9px] text-dg-text-muted font-bold">
                   Confianza
                 </span>
                 <span
@@ -370,7 +370,7 @@ function CameraPanel({
       {/* Anti-spoofing Metrics (solo si hay evento con métricas) */}
       {ultimoEvento?.metricas_json && (
         <div className="cyber-card p-4">
-          <h4 className="text-[10px] font-bold text-dg-text-muted uppercase tracking-[0.15em] mb-4">
+          <h4 className="text-[10px] font-bold text-dg-text-muted mb-4">
             {cameraType === "3D"
               ? "Métricas Anti-Spoofing"
               : "Métricas de Detección"}
@@ -420,7 +420,7 @@ function CameraPanel({
       {/* Mini Event Log */}
       <div className="cyber-card overflow-hidden">
         <div className="px-4 py-3 border-b border-dg-border bg-white/5 flex items-center justify-between">
-          <h4 className="text-[10px] font-bold text-dg-text-muted uppercase tracking-[0.15em]">
+          <h4 className="text-[10px] font-bold text-dg-text-muted">
             Últimos Eventos
           </h4>
           <span className="text-[9px] text-dg-text-muted font-medium">
@@ -452,7 +452,7 @@ function CameraPanel({
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-dg-accent rounded-full border border-dg-card animate-pulse" />
           </div>
           <div>
-            <div className="text-[8px] font-bold text-dg-text-muted uppercase tracking-wider">
+            <div className="text-[8px] font-bold text-dg-text-muted">
               Supabase Realtime
             </div>
             <div className="text-[10px] font-bold text-dg-accent flex items-center gap-1">
@@ -679,7 +679,7 @@ function LiveSnapshotPreview({
       <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 py-2 bg-gradient-to-b from-black/70 to-transparent">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_6px_#ef4444]" />
-          <span className="text-[10px] font-bold text-white/90 uppercase tracking-widest">
+          <span className="text-[10px] font-bold text-white/90">
             En Vivo
           </span>
         </div>

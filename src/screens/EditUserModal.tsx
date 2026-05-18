@@ -61,13 +61,13 @@ export default function EditUserModal() {
           <div className="w-12 h-12 bg-dg-accent/10 rounded-full flex items-center justify-center mb-4">
             <Edit2 className="w-6 h-6 text-dg-accent" />
           </div>
-          <h2 className="text-2xl font-bold font-headline text-white tracking-tight">Editar Usuario</h2>
+          <h2 className="text-2xl font-bold font-headline text-white">Editar Usuario</h2>
           <p className="text-dg-text-muted text-sm mt-1">{user?.nombre ?? "—"} — ID #{id?.substring(0, 8)}</p>
         </div>
 
         <div className="px-6 pb-8 space-y-8">
           <div className="space-y-3">
-            <label className="block text-[10px] font-bold tracking-widest text-dg-text-muted uppercase font-display">ESTADO DEL USUARIO</label>
+            <label className="block text-[10px] font-bold text-dg-text-muted font-display">ESTADO DEL USUARIO</label>
             <div className="flex items-center justify-between bg-dg-bg p-4 rounded-xl border border-dg-border">
               <span className="text-white font-medium">{isActive ? "Activo" : "Inactivo"}</span>
               <div 
@@ -84,7 +84,7 @@ export default function EditUserModal() {
           </div>
 
           <div className="space-y-3">
-            <label className="block text-[10px] font-bold tracking-widest text-dg-text-muted uppercase font-display">NOTAS</label>
+            <label className="block text-[10px] font-bold text-dg-text-muted font-display">NOTAS</label>
             <textarea 
               className="w-full bg-dg-bg border border-dg-border text-white rounded-xl p-4 min-h-[100px] focus:ring-1 focus:ring-dg-accent focus:border-dg-accent transition-all resize-none text-sm outline-none"
               placeholder="Ingrese notas del usuario..."

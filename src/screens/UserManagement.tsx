@@ -55,7 +55,7 @@ export default function UserManagement() {
           <div className="flex items-center justify-between px-4 py-4">
             <div className="flex items-center gap-3">
               <Users className="w-6 h-6 text-dg-accent" />
-              <h1 className="text-xl font-bold tracking-tight font-headline">Usuarios</h1>
+              <h1 className="text-xl font-bold font-headline">Usuarios</h1>
             </div>
             <button 
               onClick={() => navigate("/register/start")}
@@ -80,19 +80,19 @@ export default function UserManagement() {
             <div className="bg-dg-card/50 border border-dg-border rounded-xl p-3 flex justify-around text-center max-w-2xl">
               <div>
                 <p className="text-dg-accent font-bold text-sm">{users.length}</p>
-                <p className="text-[9px] text-dg-text-muted uppercase tracking-wider">Registrados</p>
+                <p className="text-[9px] text-dg-text-muted">Registrados</p>
               </div>
               <div className="w-[1px] bg-dg-border" />
               <div>
                 <p className="text-white font-bold text-sm">{totalAccesos}</p>
-                <p className="text-[9px] text-dg-text-muted uppercase tracking-wider">Accesos</p>
+                <p className="text-[9px] text-dg-text-muted">Accesos</p>
               </div>
               <div className="w-[1px] bg-dg-border" />
               <div>
                 <p className="text-white font-bold text-sm flex items-center justify-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-dg-accent animate-pulse" /> {estadoCount.activos} / {estadoCount.inactivos}
                 </p>
-                <p className="text-[9px] text-dg-text-muted uppercase tracking-wider">Activos / Inactivos</p>
+                <p className="text-[9px] text-dg-text-muted">Activos / Inactivos</p>
               </div>
             </div>
           </div>
@@ -100,7 +100,7 @@ export default function UserManagement() {
       </header>
 
       <main className="flex-1 px-4 py-4 space-y-3 max-w-7xl mx-auto w-full">
-        <div className="text-xs font-bold text-dg-text-muted uppercase tracking-wider mb-2">Personal Autorizado</div>
+        <div className="text-xs font-bold text-dg-text-muted mb-2">Personal Autorizado</div>
         
         {loading ? (
           <div className="flex items-center justify-center py-20">

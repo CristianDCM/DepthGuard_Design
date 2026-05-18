@@ -239,7 +239,7 @@ export default function RegisterStart() {
         <header className="bg-dg-bg border-b border-dg-border px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <Users className="w-6 h-6 text-dg-accent" />
-            <h1 className="text-xl font-bold tracking-tight font-headline">Usuarios</h1>
+            <h1 className="text-xl font-bold font-headline">Usuarios</h1>
           </div>
         </header>
         <main className="p-4 space-y-3">
@@ -264,13 +264,13 @@ export default function RegisterStart() {
               <div className="w-10 h-10 rounded-xl bg-dg-accent/10 flex items-center justify-center">
                 <UserPlus className="w-6 h-6 text-dg-accent" />
               </div>
-              <h2 className="text-xl font-bold text-white tracking-tight font-headline">Registrar Nuevo Usuario</h2>
+              <h2 className="text-xl font-bold text-white font-headline">Registrar Nuevo Usuario</h2>
             </div>
 
             <div className="space-y-6 pb-10">
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-dg-text-muted px-1">NOMBRE COMPLETO</label>
+                  <label className="text-[10px] font-bold text-dg-text-muted px-1">NOMBRE COMPLETO</label>
                   <input 
                     type="text" 
                     placeholder="Ej: Juan Pérez"
@@ -282,7 +282,7 @@ export default function RegisterStart() {
                   {error && <p className="text-xs text-dg-error px-1 mt-1">{error}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-dg-text-muted px-1">NOTAS (OPCIONAL)</label>
+                  <label className="text-[10px] font-bold text-dg-text-muted px-1">NOTAS (OPCIONAL)</label>
                   <input 
                     type="text" 
                     placeholder="Ej: Empleado piso 3, Visitante temporal"
@@ -358,7 +358,7 @@ export default function RegisterStart() {
                 <UserPlus className="w-6 h-6 text-dg-accent" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white tracking-tight font-headline">Registrar Nuevo Usuario</h2>
+                <h2 className="text-xl font-bold text-white font-headline">Registrar Nuevo Usuario</h2>
                 {usuarioCreado && (
                   <p className="text-[10px] text-dg-text-muted font-medium mt-0.5">
                     {usuarioCreado.nombre} · ID: {usuarioCreado.id.substring(0, 8)}
@@ -380,7 +380,7 @@ export default function RegisterStart() {
                 </p>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-dg-warning/10 border border-dg-warning/20">
                   <div className="w-2 h-2 rounded-full bg-dg-warning animate-pulse" />
-                  <span className="text-[10px] font-bold text-dg-warning uppercase tracking-wider">
+                  <span className="text-[10px] font-bold text-dg-warning">
                     Polling...
                   </span>
                 </div>
@@ -404,7 +404,7 @@ export default function RegisterStart() {
                 <UserPlus className="w-6 h-6 text-dg-accent" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white tracking-tight font-headline">Registrar Nuevo Usuario</h2>
+                <h2 className="text-xl font-bold text-white font-headline">Registrar Nuevo Usuario</h2>
                 {usuarioCreado && (
                   <p className="text-[10px] text-dg-text-muted font-medium mt-0.5">
                     {usuarioCreado.nombre} · ID: {usuarioCreado.id.substring(0, 8)}
@@ -436,7 +436,7 @@ export default function RegisterStart() {
               </div>
 
               <div className="text-center mt-6 flex flex-col gap-1">
-                <p className="text-dg-text-muted text-[10px] uppercase font-bold tracking-widest">
+                <p className="text-dg-text-muted text-[10px] font-bold">
                   Paso {Math.min(anguloActual + 1, ANGULOS.length)} de {ANGULOS.length}
                 </p>
                 <p className="text-dg-text-muted/50 text-[9px] font-medium">
@@ -456,7 +456,7 @@ export default function RegisterStart() {
                 </p>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-dg-accent/10 border border-dg-accent/20">
                   <Hourglass className="w-3.5 h-3.5 text-dg-accent animate-pulse" />
-                  <span className="text-[10px] font-bold text-dg-accent uppercase tracking-wider">
+                  <span className="text-[10px] font-bold text-dg-accent">
                     Capturando ángulo {anguloActual < ANGULOS.length ? ANGULOS[anguloActual]?.label : "..."}
                   </span>
                 </div>
@@ -542,7 +542,7 @@ export default function RegisterStart() {
               </div>
               <div className="flex items-center gap-1.5 bg-dg-success/20 px-3 py-1 rounded-full border border-dg-success/30">
                 <span className="w-2 h-2 rounded-full bg-dg-success" />
-                <span className="text-[10px] font-bold text-dg-success uppercase tracking-wider">Activo</span>
+                <span className="text-[10px] font-bold text-dg-success">Activo</span>
               </div>
             </div>
 
@@ -557,7 +557,7 @@ export default function RegisterStart() {
                   </div>
                 ))}
               </div>
-              <p className="text-center text-dg-text-muted text-[10px] font-medium tracking-wide">
+              <p className="text-center text-dg-text-muted text-[10px] font-medium">
                 {usuarioCreado?.num_angulos ?? 5} de 5 ángulos capturados
               </p>
             </div>
@@ -565,11 +565,11 @@ export default function RegisterStart() {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-dg-card p-4 rounded-xl border border-dg-border flex flex-col items-center justify-center">
                 <span className="text-dg-accent text-2xl font-bold font-headline">{usuarioCreado?.num_angulos ?? 5}</span>
-                <span className="text-dg-text-muted text-[10px] uppercase tracking-widest font-semibold">Ángulos</span>
+                <span className="text-dg-text-muted text-[10px] font-semibold">Ángulos</span>
               </div>
               <div className="bg-dg-card p-4 rounded-xl border border-dg-border flex flex-col items-center justify-center">
                 <span className="text-white text-2xl font-bold font-headline">Real</span>
-                <span className="text-dg-text-muted text-[10px] uppercase tracking-widest font-semibold">Pipeline IA</span>
+                <span className="text-dg-text-muted text-[10px] font-semibold">Pipeline IA</span>
               </div>
             </div>
 
@@ -601,7 +601,7 @@ function StepIndicator({ step, label, completed, active }: { step: number, label
       }`}>
         {completed ? <Check className="w-5 h-5" /> : <span className="text-sm font-bold">{step}</span>}
       </div>
-      <span className={`text-[8px] font-bold uppercase tracking-tighter ${active || completed ? "text-dg-accent" : "text-dg-text-muted/60"}`}>
+      <span className={`text-[8px] font-bold ${active || completed ? "text-dg-accent" : "text-dg-text-muted/60"}`}>
         {label}
       </span>
     </div>

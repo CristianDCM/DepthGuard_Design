@@ -62,7 +62,7 @@ export default function UserProfile() {
             <button onClick={() => navigate(-1)} className="active:scale-95 transition-transform">
               <ArrowLeft className="w-6 h-6 text-dg-accent" />
             </button>
-            <h1 className="font-headline font-bold text-xl tracking-wider text-white">Perfil de Usuario</h1>
+            <h1 className="font-headline font-bold text-xl text-white">Perfil de Usuario</h1>
           </div>
         </div>
       </header>
@@ -87,11 +87,11 @@ export default function UserProfile() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-dg-card p-5 rounded-xl border border-dg-border">
-                <p className="text-dg-text-muted text-[10px] font-bold uppercase tracking-widest">Accesos Totales</p>
+                <p className="text-dg-text-muted text-[10px] font-bold">Accesos Totales</p>
                 <p className="font-headline font-black text-4xl text-dg-accent mt-1">{accesos}</p>
               </div>
               <div className="bg-dg-card p-5 rounded-xl border border-dg-border">
-                <p className="text-dg-text-muted text-[10px] font-bold uppercase tracking-widest">Alertas Generadas</p>
+                <p className="text-dg-text-muted text-[10px] font-bold">Alertas Generadas</p>
                 <p className="font-headline font-black text-4xl text-white mt-1">{alertas}</p>
               </div>
             </div>
@@ -99,13 +99,13 @@ export default function UserProfile() {
             <div className="space-y-3 pt-4 lg:pt-0">
               <button 
                 onClick={() => navigate(`/users/edit/${user.id}`)}
-                className="w-full py-4 rounded-xl border border-dg-accent text-dg-accent font-headline font-bold uppercase tracking-widest text-sm bg-dg-accent/5 hover:bg-dg-accent/10 transition-all active:scale-95"
+                className="w-full py-4 rounded-xl border border-dg-accent text-dg-accent font-headline font-bold text-sm bg-dg-accent/5 hover:bg-dg-accent/10 transition-all active:scale-95"
               >
                 Editar Usuario
               </button>
               <button 
                 onClick={() => navigate(`/users/delete/${user.id}`)}
-                className="w-full py-4 rounded-xl border border-dg-error/40 text-dg-error font-headline font-bold uppercase tracking-widest text-sm hover:bg-dg-error/10 transition-all active:scale-95"
+                className="w-full py-4 rounded-xl border border-dg-error/40 text-dg-error font-headline font-bold text-sm hover:bg-dg-error/10 transition-all active:scale-95"
               >
                 Eliminar Usuario
               </button>
@@ -115,7 +115,7 @@ export default function UserProfile() {
           {/* Right Column: Details & Captures */}
           <div className="lg:col-span-8 space-y-6">
             <div className="bg-dg-card p-6 rounded-xl space-y-4 border border-dg-border">
-              <h3 className="font-headline font-bold text-sm text-dg-text-muted uppercase tracking-widest mb-4">Información</h3>
+              <h3 className="font-headline font-bold text-sm text-dg-text-muted mb-4">Información</h3>
               <div className="space-y-4">
                 <InfoRow label="ID" value={`#${user.id.substring(0, 8)}`} mono />
                 <InfoRow label="Fecha de Registro" value={new Date(user.fecha_registro).toLocaleDateString("es")} />
@@ -127,7 +127,7 @@ export default function UserProfile() {
 
             {eventos.length > 0 && (
               <div className="bg-dg-card p-6 rounded-xl border border-dg-border">
-                <h3 className="font-headline font-bold text-sm text-dg-text-muted uppercase tracking-widest mb-4">Últimas Capturas</h3>
+                <h3 className="font-headline font-bold text-sm text-dg-text-muted mb-4">Últimas Capturas</h3>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                   {eventos.filter(e => e.foto_url).map((evento) => (
                     <div key={evento.id} className="aspect-square bg-dg-bg rounded-lg overflow-hidden border border-dg-border relative group cursor-pointer" onClick={() => navigate(`/event/${evento.id}`)}>

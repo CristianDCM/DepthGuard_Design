@@ -106,7 +106,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between px-4 py-4">
             <div className="flex items-center gap-2">
               <Home className="w-6 h-6 text-dg-accent" />
-              <h1 className="text-xl font-bold tracking-tight font-headline">Inicio</h1>
+              <h1 className="text-xl font-bold font-headline">Inicio</h1>
             </div>
           </div>
         </div>
@@ -131,7 +131,7 @@ export default function Dashboard() {
                 >
                   <stat.icon className={`w-6 h-6 mb-2 ${stat.color}`} />
                   <span className={`text-3xl font-bold ${stat.color}`}>{stat.value}</span>
-                  <span className="text-[10px] uppercase tracking-wider text-dg-text-muted font-bold leading-none mt-1">{stat.label}</span>
+                  <span className="text-[10px] text-dg-text-muted font-bold leading-none mt-1">{stat.label}</span>
                   {stat.sub && <span className="text-[9px] text-dg-text-muted/60 font-medium mt-1">{stat.sub}</span>}
                 </motion.div>
               ))}
@@ -142,7 +142,7 @@ export default function Dashboard() {
               <section>
                 <div className="cyber-card overflow-hidden h-full">
                   <div className="px-4 py-3 border-b border-dg-border bg-white/5">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-muted">Estado del Sistema</h2>
+                    <h2 className="text-xs font-bold text-dg-text-muted">Estado del Sistema</h2>
                   </div>
                   <div className="divide-y divide-dg-border">
                     <div className="flex items-center justify-between p-5">
@@ -197,7 +197,7 @@ export default function Dashboard() {
                   <h2 className="text-lg font-bold font-headline">Últimos Eventos</h2>
                   <button 
                     onClick={() => navigate("/history")}
-                    className="text-xs font-bold text-dg-accent uppercase tracking-wider"
+                    className="text-xs font-bold text-dg-accent"
                   >
                     Ver todo
                   </button>
@@ -225,7 +225,7 @@ export default function Dashboard() {
                               <p className={`text-base font-semibold ${config.color}`}>{config.title}</p>
                               <div className="flex items-center gap-2 shrink-0">
                                 {evento.camera_id && (
-                                  <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                                  <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded ${
                                     evento.camera_type === "3D"
                                       ? "bg-dg-accent/10 text-dg-accent"
                                       : "bg-blue-500/10 text-blue-400"
