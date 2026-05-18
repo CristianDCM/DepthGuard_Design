@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+﻿import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { ArrowLeft, Video, ExternalLink, Fingerprint, ShieldAlert, UserSearch, Plus, FileText, Download } from "lucide-react";
 import { motion } from "motion/react";
@@ -327,44 +327,40 @@ function generarHTMLInforme(evento: Evento, fotoBase64: string): string {
     timeStyle: "medium",
   });
 
-  const estadoColor = isFraud ? "#ef4444" : isUnknown ? "#eab308" : "#a3ff00";
+  const estadoColor = isFraud ? "#ef4444" : isUnknown ? "#eab308" : "#16a34a";
   const estadoLabel = isFraud ? "FRAUDE DETECTADO" : isUnknown ? "PERSONA DESCONOCIDA" : "ACCESO PERMITIDO";
   const estadoBg = isFraud ? "#fef2f2" : isUnknown ? "#fefce8" : "#f0fdf4";
 
   const metricasHTML = `
-    <table style="width:100%;border-collapse:collapse;margin-top:12px;">
+    <table style="width:100%;border-collapse:collapse;margin-top:8px;">
       <tr>
-        <td style="padding:10px 12px;border:1px solid #e5e7eb;font-size:13px;color:#6b7280;">Confianza</td>
-        <td style="padding:10px 12px;border:1px solid #e5e7eb;font-size:13px;font-weight:700;text-align:right;">${confianzaPct != null ? confianzaPct + "%" : "N/A"}</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;color:#6b7280;">Confianza</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;font-weight:700;text-align:right;">${confianzaPct != null ? confianzaPct + "%" : "N/A"}</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;color:#6b7280;">Varianza Prof.</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;font-weight:700;text-align:right;">${metricas?.varianza?.toFixed(2) ?? "—"}</td>
       </tr>
       <tr>
-        <td style="padding:10px 12px;border:1px solid #e5e7eb;font-size:13px;color:#6b7280;">Varianza de Profundidad</td>
-        <td style="padding:10px 12px;border:1px solid #e5e7eb;font-size:13px;font-weight:700;text-align:right;">${metricas?.varianza?.toFixed(2) ?? "—"}</td>
-      </tr>
-      <tr>
-        <td style="padding:10px 12px;border:1px solid #e5e7eb;font-size:13px;color:#6b7280;">Rango 3D</td>
-        <td style="padding:10px 12px;border:1px solid #e5e7eb;font-size:13px;font-weight:700;text-align:right;">${metricas?.rango_3d ? metricas.rango_3d.toFixed(2) + " cm" : "—"}</td>
-      </tr>
-      <tr>
-        <td style="padding:10px 12px;border:1px solid #e5e7eb;font-size:13px;color:#6b7280;">Distancia</td>
-        <td style="padding:10px 12px;border:1px solid #e5e7eb;font-size:13px;font-weight:700;text-align:right;">${metricas?.distancia ? metricas.distancia + " cm" : "—"}</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;color:#6b7280;">Rango 3D</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;font-weight:700;text-align:right;">${metricas?.rango_3d ? metricas.rango_3d.toFixed(2) + " cm" : "—"}</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;color:#6b7280;">Distancia</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;font-weight:700;text-align:right;">${metricas?.distancia ? metricas.distancia + " cm" : "—"}</td>
       </tr>
     </table>
   `;
 
   const fotoHTML = fotoBase64
-    ? `<img src="${fotoBase64}" style="width:100%;max-height:300px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;" />`
-    : `<div style="width:100%;height:200px;background:#f3f4f6;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:14px;">Sin captura disponible</div>`;
+    ? `<img src="${fotoBase64}" style="width:100%;max-height:200px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;" />`
+    : `<div style="width:100%;height:120px;background:#f3f4f6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:13px;">Sin captura disponible</div>`;
 
   const usuarioHTML = isAuthorized && evento.nombre
     ? `
-      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-top:16px;display:flex;align-items:center;gap:16px;">
-        <div style="width:48px;height:48px;border-radius:50%;background:${estadoColor}22;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:${estadoColor};border:2px solid ${estadoColor}44;">
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-top:12px;display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:50%;background:${estadoColor}18;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:${estadoColor};border:2px solid ${estadoColor}44;">
           ${evento.nombre.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase()}
         </div>
         <div>
-          <div style="font-weight:700;font-size:16px;color:#111827;">${evento.nombre}</div>
-          <div style="font-size:11px;color:#6b7280;font-family:monospace;">ID: ${evento.usuario_id?.substring(0, 8) ?? "—"}</div>
+          <div style="font-weight:700;font-size:14px;color:#111827;">${evento.nombre}</div>
+          <div style="font-size:10px;color:#6b7280;font-family:monospace;">ID: ${evento.usuario_id?.substring(0, 8) ?? "—"}</div>
         </div>
       </div>
     `
@@ -372,18 +368,18 @@ function generarHTMLInforme(evento: Evento, fotoBase64: string): string {
 
   const motivoHTML = isFraud
     ? `
-      <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:16px;margin-top:16px;">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#ef4444;margin-bottom:8px;">Motivo de Detección</div>
-        <div style="font-size:14px;color:#1f2937;line-height:1.5;">${evento.motivo ?? "Superficie plana detectada"}</div>
+      <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px;margin-top:12px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#ef4444;margin-bottom:6px;">Motivo de Detección</div>
+        <div style="font-size:13px;color:#1f2937;line-height:1.4;">${evento.motivo ?? "Superficie plana detectada"}</div>
       </div>
     `
     : "";
 
   const desconocidoHTML = isUnknown
     ? `
-      <div style="background:#fefce8;border:1px solid #fde68a;border-radius:10px;padding:20px;margin-top:16px;text-align:center;">
-        <div style="font-size:18px;font-weight:700;color:#92400e;">Persona No Registrada</div>
-        <div style="font-size:13px;color:#a16207;margin-top:4px;">No se encontró coincidencia en la base de datos</div>
+      <div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:14px;margin-top:12px;text-align:center;">
+        <div style="font-size:15px;font-weight:700;color:#92400e;">Persona No Registrada</div>
+        <div style="font-size:12px;color:#a16207;margin-top:2px;">No se encontró coincidencia en la base de datos</div>
       </div>
     `
     : "";
@@ -401,48 +397,48 @@ function generarHTMLInforme(evento: Evento, fotoBase64: string): string {
     @media print {
       body { padding: 0; }
       .no-print { display: none !important; }
-      @page { margin: 15mm; size: A4; }
+      @page { margin: 12mm; size: A4; }
     }
-    .container { max-width: 720px; margin: 0 auto; padding: 32px 24px; }
+    .container { max-width: 720px; margin: 0 auto; padding: 20px 24px; }
   </style>
 </head>
 <body>
   <div class="container">
     <!-- Header -->
-    <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #111827;padding-bottom:16px;margin-bottom:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #111827;padding-bottom:12px;margin-bottom:16px;">
       <div>
-        <div style="font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#111827;">🛡️ DepthGuard</div>
-        <div style="font-size:11px;color:#6b7280;margin-top:2px;">Sistema de Control de Acceso Biométrico 3D</div>
+        <div style="font-size:20px;font-weight:800;letter-spacing:-0.5px;color:#111827;">🛡️ DepthGuard</div>
+        <div style="font-size:10px;color:#6b7280;margin-top:2px;">Sistema de Control de Acceso Biométrico 3D</div>
       </div>
       <div style="text-align:right;">
-        <div style="font-size:11px;color:#6b7280;">Informe de Evento</div>
-        <div style="font-size:11px;font-family:monospace;color:#9ca3af;">#${evento.id.substring(0, 8)}</div>
+        <div style="font-size:10px;color:#6b7280;">Informe de Evento</div>
+        <div style="font-size:10px;font-family:monospace;color:#9ca3af;">#${evento.id.substring(0, 8)}</div>
       </div>
     </div>
 
     <!-- Estado -->
-    <div style="background:${estadoBg};border:2px solid ${estadoColor}44;border-radius:10px;padding:14px 20px;display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-      <div style="width:10px;height:10px;border-radius:50%;background:${estadoColor};"></div>
-      <span style="font-weight:800;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:${estadoColor};">${estadoLabel}</span>
+    <div style="background:${estadoBg};border:2px solid ${estadoColor}44;border-radius:8px;padding:10px 16px;display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <div style="width:8px;height:8px;border-radius:50%;background:${estadoColor};"></div>
+      <span style="font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:${estadoColor};">${estadoLabel}</span>
     </div>
 
     <!-- Info general -->
-    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+    <table style="width:100%;border-collapse:collapse;margin-bottom:12px;">
       <tr>
-        <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:12px;color:#6b7280;width:40%;">Fecha y Hora</td>
-        <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:13px;font-weight:600;">${timestamp}</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;color:#6b7280;width:30%;">Fecha y Hora</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;font-weight:600;">${timestamp}</td>
       </tr>
       <tr>
-        <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:12px;color:#6b7280;">Cámara</td>
-        <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:13px;font-weight:600;">${evento.camera_id ?? "entrada_principal"} (${evento.camera_type ?? "3D"})</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;color:#6b7280;">Cámara</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;font-weight:600;">${evento.camera_id ?? "entrada_principal"} (${evento.camera_type ?? "3D"})</td>
       </tr>
       <tr>
-        <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:12px;color:#6b7280;">Nivel de Verificación</td>
-        <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:13px;font-weight:600;">${evento.verification_level ?? "3D_antispoofing"}</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;color:#6b7280;">Verificación</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;font-weight:600;">${evento.verification_level ?? "3D_antispoofing"}</td>
       </tr>
       <tr>
-        <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:12px;color:#6b7280;">ID del Evento</td>
-        <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:12px;font-family:monospace;">${evento.id}</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;color:#6b7280;">ID Evento</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:10px;font-family:monospace;">${evento.id}</td>
       </tr>
     </table>
 
@@ -450,24 +446,24 @@ function generarHTMLInforme(evento: Evento, fotoBase64: string): string {
     ${motivoHTML}
     ${desconocidoHTML}
 
-    <!-- Captura -->
-    <div style="margin-top:24px;">
-      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280;margin-bottom:10px;">Captura del Evento</div>
-      ${fotoHTML}
-    </div>
-
-    <!-- Métricas -->
-    <div style="margin-top:24px;">
-      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280;margin-bottom:4px;">Análisis Biométrico</div>
-      ${metricasHTML}
+    <!-- Captura y Métricas lado a lado -->
+    <div style="display:flex;gap:16px;margin-top:14px;">
+      <div style="flex:1;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280;margin-bottom:8px;">Captura del Evento</div>
+        ${fotoHTML}
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280;margin-bottom:4px;">Análisis Biométrico</div>
+        ${metricasHTML}
+      </div>
     </div>
 
     <!-- Footer -->
-    <div style="margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
-      <div style="font-size:10px;color:#9ca3af;">
+    <div style="margin-top:20px;padding-top:10px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:9px;color:#9ca3af;">
         Generado automáticamente por DepthGuard · ${new Date().toLocaleString("es")}
       </div>
-      <div style="font-size:10px;color:#9ca3af;">
+      <div style="font-size:9px;color:#9ca3af;">
         Proyecto de Grado 2026
       </div>
     </div>
