@@ -22,6 +22,7 @@ import {
   cancelarRegistroEdge,
   isEdgeOnline,
   getEstadoSistema,
+  getUsuarios,
   type Usuario,
   type ComandoEdge,
   type EstadoComando,
@@ -32,11 +33,11 @@ import {
 // ============================================
 
 const ANGULOS = [
-  { step: 1, label: "Frontal", instruccion: "Mire directamente a la cámara" },
-  { step: 2, label: "Der. leve", instruccion: "Gire ligeramente la cabeza a la DERECHA" },
-  { step: 3, label: "Der. full", instruccion: "Gire más, hasta el ángulo completo a la DERECHA" },
-  { step: 4, label: "Izq. leve", instruccion: "Gire ligeramente la cabeza a la IZQUIERDA" },
-  { step: 5, label: "Izq. full", instruccion: "Gire más, hasta el ángulo completo a la IZQUIERDA" },
+  { step: 1, label: "Frontal", instruccion: "Mire directamente al frente" },
+  { step: 2, label: "Izquierda", instruccion: "Gire la cabeza a su IZQUIERDA" },
+  { step: 3, label: "Derecha", instruccion: "Gire la cabeza a su DERECHA" },
+  { step: 4, label: "Arriba", instruccion: "Mire hacia ARRIBA" },
+  { step: 5, label: "Abajo", instruccion: "Mire hacia ABAJO" },
 ];
 
 export default function RegisterStart() {
@@ -86,6 +87,17 @@ export default function RegisterStart() {
       const estado = await getEstadoSistema();
       if (!isEdgeOnline(estado.ultimo_heartbeat)) {
         setError("El nodo edge no está activo. Encienda el sistema DepthGuard antes de registrar.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Verificar que no exista un usuario con el mismo nombre
+      const usuariosExistentes = await getUsuarios();
+      const duplicado = usuariosExistentes.find(
+        (u) => u.nombre.toLowerCase().trim() === name.trim().toLowerCase()
+      );
+      if (duplicado) {
+        setError(`Ya existe un usuario registrado con el nombre "${duplicado.nombre}".`);
         setIsSubmitting(false);
         return;
       }
