@@ -298,7 +298,7 @@ function MetricItem({ label, value, progress, color = "bg-dg-accent" }: { label:
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-end">
-        <span className="text-dg-text-muted text-xs uppercase tracking-widest font-semibold">{label}</span>
+        <span className="text-dg-text-muted text-xs font-semibold">{label}</span>
         <span className={`${color.replace('bg-', 'text-')} font-bold text-sm`}>{value}</span>
       </div>
       <div className="w-full bg-dg-bg rounded-full h-1.5 overflow-hidden">
