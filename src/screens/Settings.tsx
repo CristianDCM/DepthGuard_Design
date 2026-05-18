@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Settings as SettingsIcon, Server, Video, Bell, Database, Shield, LogOut } from "lucide-react";
 import Navigation from "../components/Navigation";
-import { getEstadoSistema, isEdgeOnline, logoutAdmin, type EstadoSistema } from "../lib/supabase";
+import { getEstadoSistema, isEdgeOnline, isCamaraActiva, logoutAdmin, type EstadoSistema } from "../lib/supabase";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -60,7 +60,7 @@ export default function Settings() {
                       <StatusRow 
                         label={`${cam.camera_id === "entrada_principal" ? "Cámara Principal" : "Cámara Secundaria"} (${cam.camera_type})`}
                         icon={Video}
-                        connected={cam.activa}
+                        connected={isCamaraActiva(cam, estado?.ultimo_heartbeat ?? null)}
                       />
                     </div>
                   ))}

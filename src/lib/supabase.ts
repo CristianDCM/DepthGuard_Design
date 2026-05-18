@@ -114,6 +114,17 @@ export function isEdgeOnline(ultimoHeartbeat: string | null): boolean {
   return (Date.now() - new Date(ultimoHeartbeat).getTime()) < EDGE_HEARTBEAT_TIMEOUT_MS;
 }
 
+/**
+ * Determina si una cámara está realmente activa.
+ * Combina el heartbeat del edge con el campo `activa` de la cámara:
+ * - Si el edge está offline (heartbeat vencido), NINGUNA cámara puede estar activa.
+ * - Si el edge está online, se usa el valor de `cam.activa` reportado por el heartbeat.
+ */
+export function isCamaraActiva(cam: CamaraEstado, ultimoHeartbeat: string | null): boolean {
+  if (!isEdgeOnline(ultimoHeartbeat)) return false;
+  return cam.activa;
+}
+
 // Admin type ya no es necesario — Supabase Auth maneja la sesión
 // El tipo de usuario de auth es `import { User } from '@supabase/supabase-js'`
 

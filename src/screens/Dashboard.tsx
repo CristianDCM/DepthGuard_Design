@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { CheckCircle, AlertTriangle, HelpCircle, Video, History, Users, Home, Server } from "lucide-react";
 import { motion } from "motion/react";
 import Navigation from "../components/Navigation";
-import { supabase, getEstadisticasHoy, getUltimosEventos, getEstadoSistema, isEdgeOnline, type Evento, type EstadoSistema } from "../lib/supabase";
+import { supabase, getEstadisticasHoy, getUltimosEventos, getEstadoSistema, isEdgeOnline, isCamaraActiva, type Evento, type EstadoSistema } from "../lib/supabase";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -155,21 +155,24 @@ export default function Dashboard() {
                         {isEdgeOnline(estado?.ultimo_heartbeat ?? null) ? "ONLINE" : "OFFLINE"}
                       </span>
                     </div>
-                    {(estado?.camaras ?? []).map((cam) => (
-                      <div key={cam.camera_id} className="flex items-center justify-between p-5">
-                        <div className="flex items-center gap-3">
-                          <Video className="w-5 h-5 text-blue-400" />
-                          <div>
-                            <span className="text-sm font-medium">{cam.camera_id === "entrada_principal" ? "Cámara Principal" : "Cámara Secundaria"}</span>
-                            <span className="text-[9px] ml-2 px-1.5 py-0.5 rounded bg-white/5 text-dg-text-muted font-bold">{cam.camera_type}</span>
+                    {(estado?.camaras ?? []).map((cam) => {
+                      const activa = isCamaraActiva(cam, estado?.ultimo_heartbeat ?? null);
+                      return (
+                        <div key={cam.camera_id} className="flex items-center justify-between p-5">
+                          <div className="flex items-center gap-3">
+                            <Video className="w-5 h-5 text-blue-400" />
+                            <div>
+                              <span className="text-sm font-medium">{cam.camera_id === "entrada_principal" ? "Cámara Principal" : "Cámara Secundaria"}</span>
+                              <span className="text-[9px] ml-2 px-1.5 py-0.5 rounded bg-white/5 text-dg-text-muted font-bold">{cam.camera_type}</span>
+                            </div>
                           </div>
+                          <span className={`text-xs font-bold flex items-center gap-1 ${activa ? 'text-dg-accent' : 'text-dg-error'}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${activa ? 'bg-dg-accent animate-pulse' : 'bg-dg-error'}`} />
+                            {activa ? "ACTIVA" : "INACTIVA"}
+                          </span>
                         </div>
-                        <span className={`text-xs font-bold flex items-center gap-1 ${cam.activa ? 'text-dg-accent' : 'text-dg-error'}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${cam.activa ? 'bg-dg-accent animate-pulse' : 'bg-dg-error'}`} />
-                          {cam.activa ? "ACTIVA" : "INACTIVA"}
-                        </span>
-                      </div>
-                    ))}
+                      );
+                    })}
                     <div className="flex items-center justify-between p-5">
                       <div className="flex items-center gap-3">
                         <History className="w-5 h-5 text-blue-400" />
