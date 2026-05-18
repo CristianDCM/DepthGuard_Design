@@ -296,6 +296,9 @@ function CameraPanel({
         </div>
       </div>
 
+      {/* Live Preview Snapshot */}
+      <LiveSnapshotPreview camaraActiva={camaraActiva} cameraId={cameraId} />
+
       {/* Status Card — el evento actual */}
       <div
         className={`cyber-card relative overflow-hidden ${
@@ -615,4 +618,107 @@ function formatRelativeTime(timestamp: string) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+// ============================================
+// Componente de preview en vivo (snapshots)
+// ============================================
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? "";
+const SNAPSHOT_PATH = "storage/v1/object/public/capturas/live_preview.jpg";
+
+function LiveSnapshotPreview({
+  camaraActiva,
+  cameraId,
+}: {
+  camaraActiva: boolean;
+  cameraId: CameraId;
+}) {
+  const [snapshotUrl, setSnapshotUrl] = useState<string | null>(null);
+  const [imgError, setImgError] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<number>(0);
+
+  // Solo el panel de la cámara principal muestra el snapshot
+  // (el edge solo sube un snapshot, no uno por cámara)
+  const isMainCamera = cameraId === "entrada_principal";
+
+  // Polling: actualizar URL cada 2s con cache-busting
+  useEffect(() => {
+    if (!camaraActiva || !isMainCamera || !SUPABASE_URL) return;
+
+    const updateUrl = () => {
+      const ts = Date.now();
+      setSnapshotUrl(`${SUPABASE_URL}/${SNAPSHOT_PATH}?t=${ts}`);
+      setLastUpdate(ts);
+      setImgError(false);
+    };
+
+    // Primera carga inmediata
+    updateUrl();
+
+    const interval = setInterval(updateUrl, 2000);
+    return () => clearInterval(interval);
+  }, [camaraActiva, isMainCamera]);
+
+  // Si no es la cámara principal, no mostrar nada
+  if (!isMainCamera) return null;
+
+  // Cámara inactiva — placeholder
+  if (!camaraActiva) {
+    return (
+      <div className="cyber-card overflow-hidden">
+        <div className="aspect-video bg-dg-bg flex flex-col items-center justify-center gap-2 text-dg-text-muted">
+          <Video className="w-8 h-8 opacity-30" />
+          <span className="text-xs font-medium">Cámara desconectada</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="cyber-card overflow-hidden relative group">
+      {/* Header del preview */}
+      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 py-2 bg-gradient-to-b from-black/70 to-transparent">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_6px_#ef4444]" />
+          <span className="text-[10px] font-bold text-white/90 uppercase tracking-widest">
+            En Vivo
+          </span>
+        </div>
+        {lastUpdate > 0 && (
+          <span className="text-[9px] text-white/50 font-mono">
+            {new Date(lastUpdate).toLocaleTimeString("es", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            })}
+          </span>
+        )}
+      </div>
+
+      {/* Imagen del snapshot */}
+      {snapshotUrl && !imgError ? (
+        <img
+          src={snapshotUrl}
+          alt="Preview en vivo de la cámara"
+          className="w-full aspect-video object-cover bg-black"
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        <div className="aspect-video bg-dg-bg flex flex-col items-center justify-center gap-2 text-dg-text-muted">
+          <div className="w-6 h-6 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs font-medium">
+            {imgError ? "Esperando snapshot del edge..." : "Conectando..."}
+          </span>
+        </div>
+      )}
+
+      {/* Footer sutil */}
+      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5 bg-gradient-to-t from-black/60 to-transparent">
+        <span className="text-[9px] text-white/40 font-medium">
+          Actualización cada 2s · Resolución reducida
+        </span>
+      </div>
+    </div>
+  );
 }
