@@ -636,13 +636,10 @@ function LiveSnapshotPreview({
   const [imgError, setImgError] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<number>(0);
 
-  // Solo el panel de la cámara principal muestra el snapshot
-  // (el edge solo sube un snapshot, no uno por cámara)
-  const isMainCamera = cameraId === "entrada_principal";
-
   // Polling: actualizar URL cada 2s con cache-busting
+  // Solo cargar el snapshot si ESTA cámara está activa
   useEffect(() => {
-    if (!camaraActiva || !isMainCamera || !SUPABASE_URL) return;
+    if (!camaraActiva || !SUPABASE_URL) return;
 
     const updateUrl = () => {
       const ts = Date.now();
@@ -656,12 +653,9 @@ function LiveSnapshotPreview({
 
     const interval = setInterval(updateUrl, 2000);
     return () => clearInterval(interval);
-  }, [camaraActiva, isMainCamera]);
+  }, [camaraActiva]);
 
-  // Si no es la cámara principal, no mostrar nada
-  if (!isMainCamera) return null;
-
-  // Cámara inactiva — placeholder
+  // Cámara inactiva — placeholder de desconectada
   if (!camaraActiva) {
     return (
       <div className="cyber-card overflow-hidden">
