@@ -38,7 +38,7 @@ export default function Settings() {
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
             <SettingsIcon className="w-6 h-6 text-dg-accent" />
-            <h1 className="text-xl font-bold font-headline">Ajustes</h1>
+            <h1 className="text-xl font-bold tracking-tight font-headline">Ajustes</h1>
           </div>
         </div>
       </header>
@@ -52,7 +52,7 @@ export default function Settings() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-6">
               <section className="cyber-card p-5 space-y-4">
-                <h2 className="text-xs font-bold text-dg-accent">Estado del Sistema</h2>
+                <h2 className="text-xs font-bold uppercase tracking-widest text-dg-accent">Estado del Sistema</h2>
                 <div className="space-y-4">
                   <StatusRow label="Nodo Edge" icon={Server} connected={servidorConectado} />
                   {(estado?.camaras ?? []).map((cam) => (
@@ -70,12 +70,12 @@ export default function Settings() {
               </section>
 
               <section className="cyber-card p-5 space-y-5">
-                <h2 className="text-xs font-bold text-dg-accent">Notificaciones</h2>
+                <h2 className="text-xs font-bold uppercase tracking-widest text-dg-accent">Notificaciones</h2>
                 <div className="space-y-6">
                   <ToggleRow label="Alertas de fraude" checked />
                   <ToggleRow label="Accesos permitidos" />
                   <ToggleRow label="Desconocidos" checked />
-                  <button className="w-full py-3 bg-dg-accent/10 border border-dg-accent/20 rounded-lg text-[10px] font-bold text-dg-accent hover:bg-dg-accent/20 transition-all active:scale-95">
+                  <button className="w-full py-3 bg-dg-accent/10 border border-dg-accent/20 rounded-lg text-[10px] font-bold uppercase tracking-widest text-dg-accent hover:bg-dg-accent/20 transition-all active:scale-95">
                     Enviar notificación de prueba
                   </button>
                 </div>
@@ -84,7 +84,7 @@ export default function Settings() {
 
             <div className="space-y-6">
               <section className="cyber-card overflow-hidden p-5 space-y-4">
-                <h2 className="text-xs font-bold text-dg-accent">Información Técnica</h2>
+                <h2 className="text-xs font-bold uppercase tracking-widest text-dg-accent">Información Técnica</h2>
                 <div className="rounded-lg overflow-hidden border border-dg-border">
                   <table className="w-full text-left text-xs">
                     <tbody className="divide-y divide-dg-border">
@@ -103,7 +103,7 @@ export default function Settings() {
                   <Shield className="w-12 h-12 text-dg-accent fill-dg-accent/10" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black text-dg-accent font-headline">DepthGuard</h3>
+                  <h3 className="text-2xl font-black text-dg-accent tracking-tighter font-headline">DepthGuard</h3>
                   <p className="text-sm font-medium mt-1">Proyecto de Grado 2026</p>
                   <p className="text-xs text-dg-text-muted mt-1">Institución Universitaria de Colombia</p>
                 </div>
@@ -124,7 +124,7 @@ export default function Settings() {
           className="w-full py-4 rounded-xl border border-dg-error/30 bg-dg-error/5 flex items-center justify-center gap-3 group hover:bg-dg-error/10 transition-colors active:scale-95 max-w-md mx-auto"
         >
           <LogOut className="w-5 h-5 text-dg-error" />
-          <span className="text-sm font-bold text-dg-error">Cerrar Sesión</span>
+          <span className="text-sm font-bold uppercase tracking-widest text-dg-error">Cerrar Sesión</span>
         </button>
       </main>
 
@@ -142,7 +142,7 @@ function StatusRow({ label, icon: Icon, connected }: { label: string, icon: any,
       </div>
       <div className={`flex items-center gap-2 px-2 py-1 rounded-full ${connected ? 'bg-dg-success/10' : 'bg-dg-error/10'}`}>
         <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-dg-success animate-pulse' : 'bg-dg-error'}`} />
-        <span className={`text-[10px] font-bold ${connected ? 'text-dg-success' : 'text-dg-error'}`}>
+        <span className={`text-[10px] font-bold uppercase ${connected ? 'text-dg-success' : 'text-dg-error'}`}>
           {connected ? "Conectado" : "Desconectado"}
         </span>
       </div>
@@ -170,7 +170,7 @@ function TechRow({ label, value, highlight }: { label: string, value: string, hi
   return (
     <tr className="bg-dg-bg/30">
       <td className="p-3 text-dg-text-muted">{label}</td>
-      <td className={`p-3 text-right ${highlight ? 'font-bold text-dg-success text-[10px]' : 'font-medium'}`}>{value}</td>
+      <td className={`p-3 text-right ${highlight ? 'font-bold text-dg-success uppercase text-[10px]' : 'font-medium'}`}>{value}</td>
     </tr>
   );
 }

@@ -68,7 +68,7 @@ export default function DeleteConfirmModal() {
             <AlertTriangle className="w-10 h-10 text-dg-error fill-dg-error/10" />
           </div>
           
-          <h2 className="text-xl font-bold text-white mb-3 font-headline">¿Eliminar usuario?</h2>
+          <h2 className="text-xl font-bold text-white mb-3 tracking-tight font-headline">¿Eliminar usuario?</h2>
           
           <p className="text-dg-text-muted text-xs leading-relaxed mb-6 px-2">
             Se eliminarán sus datos biométricos (embeddings faciales) y su registro del sistema. 
@@ -81,7 +81,7 @@ export default function DeleteConfirmModal() {
             </div>
             <div className="text-left overflow-hidden">
               <h3 className="font-bold text-white text-sm truncate">{user?.nombre ?? "—"}</h3>
-              <p className="text-[10px] text-dg-text-muted font-medium">ID #{id?.substring(0, 8)}</p>
+              <p className="text-[10px] text-dg-text-muted uppercase tracking-wider font-medium">ID #{id?.substring(0, 8)}</p>
             </div>
           </div>
 

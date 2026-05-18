@@ -76,7 +76,7 @@ export default function History() {
           <div className="flex items-center justify-between px-4 py-4">
             <div className="flex items-center gap-3">
               <HistoryIcon className="w-6 h-6 text-dg-accent" />
-              <h1 className="text-xl font-bold font-headline">Historial</h1>
+              <h1 className="text-xl font-bold tracking-tight font-headline">Historial</h1>
             </div>
           </div>
           
@@ -113,7 +113,7 @@ export default function History() {
         ) : (
           (Object.entries(groupedEvents) as [string, Evento[]][]).map(([dateLabel, dateEvents]) => (
             <div key={dateLabel}>
-              <div className="text-xs font-bold text-dg-text-muted mb-2 mt-4">{dateLabel}</div>
+              <div className="text-xs font-bold text-dg-text-muted uppercase tracking-wider mb-2 mt-4">{dateLabel}</div>
               {dateEvents.map((evento) => {
                 const config = getEventConfig(evento);
                 return (
