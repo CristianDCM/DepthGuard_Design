@@ -215,7 +215,7 @@ export default function Dashboard() {
                           key={evento.id}
                           whileTap={{ scale: 0.98 }}
                           onClick={() => navigate(`/event/${evento.id}`)}
-                          className={`cyber-card p-4 flex items-center gap-4 cursor-pointer hover:bg-white/5 transition-colors ${config.border ? 'border-l-4 border-l-yellow-500' : ''}`}
+                          className={`cyber-card p-4 flex items-center gap-4 cursor-pointer hover:bg-white/5 transition-colors`}
                         >
                           <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
                             <config.icon className={`w-7 h-7 ${config.color}`} />

@@ -310,9 +310,7 @@ function CameraPanel({
           <div className="absolute inset-0 bg-dg-error/5 animate-pulse pointer-events-none" />
         )}
 
-        <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: statusConfig.accentColor }} />
-
-        <div className="p-5 relative z-10 ml-1">
+        <div className="p-5 relative z-10">
           <div className="flex items-start justify-between">
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5" style={{ color: statusConfig.accentColor }}>

@@ -197,7 +197,7 @@ export default function EventDetail() {
                   </div>
                 </div>
 
-                <div className="bg-dg-card p-6 rounded-2xl border-l-4 border-dg-error border-y border-r border-dg-border">
+                <div className="bg-dg-card p-6 rounded-2xl border border-dg-border">
                   <h4 className="font-headline font-bold text-xs tracking-widest text-dg-error mb-3 uppercase">Motivo de Detección</h4>
                   <p className="text-white text-base leading-relaxed">
                     {evento.motivo ?? "Superficie plana detectada — Varianza de profundidad insuficiente para rostro real"}
@@ -372,7 +372,7 @@ function generarHTMLInforme(evento: Evento, fotoBase64: string): string {
 
   const motivoHTML = isFraud
     ? `
-      <div style="background:#fef2f2;border-left:4px solid #ef4444;border-radius:8px;padding:16px;margin-top:16px;">
+      <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:16px;margin-top:16px;">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#ef4444;margin-bottom:8px;">Motivo de Detección</div>
         <div style="font-size:14px;color:#1f2937;line-height:1.5;">${evento.motivo ?? "Superficie plana detectada"}</div>
       </div>

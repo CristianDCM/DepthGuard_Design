@@ -86,11 +86,11 @@ export default function UserProfile() {
             </section>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-dg-card p-5 rounded-xl border-l-2 border-dg-accent border-y border-r border-dg-border">
+              <div className="bg-dg-card p-5 rounded-xl border border-dg-border">
                 <p className="text-dg-text-muted text-[10px] font-bold uppercase tracking-widest">Accesos Totales</p>
                 <p className="font-headline font-black text-4xl text-dg-accent mt-1">{accesos}</p>
               </div>
-              <div className="bg-dg-card p-5 rounded-xl border-l-2 border-dg-text-muted border-y border-r border-dg-border">
+              <div className="bg-dg-card p-5 rounded-xl border border-dg-border">
                 <p className="text-dg-text-muted text-[10px] font-bold uppercase tracking-widest">Alertas Generadas</p>
                 <p className="font-headline font-black text-4xl text-white mt-1">{alertas}</p>
               </div>
