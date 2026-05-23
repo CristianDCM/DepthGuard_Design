@@ -1,6 +1,19 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
+CREATE TABLE public.comandos_edge (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  tipo text NOT NULL CHECK (tipo = ANY (ARRAY['INICIAR_REGISTRO'::text, 'CANCELAR_REGISTRO'::text])),
+  usuario_id uuid,
+  nombre text,
+  estado text NOT NULL DEFAULT 'pendiente'::text CHECK (estado = ANY (ARRAY['pendiente'::text, 'en_progreso'::text, 'completado'::text, 'error'::text, 'cancelado'::text])),
+  progreso integer DEFAULT 0,
+  resultado jsonb DEFAULT '{}'::jsonb,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT comandos_edge_pkey PRIMARY KEY (id),
+  CONSTRAINT comandos_edge_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.usuarios(id)
+);
 CREATE TABLE public.estado_sistema (
   id integer NOT NULL DEFAULT 1 CHECK (id = 1),
   camara_activa boolean DEFAULT false,
@@ -49,43 +62,3 @@ CREATE TABLE public.usuarios (
   foto_perfil text,
   CONSTRAINT usuarios_pkey PRIMARY KEY (id)
 );
-CREATE TABLE public.comandos_edge (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  tipo text NOT NULL CHECK (tipo = ANY (ARRAY['INICIAR_REGISTRO'::text, 'CANCELAR_REGISTRO'::text])),
-  usuario_id uuid REFERENCES public.usuarios(id) ON DELETE CASCADE,
-  nombre text,
-  estado text NOT NULL DEFAULT 'pendiente' CHECK (estado = ANY (ARRAY['pendiente'::text, 'en_progreso'::text, 'completado'::text, 'error'::text, 'cancelado'::text])),
-  progreso integer DEFAULT 0,
-  resultado jsonb DEFAULT '{}'::jsonb,
-  created_at timestamp with time zone DEFAULT now(),
-  updated_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT comandos_edge_pkey PRIMARY KEY (id)
-);
-
--- Índice para el polling del edge (busca pendientes rápido)
-CREATE INDEX IF NOT EXISTS idx_comandos_edge_estado
-  ON public.comandos_edge (estado)
-  WHERE estado = 'pendiente';
-
--- Habilitar Realtime para que el frontend pueda suscribirse a cambios
-ALTER PUBLICATION supabase_realtime ADD TABLE public.comandos_edge;
-
--- RLS: Permitir insert desde el frontend (anon/authenticated)
--- y full access desde service_role (edge)
-ALTER TABLE public.comandos_edge ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Frontend puede insertar comandos"
-  ON public.comandos_edge FOR INSERT
-  TO authenticated
-  WITH CHECK (true);
-
-CREATE POLICY "Frontend puede leer comandos"
-  ON public.comandos_edge FOR SELECT
-  TO authenticated
-  USING (true);
-
-CREATE POLICY "Service role tiene acceso completo"
-  ON public.comandos_edge FOR ALL
-  TO service_role
-  USING (true)
-  WITH CHECK (true);
