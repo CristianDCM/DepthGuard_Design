@@ -127,7 +127,7 @@ export default function WebRTCPlayer({
       canal = supabase.channel(canalNombre);
 
       // Manejar mensajes del edge (answer + ice_candidates)
-      canal.on("broadcast", { event: "señalización" }, async (msg) => {
+      canal.on("broadcast", { event: "signal" }, async (msg) => {
         if (!pc || desmontado) return;
         const payload = msg.payload as Record<string, unknown>;
 
@@ -149,7 +149,15 @@ export default function WebRTCPlayer({
         }
       });
 
-      await canal.subscribe();
+      await new Promise<void>((resolve, reject) => {
+        canal!.subscribe((status, err) => {
+          if (status === "SUBSCRIBED") {
+            resolve();
+          } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+            reject(err || new Error(`Error de suscripción: ${status}`));
+          }
+        });
+      });
 
       // NO enviar candidates individuales (Trickle ICE).
       // aiortc en el backend NO soporta Trickle ICE —
@@ -187,7 +195,7 @@ export default function WebRTCPlayer({
       console.log(`[WebRTCPlayer] ICE gathering completado. Enviando offer con candidates embebidos.`);
       canal.send({
         type: "broadcast",
-        event: "señalización",
+        event: "signal",
         payload: {
           tipo: "offer",
           session_id: sessionId,
