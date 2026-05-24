@@ -45,7 +45,7 @@ const ICE_SERVERS: RTCIceServer[] = [
 ];
 
 // Timeout para fallback si WebRTC no conecta (ms)
-const WEBRTC_TIMEOUT_MS = 5_000;
+const WEBRTC_TIMEOUT_MS = 10_000;
 
 // ──────────────────────────────────────────────
 // Tipos
@@ -134,9 +134,13 @@ export default function WebRTCPlayer({
         // Solo procesar mensajes destinados a esta sesión
         if (payload.session_id !== sessionId) return;
 
+        console.log(`[WebRTCPlayer] Recibido: tipo=${payload.tipo}, session=${sessionId.slice(0, 12)}`);
+
         if (payload.tipo === "answer") {
           const sdp = payload.sdp as string;
+          console.log(`[WebRTCPlayer] Answer SDP recibida (${sdp.length} chars), contiene candidatos: ${sdp.includes("a=candidate:")}`);
           await pc.setRemoteDescription(new RTCSessionDescription({ type: "answer", sdp }));
+          console.log(`[WebRTCPlayer] remoteDescription asignada, connectionState=${pc.connectionState}`);
         } else if (payload.tipo === "ice_candidate") {
           const candidateData = payload.candidate as RTCIceCandidateInit | null;
           if (candidateData?.candidate) {
