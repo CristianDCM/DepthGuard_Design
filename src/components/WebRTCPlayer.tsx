@@ -151,24 +151,40 @@ export default function WebRTCPlayer({
 
       await canal.subscribe();
 
-      // Enviar candidatos ICE locales al edge
-      pc.onicecandidate = (event) => {
-        if (!event.candidate || !canal || desmontado) return;
-        canal.send({
-          type: "broadcast",
-          event: "señalización",
-          payload: {
-            tipo: "ice_candidate",
-            session_id: sessionId,
-            candidate: event.candidate.toJSON(),
-          },
-        });
-      };
+      // NO enviar candidates individuales (Trickle ICE).
+      // aiortc en el backend NO soporta Trickle ICE —
+      // los candidates deben ir embebidos en el SDP de la offer.
+      // Se esperará a ICE gathering completo antes de enviar.
 
-      // Generar y enviar SDP offer
+      // Generar offer y esperar ICE gathering completo.
+      // aiortc NO soporta Trickle ICE — candidates deben ir embebidos en el SDP.
       const offer = await pc.createOffer({ offerToReceiveVideo: true });
       await pc.setLocalDescription(offer);
 
+      // Esperar a que el navegador recolecte todos los ICE candidates
+      await new Promise<void>((resolve) => {
+        if (pc!.iceGatheringState === "complete") {
+          resolve();
+          return;
+        }
+        const check = () => {
+          if (pc!.iceGatheringState === "complete") {
+            pc!.removeEventListener("icegatheringstatechange", check);
+            resolve();
+          }
+        };
+        pc!.addEventListener("icegatheringstatechange", check);
+        // Safety timeout — si no termina en 5s, enviar lo que haya
+        setTimeout(() => {
+          pc!.removeEventListener("icegatheringstatechange", check);
+          resolve();
+        }, 5000);
+      });
+
+      if (desmontado) return;
+
+      // Ahora el SDP tiene todos los candidates embebidos
+      console.log(`[WebRTCPlayer] ICE gathering completado. Enviando offer con candidates embebidos.`);
       canal.send({
         type: "broadcast",
         event: "señalización",
