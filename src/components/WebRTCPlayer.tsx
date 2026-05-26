@@ -151,6 +151,7 @@ export default function WebRTCPlayer({
 
       await new Promise<void>((resolve, reject) => {
         canal!.subscribe((status, err) => {
+          console.log(`[WebRTCPlayer] Supabase canal status: ${status}`);
           if (status === "SUBSCRIBED") {
             resolve();
           } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
@@ -158,6 +159,7 @@ export default function WebRTCPlayer({
           }
         });
       });
+      console.log(`[WebRTCPlayer] Suscrito a canal '${canalNombre}'. Generando offer...`);
 
       // NO enviar candidates individuales (Trickle ICE).
       // aiortc en el backend NO soporta Trickle ICE —
@@ -193,7 +195,8 @@ export default function WebRTCPlayer({
 
       // Ahora el SDP tiene todos los candidates embebidos
       console.log(`[WebRTCPlayer] ICE gathering completado. Enviando offer con candidates embebidos.`);
-      canal.send({
+      console.log(`[WebRTCPlayer] SDP offer (${pc.localDescription!.sdp.length} chars), candidates: ${pc.localDescription!.sdp.includes('a=candidate:')}`);
+      const sendResult = canal.send({
         type: "broadcast",
         event: "signal",
         payload: {
@@ -202,6 +205,7 @@ export default function WebRTCPlayer({
           sdp: pc.localDescription!.sdp,
         },
       });
+      console.log(`[WebRTCPlayer] canal.send() retornó:`, sendResult);
 
       // Iniciar timer de fallback (5 segundos)
       fallbackTimer = setTimeout(() => {
