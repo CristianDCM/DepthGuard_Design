@@ -12,7 +12,7 @@
  *  8. Cleanup completo al desmontar (Corrección #3).
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Wifi, WifiOff, Loader2 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import type { CameraId } from "../lib/supabase";
@@ -76,10 +76,15 @@ export default function WebRTCPlayer({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [status, setStatus] = useState<ConnectionStatus>("iniciando");
 
+  // Ref estable para onFallback — evita que re-renders del padre
+  // re-ejecuten el useEffect y destruyan la conexión WebRTC en curso.
+  const onFallbackRef = useRef(onFallback);
+  useEffect(() => { onFallbackRef.current = onFallback; }, [onFallback]);
+
   useEffect(() => {
     // Corrección #5: si el edge está offline, no intentar WebRTC
     if (!edgeOnline) {
-      onFallback();
+      onFallbackRef.current();
       return;
     }
 
@@ -119,7 +124,7 @@ export default function WebRTCPlayer({
           }
         } else if (state === "failed" || state === "closed") {
           setStatus("fallback");
-          onFallback();
+          onFallbackRef.current();
         }
       };
 
@@ -212,8 +217,9 @@ export default function WebRTCPlayer({
         if (desmontado) return;
         const state = pc?.connectionState;
         if (state !== "connected") {
+          console.log(`[WebRTCPlayer] Timeout: connectionState=${state}, haciendo fallback`);
           setStatus("fallback");
-          onFallback();
+          onFallbackRef.current();
         }
       }, WEBRTC_TIMEOUT_MS);
     }
@@ -221,7 +227,7 @@ export default function WebRTCPlayer({
     iniciarWebRTC().catch((err) => {
       console.error("[WebRTCPlayer] Error al iniciar:", err);
       setStatus("error");
-      onFallback();
+      onFallbackRef.current();
     });
 
     // Corrección #3: Cleanup completo al desmontar
@@ -231,7 +237,8 @@ export default function WebRTCPlayer({
       if (canal) supabase.removeChannel(canal);
       if (pc) pc.close();
     };
-  }, [cameraId, edgeOnline, onFallback]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cameraId, edgeOnline]);
 
   // ──────────────────────────────────────────────
   // Render
