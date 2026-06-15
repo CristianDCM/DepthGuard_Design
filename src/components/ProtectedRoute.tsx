@@ -44,7 +44,6 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     if (countdownInterval.current) clearInterval(countdownInterval.current);
 
     await logoutAdmin();
-    localStorage.removeItem("dg_admin");
     navigate("/", { replace: true });
   }, [navigate]);
 
@@ -87,7 +86,6 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
       // SOLO validar con Supabase Auth — NUNCA confiar en localStorage
       const user = await getUsuarioAuth();
       if (!user) {
-        localStorage.removeItem("dg_admin");
         setAuthenticated(false);
       } else {
         setAuthenticated(true);
@@ -103,7 +101,6 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
       // Si la sesión es revocada o cerrada desde otro lugar
       if (event === "SIGNED_OUT" || event === "TOKEN_REFRESHED" && !_session) {
         setAuthenticated(false);
-        localStorage.removeItem("dg_admin");
         navigate("/", { replace: true });
       }
     });

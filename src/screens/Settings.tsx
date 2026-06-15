@@ -24,8 +24,7 @@ export default function Settings() {
   }, []);
 
   const handleLogout = async () => {
-    await logoutAdmin();
-    localStorage.removeItem("dg_admin");
+    await supabase.auth.signOut();
     navigate("/");
   };
 

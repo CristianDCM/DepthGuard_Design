@@ -106,8 +106,6 @@ export default function Login() {
         saveAttemptState(resetState);
         setAttemptState(resetState);
 
-        // Supabase Auth maneja la sesión automáticamente (JWT en localStorage)
-        localStorage.setItem("dg_admin", JSON.stringify({ email: user.email, id: user.id }));
         navigate("/dashboard");
       } else {
         handleFailedAttempt();
