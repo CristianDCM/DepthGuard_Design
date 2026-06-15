@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Navigation from "../components/Navigation";
+import WebRTCPlayer from "../components/WebRTCPlayer";
 import {
   supabase,
   getEventosPorCamara,
@@ -238,6 +239,9 @@ function CameraPanel({
   const { cameraId, cameraType, label, ultimoEvento, eventosRecientes } = data;
   const statusConfig = getStatusConfig(ultimoEvento);
 
+  // Cada panel gestiona su propio estado de fallback independientemente
+  const [webrtcFailed, setWebrtcFailed] = useState(false);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -296,8 +300,16 @@ function CameraPanel({
         </div>
       </div>
 
-      {/* Live Preview Snapshot */}
-      <LiveSnapshotPreview camaraActiva={camaraActiva} cameraId={cameraId} />
+      {/* Preview en Vivo: WebRTC P2P (primero) con fallback automático a Snapshot */}
+      {camaraActiva && !webrtcFailed ? (
+        <WebRTCPlayer
+          cameraId={cameraId}
+          edgeOnline={edgeOnline}
+          onFallback={() => setWebrtcFailed(true)}
+        />
+      ) : (
+        <LiveSnapshotPreview camaraActiva={camaraActiva} cameraId={cameraId} />
+      )}
 
       {/* Status Card — el evento actual */}
       <div
