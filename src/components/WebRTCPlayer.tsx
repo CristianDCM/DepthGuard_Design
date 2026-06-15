@@ -88,8 +88,8 @@ export default function WebRTCPlayer({
       return;
     }
 
-    // Generar un ID único para esta sesión de señalización
-    const sessionId = `${cameraId}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    // Generar un ID único para esta sesión de señalización de forma criptográficamente segura
+    const sessionId = `${cameraId}-${Date.now()}-${crypto.randomUUID().split('-')[0]}`;
     const canalNombre = `webrtc-signaling-${cameraId}`;
 
     // Referencias para el cleanup
