@@ -109,14 +109,16 @@ export default function Login() {
         // Supabase Auth maneja la sesión automáticamente (JWT en localStorage)
         localStorage.setItem("dg_admin", JSON.stringify({ email: user.email, id: user.id }));
         navigate("/dashboard");
+      } else {
+        handleFailedAttempt();
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error de login:", err);
-      handleFailedAttempt(err.message || "Credenciales incorrectas.");
+      handleFailedAttempt();
     }
   };
 
-  const handleFailedAttempt = (customMessage?: string) => {
+  const handleFailedAttempt = () => {
     const newAttempts = attemptState.attempts + 1;
     const lockoutSeconds = getLockoutSeconds(newAttempts);
 
@@ -133,12 +135,10 @@ export default function Login() {
       setError(`Demasiados intentos fallidos. Bloqueado por ${formatTime(lockoutSeconds)}.`);
     } else {
       const remaining = LOCKOUT_THRESHOLDS[0][0] - newAttempts;
-      // Si Supabase envía un mensaje específico (ej. Email not confirmed), mostrarlo
-      const baseMsg = customMessage || "Credenciales incorrectas.";
       setError(
         remaining > 0
-          ? `${baseMsg} ${remaining} intento${remaining !== 1 ? "s" : ""} restante${remaining !== 1 ? "s" : ""} antes del bloqueo.`
-          : baseMsg
+          ? `Credenciales incorrectas. ${remaining} intento${remaining !== 1 ? "s" : ""} restante${remaining !== 1 ? "s" : ""} antes del bloqueo.`
+          : "Credenciales incorrectas."
       );
     }
   };

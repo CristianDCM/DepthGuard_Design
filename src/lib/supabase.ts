@@ -315,8 +315,7 @@ export async function loginAdmin(email: string, password: string) {
     password,
   });
 
-  if (error) throw error;
-  if (!data.user) throw new Error("No user data returned");
+  if (error || !data.user) return null;
   return data.user;
 }
 
