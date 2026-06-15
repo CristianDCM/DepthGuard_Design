@@ -16,23 +16,26 @@ import DeleteConfirmModal from "./screens/DeleteConfirmModal";
 /**
  * Interceptor de tokens de invitación.
  * 
- * El hash de autenticación (access_token, type=invite, etc.) es capturado
- * por un script inline en index.html ANTES de que Supabase JS lo consuma.
- * Se guarda en sessionStorage con la clave 'dg_auth_hash'.
+ * Cuando Supabase envía un correo de invitación, el enlace redirige a la
+ * Site URL (raíz "/") con un hash como:
+ *   /#access_token=xxx&type=invite
  * 
- * Este componente lee ese valor guardado y redirige a /auth/callback
- * para que el usuario establezca su contraseña.
+ * Este componente detecta ese hash ANTES de que el Login se renderice
+ * y redirige automáticamente a /auth/callback donde SetPassword
+ * procesa el token y permite establecer la contraseña.
  */
 function InviteRedirect({ children }: { children: React.ReactNode }) {
   const location = useLocation();
+  const hash = window.location.hash;
 
-  // Leer el hash capturado por el script inline de index.html
-  const savedHash = sessionStorage.getItem("dg_auth_hash");
-
-  if (location.pathname === "/" && savedHash) {
-    // Limpiar para que no redirija en bucle
-    sessionStorage.removeItem("dg_auth_hash");
-    return <Navigate to="/auth/callback" replace />;
+  // Detectar tokens de invitación o recuperación de contraseña en la URL
+  if (
+    location.pathname === "/" &&
+    hash &&
+    (hash.includes("type=invite") || hash.includes("type=recovery") || hash.includes("type=signup"))
+  ) {
+    // Redirigir a /auth/callback conservando el hash con el token
+    return <Navigate to={"/auth/callback" + hash} replace />;
   }
 
   return <>{children}</>;

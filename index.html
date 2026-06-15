@@ -10,19 +10,6 @@
 
 <body>
   <div id="root"></div>
-  <!--
-    Captura el hash de autenticación de Supabase ANTES de que la app cargue.
-    Supabase JS client borra el hash automáticamente al inicializarse,
-    así que lo guardamos en sessionStorage para que React pueda leerlo.
-  -->
-  <script>
-    (function() {
-      var h = window.location.hash;
-      if (h && (h.indexOf('type=invite') !== -1 || h.indexOf('type=recovery') !== -1 || h.indexOf('type=signup') !== -1)) {
-        sessionStorage.setItem('dg_auth_hash', h);
-      }
-    })();
-  </script>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 
