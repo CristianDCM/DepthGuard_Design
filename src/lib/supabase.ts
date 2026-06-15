@@ -527,3 +527,38 @@ export function suscribirComandoEstado(
     supabase.removeChannel(channel);
   };
 }
+
+// ============================================
+// Funciones de seguridad (auth blindado)
+// ============================================
+
+/** Establecer contraseña para un usuario invitado (flujo de invitación) */
+export async function setNewPassword(password: string) {
+  const { data, error } = await supabase.auth.updateUser({ password });
+  if (error) throw error;
+  return data.user;
+}
+
+/**
+ * Suscribirse a cambios de estado de autenticación en tiempo real.
+ * Retorna la función de cleanup para cancelar la suscripción.
+ */
+export function onAuthChange(
+  callback: (event: string, session: any) => void
+): () => void {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    (event, session) => {
+      callback(event, session);
+    }
+  );
+  return () => {
+    subscription.unsubscribe();
+  };
+}
+
+/** Obtener el usuario autenticado actual (fuente de verdad, NO localStorage) */
+export async function getUsuarioAuth() {
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) return null;
+  return user;
+}

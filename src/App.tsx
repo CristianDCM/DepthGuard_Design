@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./screens/Login";
+import SetPassword from "./screens/SetPassword";
 import Dashboard from "./screens/Dashboard";
 import LiveMonitor from "./screens/LiveMonitor";
 import History from "./screens/History";
@@ -16,8 +17,9 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        {/* Ruta pública */}
+        {/* Rutas públicas */}
         <Route path="/" element={<Login />} />
+        <Route path="/auth/callback" element={<SetPassword />} />
 
         {/* Rutas protegidas — requieren login */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
