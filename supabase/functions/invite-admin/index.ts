@@ -1,6 +1,6 @@
 // supabase/functions/invite-admin/index.ts
 // Edge Function: Invitar un nuevo administrador vía Supabase Auth.
-// Seguridad: verifica JWT del caller antes de ejecutar la invitación.
+// Seguridad: verifica JWT del caller Y que tenga rol "owner" en app_metadata.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
@@ -41,7 +41,16 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // 2. Obtener email del body
+    // 2. Verificar que el caller es propietario (owner)
+    const callerRole = caller.app_metadata?.role;
+    if (callerRole !== "owner") {
+      return new Response(
+        JSON.stringify({ error: "Acceso denegado: solo el propietario puede invitar administradores" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 3. Obtener email del body
     const { email } = await req.json();
     if (!email || typeof email !== "string" || !email.includes("@")) {
       return new Response(
@@ -50,7 +59,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // 3. Usar service_role para invitar (nunca expuesta al frontend)
+    // 4. Usar service_role para invitar (nunca expuesta al frontend)
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!

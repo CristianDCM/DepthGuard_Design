@@ -1,6 +1,7 @@
-// supabase/functions/delete-admin/index.ts
-// Edge Function: Eliminar un administrador de Supabase Auth.
-// Seguridad: verifica JWT del caller, requiere rol "owner", e impide auto-eliminación.
+// supabase/functions/set-owner/index.ts
+// Edge Function: Establecer al caller como propietario (owner) del sistema.
+// Seguridad: SOLO funciona si no existe ningún owner todavía (primera vez).
+// Una vez que un owner existe, esta función se bloquea permanentemente.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
@@ -40,49 +41,43 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // 2. Verificar que el caller es propietario (owner)
-    const callerRole = caller.app_metadata?.role;
-    if (callerRole !== "owner") {
-      return new Response(
-        JSON.stringify({ error: "Acceso denegado: solo el propietario puede eliminar administradores" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // 3. Obtener userId del body
-    const { userId } = await req.json();
-    if (!userId || typeof userId !== "string") {
-      return new Response(
-        JSON.stringify({ error: "userId es requerido" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // 4. Impedir auto-eliminación
-    if (userId === caller.id) {
-      return new Response(
-        JSON.stringify({ error: "No puedes eliminarte a ti mismo" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // 5. Eliminar con service_role
+    // 2. Verificar si ya existe un owner
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
-
-    if (error) {
+    const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    if (listError) {
       return new Response(
-        JSON.stringify({ error: error.message }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: listError.message }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const existingOwner = users.find((u) => u.app_metadata?.role === "owner");
+    if (existingOwner) {
+      return new Response(
+        JSON.stringify({ error: "Ya existe un propietario registrado. Esta función está bloqueada." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 3. Establecer al caller como owner
+    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+      caller.id,
+      { app_metadata: { role: "owner" } }
+    );
+
+    if (updateError) {
+      return new Response(
+        JSON.stringify({ error: updateError.message }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ success: true, message: "Ahora eres el propietario del sistema", userId: caller.id }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {

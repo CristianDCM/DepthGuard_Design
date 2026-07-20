@@ -1,6 +1,7 @@
 // supabase/functions/list-admins/index.ts
 // Edge Function: Listar todos los administradores registrados en Supabase Auth.
-// Seguridad: verifica JWT del caller antes de retornar la lista.
+// Seguridad: verifica JWT del caller. Retorna el rol del caller para que el frontend
+// sepa si debe mostrar los controles de gestión (solo owner).
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
@@ -62,10 +63,14 @@ Deno.serve(async (req: Request) => {
       created_at: u.created_at,
       last_sign_in_at: u.last_sign_in_at,
       confirmed: !!u.email_confirmed_at,
+      role: u.app_metadata?.role ?? "admin",
     }));
 
+    // 4. Retornar el rol del caller para que el frontend sepa qué mostrar
+    const callerRole = caller.app_metadata?.role ?? "admin";
+
     return new Response(
-      JSON.stringify({ admins, callerId: caller.id }),
+      JSON.stringify({ admins, callerId: caller.id, callerRole }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
