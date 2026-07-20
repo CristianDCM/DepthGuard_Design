@@ -357,23 +357,7 @@ export default function Settings() {
                 </div>
               </section>
 
-              <section className="cyber-card p-8 text-center space-y-6">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-dg-bg rounded-2xl shadow-inner border border-dg-accent/10">
-                  <Shield className="w-12 h-12 text-dg-accent fill-dg-accent/10" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-black text-dg-accent tracking-tighter font-headline">DepthGuard</h3>
-                  <p className="text-sm font-medium mt-1">Proyecto de Grado 2026</p>
-                  <p className="text-xs text-dg-text-muted mt-1">Institución Universitaria de Colombia</p>
-                </div>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {["Edge Computing", "MediaPipe", "dlib", "Supabase", "Realtime", "Vercel"].map((tag) => (
-                    <span key={tag} className="px-3 py-1 bg-dg-bg text-[10px] font-bold text-dg-accent rounded-full border border-dg-accent/10">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </section>
+
             </div>
           </div>
         )}
