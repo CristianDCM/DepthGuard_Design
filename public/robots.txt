@@ -1,0 +1,9 @@
+# DepthGuard - robots.txt
+# https://depthguard.app
+
+User-agent: *
+Allow: /
+Disallow: /auth/callback
+
+# Sitemap
+Sitemap: https://depthguard.app/sitemap.xml
