@@ -576,9 +576,10 @@ export interface AdminUser {
   created_at: string;
   last_sign_in_at: string | null;
   confirmed: boolean;
+  role: "owner" | "admin";
 }
 
-/** Invitar un nuevo administrador por email (vía Edge Function) */
+/** Invitar un nuevo administrador por email (vía Edge Function, solo owner) */
 export async function invitarAdmin(email: string): Promise<{ success: boolean; error?: string }> {
   const { data, error } = await supabase.functions.invoke("invite-admin", {
     body: { email },
@@ -596,7 +597,7 @@ export async function invitarAdmin(email: string): Promise<{ success: boolean; e
 }
 
 /** Listar todos los administradores (vía Edge Function) */
-export async function listarAdmins(): Promise<{ admins: AdminUser[]; callerId: string }> {
+export async function listarAdmins(): Promise<{ admins: AdminUser[]; callerId: string; callerRole: string }> {
   const { data, error } = await supabase.functions.invoke("list-admins", {
     body: {},
   });
@@ -604,13 +605,30 @@ export async function listarAdmins(): Promise<{ admins: AdminUser[]; callerId: s
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
 
-  return { admins: data.admins, callerId: data.callerId };
+  return { admins: data.admins, callerId: data.callerId, callerRole: data.callerRole };
 }
 
-/** Eliminar un administrador (vía Edge Function) */
+/** Eliminar un administrador (vía Edge Function, solo owner) */
 export async function eliminarAdmin(userId: string): Promise<{ success: boolean; error?: string }> {
   const { data, error } = await supabase.functions.invoke("delete-admin", {
     body: { userId },
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  if (data?.error) {
+    return { success: false, error: data.error };
+  }
+
+  return { success: true };
+}
+
+/** Establecer al usuario actual como propietario (solo funciona la primera vez) */
+export async function establecerPropietario(): Promise<{ success: boolean; error?: string }> {
+  const { data, error } = await supabase.functions.invoke("set-owner", {
+    body: {},
   });
 
   if (error) {
