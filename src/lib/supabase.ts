@@ -562,3 +562,64 @@ export async function getUsuarioAuth() {
   if (error || !user) return null;
   return user;
 }
+
+// ============================================
+// Funciones de gestión de administradores
+// (llaman a Edge Functions para mantener la
+//  service_role key segura en el servidor)
+// ============================================
+
+/** Tipo para un admin retornado por la Edge Function */
+export interface AdminUser {
+  id: string;
+  email: string;
+  created_at: string;
+  last_sign_in_at: string | null;
+  confirmed: boolean;
+}
+
+/** Invitar un nuevo administrador por email (vía Edge Function) */
+export async function invitarAdmin(email: string): Promise<{ success: boolean; error?: string }> {
+  const { data, error } = await supabase.functions.invoke("invite-admin", {
+    body: { email },
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  if (data?.error) {
+    return { success: false, error: data.error };
+  }
+
+  return { success: true };
+}
+
+/** Listar todos los administradores (vía Edge Function) */
+export async function listarAdmins(): Promise<{ admins: AdminUser[]; callerId: string }> {
+  const { data, error } = await supabase.functions.invoke("list-admins", {
+    body: {},
+  });
+
+  if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
+
+  return { admins: data.admins, callerId: data.callerId };
+}
+
+/** Eliminar un administrador (vía Edge Function) */
+export async function eliminarAdmin(userId: string): Promise<{ success: boolean; error?: string }> {
+  const { data, error } = await supabase.functions.invoke("delete-admin", {
+    body: { userId },
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  if (data?.error) {
+    return { success: false, error: data.error };
+  }
+
+  return { success: true };
+}
