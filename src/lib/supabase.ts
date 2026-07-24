@@ -598,14 +598,31 @@ export async function invitarAdmin(email: string): Promise<{ success: boolean; e
 
 /** Listar todos los administradores (vía Edge Function) */
 export async function listarAdmins(): Promise<{ admins: AdminUser[]; callerId: string; callerRole: string }> {
-  const { data, error } = await supabase.functions.invoke("list-admins", {
-    body: {},
-  });
+  // Retry automático para manejar cold starts de Edge Functions (plan gratuito)
+  const MAX_INTENTOS = 3;
+  const DELAY_MS = 1500;
 
-  if (error) throw new Error(error.message);
-  if (data?.error) throw new Error(data.error);
+  for (let intento = 1; intento <= MAX_INTENTOS; intento++) {
+    const { data, error } = await supabase.functions.invoke("list-admins", {
+      body: {},
+    });
 
-  return { admins: data.admins, callerId: data.callerId, callerRole: data.callerRole };
+    // Si no hay error, retornar datos
+    if (!error && !data?.error) {
+      return { admins: data.admins, callerId: data.callerId, callerRole: data.callerRole };
+    }
+
+    // Si es el último intento, lanzar error
+    if (intento === MAX_INTENTOS) {
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+    }
+
+    // Esperar antes de reintentar (cold start)
+    await new Promise((r) => setTimeout(r, DELAY_MS));
+  }
+
+  throw new Error("Error inesperado al listar administradores");
 }
 
 /** Eliminar un administrador (vía Edge Function, solo owner) */
