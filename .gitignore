@@ -7,3 +7,5 @@ coverage/
 .env*
 !.env.example
 supabase/.temp/
+*.txt
+*service-account*.json
