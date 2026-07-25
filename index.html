@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 
 <head>
   <meta charset="UTF-8" />
@@ -9,24 +9,62 @@
     content="Sistema inteligente de control de acceso con reconocimiento facial 3D y tecnología anti-spoofing. Monitoreo en vivo y gestión de usuarios para máxima seguridad." />
   <link rel="canonical" href="https://depthguard.app/" />
 
-  <!-- Open Graph / Redes sociales -->
+  <!-- ====== Favicons ====== -->
+  <!-- SVG favicon: navegadores modernos (Chrome, Firefox, Edge) — nítido a cualquier tamaño -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <!-- PNG fallback: navegadores que no soportan SVG favicons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+  <link rel="alternate icon" href="/favicon.png" />
+  <!-- Apple Touch Icon: cuando se agrega a pantalla de inicio en iOS -->
+  <link rel="apple-touch-icon" sizes="512x512" href="/favicon.png" />
+  <!-- Web App Manifest: PWA, Android, Chrome -->
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <!-- ====== Open Graph / Redes sociales ====== -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://depthguard.app/" />
+  <meta property="og:site_name" content="DepthGuard" />
   <meta property="og:title" content="DepthGuard — Control de Acceso Biométrico 3D" />
   <meta property="og:description"
-    content="Sistema de control de acceso biométrico con reconocimiento facial 3D y detección anti-spoofing." />
+    content="Sistema de control de acceso biométrico con reconocimiento facial 3D y detección anti-spoofing. Monitoreo en vivo y gestión de usuarios." />
   <meta property="og:image" content="https://depthguard.app/favicon.png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta property="og:image:alt" content="DepthGuard Logo — Candado biométrico 3D" />
+  <meta property="og:locale" content="es_CO" />
 
-  <!-- Twitter Card -->
+  <!-- ====== Twitter Card ====== -->
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="DepthGuard — Control de Acceso Biométrico 3D" />
   <meta name="twitter:description"
     content="Sistema de control de acceso biométrico con reconocimiento facial 3D y detección anti-spoofing." />
+  <meta name="twitter:image" content="https://depthguard.app/favicon.png" />
+  <meta name="twitter:image:alt" content="DepthGuard Logo" />
 
-  <!-- SEO extras -->
-  <meta name="robots" content="index, follow" />
-  <meta name="theme-color" content="#0f172a" />
-  <link rel="icon" type="image/png" href="/favicon.png" />
+  <!-- ====== SEO ====== -->
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta name="theme-color" content="#0a0f1a" />
+  <meta name="application-name" content="DepthGuard" />
+  <meta name="author" content="DepthGuard" />
+  <meta name="keywords" content="control de acceso, reconocimiento facial 3D, biometría, anti-spoofing, seguridad, depth sensing" />
+
+  <!-- ====== Structured Data (JSON-LD) para Google ====== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "DepthGuard",
+    "url": "https://depthguard.app",
+    "description": "Sistema inteligente de control de acceso con reconocimiento facial 3D y tecnología anti-spoofing.",
+    "applicationCategory": "SecurityApplication",
+    "operatingSystem": "Web",
+    "image": "https://depthguard.app/favicon.png",
+    "author": {
+      "@type": "Organization",
+      "name": "DepthGuard"
+    }
+  }
+  </script>
 </head>
 
 <body>
