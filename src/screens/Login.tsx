@@ -158,7 +158,7 @@ export default function Login() {
             <div className="absolute inset-0 bg-[#63ff00]/20 blur-3xl rounded-full -z-10" />
           </div>
           <h1 className="text-4xl font-bold text-white tracking-tight font-headline">
-            Depth<span className="text-[#63ff00]">Guard</span>
+            Depth<span className="text-[#a3ff00]">Guard</span>
           </h1>
           <p className="text-dg-text-muted text-sm mt-1">Sistema de Control de Acceso 3D</p>
         </motion.div>
