@@ -161,8 +161,12 @@ export default function SetPassword() {
           className="mb-8 flex flex-col items-center"
         >
           <div className="relative mb-4">
-            <Shield className="w-20 h-20 text-dg-accent animate-pulse" />
-            <div className="absolute inset-0 bg-dg-accent/20 blur-2xl rounded-full -z-10" />
+            <img
+              src="/logo.svg"
+              alt="DepthGuard Logo"
+              className="w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(99,255,0,0.4)] z-10 relative"
+            />
+            <div className="absolute inset-0 bg-[#63ff00]/20 blur-3xl rounded-full -z-10" />
           </div>
           <h1 className="text-3xl font-bold text-dg-accent tracking-tight font-headline">Bienvenido</h1>
           <p className="text-dg-text-muted text-sm mt-1">Establece tu contraseña para activar tu cuenta</p>
