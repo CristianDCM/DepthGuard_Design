@@ -26,33 +26,17 @@ export function getPushStatus(): PushStatus {
 export async function subscribeToPush(): Promise<string | null> {
   try {
     const messaging = await getFirebaseMessaging();
-    if (!messaging) {
-      console.warn("[Push] Notificaciones no soportadas en este navegador.");
-      return null;
-    }
+    if (!messaging) return null;
 
-    // 1. Pedir permiso al usuario
     const permission = await Notification.requestPermission();
-    if (permission !== "granted") {
-      console.warn("[Push] Permiso de notificaciones denegado.");
-      return null;
-    }
+    if (permission !== "granted") return null;
 
-    // 2. Obtener el token de Firebase Cloud Messaging
     const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY });
-    if (!currentToken) {
-      console.warn("[Push] No se pudo obtener el token de FCM.");
-      return null;
-    }
+    if (!currentToken) return null;
 
-    // 3. Obtener el usuario actual
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      console.error("[Push] No hay usuario autenticado para guardar la suscripción.");
-      return null;
-    }
+    if (!user) return null;
 
-    // 4. Guardar en Supabase (upsert por token único)
     const { error } = await supabase.from("suscripciones_push").upsert(
       {
         token_fcm: currentToken,
@@ -62,15 +46,10 @@ export async function subscribeToPush(): Promise<string | null> {
       { onConflict: "token_fcm" }
     );
 
-    if (error) {
-      console.error("[Push] Error guardando token en Supabase:", error);
-      return null;
-    }
+    if (error) return null;
 
-    console.log("[Push] Suscripción exitosa. Token guardado en BD.");
     return currentToken;
-  } catch (error) {
-    console.error("[Push] Error al suscribirse:", error);
+  } catch {
     return null;
   }
 }
@@ -83,15 +62,13 @@ export async function unsubscribeFromPush(): Promise<void> {
     const messaging = await getFirebaseMessaging();
     if (!messaging) return;
 
-    // Obtener el token actual para borrarlo de la BD
     const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY });
     if (currentToken) {
       await supabase.from("suscripciones_push").delete().eq("token_fcm", currentToken);
       await deleteToken(messaging);
-      console.log("[Push] Suscripción cancelada y token eliminado.");
     }
-  } catch (error) {
-    console.error("[Push] Error al cancelar suscripción:", error);
+  } catch {
+    // Silencioso en producción
   }
 }
 
@@ -132,8 +109,7 @@ export async function onForegroundMessage(
     if (!messaging) return null;
 
     return onMessage(messaging, callback);
-  } catch (error) {
-    console.error("[Push] Error al escuchar mensajes en primer plano:", error);
+  } catch {
     return null;
   }
 }

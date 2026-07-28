@@ -13,8 +13,5 @@ createRoot(document.getElementById('root')!).render(
 
 // Registrar Service Worker para notificaciones push (FCM)
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker
-    .register('/firebase-messaging-sw.js')
-    .then((reg) => console.log('[SW] Registrado:', reg.scope))
-    .catch((err) => console.warn('[SW] Error al registrar:', err));
+  navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {});
 }

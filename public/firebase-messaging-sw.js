@@ -25,8 +25,6 @@ const messaging = firebase.messaging();
 // (cuando la app NO está en primer plano)
 // ==============================================
 messaging.onBackgroundMessage((payload) => {
-  console.log("[SW] Push recibido en background:", payload);
-
   const data = payload.data || {};
   const notification = payload.notification || {};
 
