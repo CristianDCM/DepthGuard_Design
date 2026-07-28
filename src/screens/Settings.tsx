@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Settings as SettingsIcon, Server, Video, Bell, Database, Shield, LogOut, UserPlus, Trash2, Mail, CheckCircle, XCircle, Users } from "lucide-react";
+import { Settings as SettingsIcon, Server, Video, Bell, Database, Shield, LogOut, UserPlus, Trash2, Mail, CheckCircle, XCircle, Users, BellRing, BellOff, Send, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Navigation from "../components/Navigation";
 import { getEstadoSistema, isEdgeOnline, isCamaraActiva, logoutAdmin, listarAdmins, invitarAdmin, eliminarAdmin, establecerPropietario, type EstadoSistema, type AdminUser } from "../lib/supabase";
+import { subscribeToPush, unsubscribeFromPush, getPushStatus, isSubscribed, type PushStatus } from "../lib/pushNotifications";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -26,6 +27,12 @@ export default function Settings() {
 
   // Estado de eliminación
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Estado de notificaciones push
+  const [pushStatus, setPushStatus] = useState<PushStatus>("default");
+  const [pushSubscribed, setPushSubscribed] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
+  const [pushChecking, setPushChecking] = useState(true);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -40,6 +47,21 @@ export default function Settings() {
       }
     }
     cargar();
+  }, []);
+
+  // Cargar estado de push al montar
+  useEffect(() => {
+    async function checkPush() {
+      setPushChecking(true);
+      const status = getPushStatus();
+      setPushStatus(status);
+      if (status === "granted") {
+        const subscribed = await isSubscribed();
+        setPushSubscribed(subscribed);
+      }
+      setPushChecking(false);
+    }
+    checkPush();
   }, []);
 
   // Cargar lista de administradores
@@ -112,6 +134,38 @@ export default function Settings() {
   // Verificar si el nodo edge está online basado en heartbeat
   const servidorConectado = isEdgeOnline(estado?.ultimo_heartbeat ?? null);
 
+  // Manejar toggle de notificaciones push
+  const handlePushToggle = async () => {
+    setPushLoading(true);
+    try {
+      if (pushSubscribed) {
+        await unsubscribeFromPush();
+        setPushSubscribed(false);
+        setInviteResult({ type: "success", message: "Notificaciones push desactivadas" });
+      } else {
+        const token = await subscribeToPush();
+        if (token) {
+          setPushSubscribed(true);
+          setPushStatus("granted");
+          setInviteResult({ type: "success", message: "Notificaciones push activadas" });
+        } else {
+          const newStatus = getPushStatus();
+          setPushStatus(newStatus);
+          if (newStatus === "denied") {
+            setInviteResult({ type: "error", message: "Permiso de notificaciones bloqueado. Desbloquéalo desde la configuración del navegador." });
+          } else {
+            setInviteResult({ type: "error", message: "No se pudo activar las notificaciones push." });
+          }
+        }
+      }
+    } catch (err) {
+      setInviteResult({ type: "error", message: "Error al cambiar notificaciones push." });
+    } finally {
+      setPushLoading(false);
+      setTimeout(() => setInviteResult(null), 5000);
+    }
+  };
+
   function formatAdminDate(fecha: string | null) {
     if (!fecha) return "Nunca";
     return new Date(fecha).toLocaleDateString("es", {
@@ -178,7 +232,7 @@ export default function Settings() {
                       />
                     </div>
                   ))}
-                  <StatusRow label="Push" icon={Bell} connected={true} />
+                  <StatusRow label="Push" icon={Bell} connected={pushSubscribed} />
                   <StatusRow label="Base de Datos" icon={Database} connected={true} />
                 </div>
               </section>
@@ -186,12 +240,66 @@ export default function Settings() {
               <section className="cyber-card p-5 space-y-5">
                 <h2 className="text-xs font-bold uppercase tracking-widest text-dg-accent">Notificaciones</h2>
                 <div className="space-y-6">
-                  <ToggleRow label="Alertas de fraude" checked />
-                  <ToggleRow label="Accesos permitidos" />
-                  <ToggleRow label="Desconocidos" checked />
-                  <button className="w-full py-3 bg-dg-accent/10 border border-dg-accent/20 rounded-lg text-[10px] font-bold uppercase tracking-widest text-dg-accent hover:bg-dg-accent/20 transition-all active:scale-95">
-                    Enviar notificación de prueba
-                  </button>
+                  {/* Push Notifications Toggle */}
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        {pushSubscribed ? (
+                          <BellRing className="w-5 h-5 text-dg-accent" />
+                        ) : (
+                          <BellOff className="w-5 h-5 text-dg-text-muted" />
+                        )}
+                        <div>
+                          <span className="text-sm font-medium">Notificaciones Push</span>
+                          <p className="text-[10px] text-dg-text-muted mt-0.5">
+                            Alertas instantáneas de fraude y accesos desconocidos
+                          </p>
+                        </div>
+                      </div>
+                      {pushChecking ? (
+                        <div className="w-11 h-6 rounded-full bg-slate-800 flex items-center justify-center">
+                          <Loader2 className="w-3 h-3 text-dg-text-muted animate-spin" />
+                        </div>
+                      ) : pushStatus === "unsupported" ? (
+                        <span className="text-[10px] text-dg-text-muted bg-slate-800 px-2 py-1 rounded-full">No soportado</span>
+                      ) : (
+                        <div
+                          onClick={pushLoading ? undefined : handlePushToggle}
+                          className={`w-11 h-6 rounded-full transition-colors flex items-center px-0.5 ${
+                            pushLoading ? 'opacity-50 cursor-wait' : 'cursor-pointer'
+                          } ${pushSubscribed ? 'bg-dg-accent' : 'bg-slate-800'}`}
+                        >
+                          {pushLoading ? (
+                            <Loader2 className={`w-5 h-5 animate-spin ${pushSubscribed ? 'translate-x-5 text-dg-bg' : 'text-dg-text-muted'}`} />
+                          ) : (
+                            <div className={`w-5 h-5 rounded-full transition-transform shadow-sm ${pushSubscribed ? 'translate-x-5 bg-dg-bg' : 'bg-dg-text-muted'}`} />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    {pushStatus === "denied" && (
+                      <p className="text-[10px] text-dg-error bg-dg-error/10 border border-dg-error/20 rounded-lg px-3 py-2">
+                        ⚠️ Notificaciones bloqueadas por el navegador. Ve a la configuración del sitio para desbloquearlas.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Email Backup Indicator */}
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <Mail className="w-5 h-5 text-dg-text-muted" />
+                      <div>
+                        <span className="text-sm font-medium">Email de respaldo</span>
+                        <p className="text-[10px] text-dg-text-muted mt-0.5">
+                          Se envía email automáticamente ante eventos de seguridad
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-dg-success/10">
+                      <span className="w-1.5 h-1.5 rounded-full bg-dg-success" />
+                      <span className="text-[10px] font-bold uppercase text-dg-success">Activo</span>
+                    </div>
+                  </div>
                 </div>
               </section>
             </div>
