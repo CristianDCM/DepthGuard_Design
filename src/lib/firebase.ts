@@ -1,17 +1,18 @@
 // src/lib/firebase.ts
 // Inicialización de Firebase — solo módulo de Messaging (push notifications).
 // La config de Firebase es pública por diseño (identifica el proyecto, no da acceso).
+// Ref: https://firebase.google.com/docs/web/learn-more#config-object
 
 import { initializeApp } from "firebase/app";
 import { getMessaging, isSupported } from "firebase/messaging";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: "AIzaSyAe9OUBTWpqQCNMUlzCnw9iECmfrxGkDZE",
+  authDomain: "depthguard.firebaseapp.com",
+  projectId: "depthguard",
+  storageBucket: "depthguard.firebasestorage.app",
+  messagingSenderId: "838319314545",
+  appId: "1:838319314545:web:53c59437ee6eba1c75edd0",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -30,4 +31,4 @@ export async function getFirebaseMessaging() {
 }
 
 /** VAPID key para Web Push (se usa al solicitar el token FCM) */
-export const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+export const VAPID_KEY = "BMip5x0j0fL6fm8etpS70pbb-wehWOu1vyBoUoZjdux_h53L6WdiiLcje638ec73ZVrNQPl54Hl7Nuw12Cgr96g";
