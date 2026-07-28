@@ -45,6 +45,7 @@ CREATE TABLE public.estado_sistema (
 CREATE TABLE public.suscripciones_push (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   token_fcm text NOT NULL UNIQUE,
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
   dispositivo text,
   created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT suscripciones_push_pkey PRIMARY KEY (id)
