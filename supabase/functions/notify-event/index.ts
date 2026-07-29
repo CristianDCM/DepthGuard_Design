@@ -190,7 +190,6 @@ async function sendEmail(
     return false;
   }
 
-  const emoji = evento.estado === "FRAUDE" ? "🚨" : "👤";
   const colorEstado = evento.estado === "FRAUDE" ? "#ef4444" : "#f59e0b";
   const labelEstado =
     evento.estado === "FRAUDE" ? "FRAUDE DETECTADO" : "PERSONA DESCONOCIDA";
@@ -212,9 +211,6 @@ async function sendEmail(
 
     <!-- Alerta -->
     <div style="background:#111827;border:1px solid ${colorEstado}33;border-radius:12px;padding:24px;margin-bottom:24px;">
-      <div style="text-align:center;margin-bottom:16px;">
-        <span style="font-size:40px;">${emoji}</span>
-      </div>
       <h2 style="color:${colorEstado};text-align:center;font-size:18px;margin:0 0 16px;text-transform:uppercase;letter-spacing:2px;">
         ${labelEstado}
       </h2>
@@ -305,8 +301,8 @@ Deno.serve(async (req: Request) => {
     // Preparar contenido de notificación
     const titulo =
       evento.estado === "FRAUDE"
-        ? "⚠️ Fraude Detectado"
-        : "👤 Persona Desconocida";
+        ? "Fraude Detectado"
+        : "Persona Desconocida";
 
     const cuerpo = [
       evento.camera_id ? `Cámara: ${evento.camera_id}` : null,
