@@ -658,3 +658,34 @@ export async function establecerPropietario(): Promise<{ success: boolean; error
 
   return { success: true };
 }
+
+// ============================================
+// Funciones de preferencias de notificaciones
+// ============================================
+
+/** 
+ * Obtener la preferencia actual del usuario para recibir notificaciones por email.
+ * Retorna true por defecto si no está definido en los metadatos.
+ */
+export async function getEmailNotificationPreference(): Promise<boolean> {
+  const user = await getUsuarioAuth();
+  if (!user) return true;
+  
+  // Si explícitamente está en false, retornamos false; caso contrario true.
+  return user.user_metadata?.email_notifications_active !== false;
+}
+
+/** 
+ * Guardar la preferencia del usuario para recibir notificaciones por email
+ */
+export async function toggleEmailNotifications(active: boolean): Promise<{ success: boolean; error?: string }> {
+  const { data, error } = await supabase.auth.updateUser({
+    data: { email_notifications_active: active }
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}

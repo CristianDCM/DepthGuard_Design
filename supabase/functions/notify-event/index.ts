@@ -379,8 +379,11 @@ Deno.serve(async (req: Request) => {
         const subject = `[DepthGuard] ${titulo}`;
 
         await Promise.allSettled(
-          users.map(async (user: { email?: string }) => {
+          users.map(async (user: any) => {
             if (!user.email) return;
+            // Verificar si el usuario ha desactivado las notificaciones por email individualmente
+            if (user.user_metadata?.email_notifications_active === false) return;
+            
             const sent = await sendEmail(user.email, subject, evento);
             if (sent) {
               results.email.sent++;

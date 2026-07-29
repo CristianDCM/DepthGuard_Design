@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Settings as SettingsIcon, Server, Video, Bell, Database, Shield, LogOut, UserPlus, Trash2, Mail, CheckCircle, XCircle, Users, BellRing, BellOff, Send, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Navigation from "../components/Navigation";
-import { getEstadoSistema, isEdgeOnline, isCamaraActiva, logoutAdmin, listarAdmins, invitarAdmin, eliminarAdmin, establecerPropietario, type EstadoSistema, type AdminUser } from "../lib/supabase";
+import { getEstadoSistema, isEdgeOnline, isCamaraActiva, logoutAdmin, listarAdmins, invitarAdmin, eliminarAdmin, establecerPropietario, type EstadoSistema, type AdminUser, getEmailNotificationPreference, toggleEmailNotifications } from "../lib/supabase";
 import { subscribeToPush, unsubscribeFromPush, getPushStatus, isSubscribed, type PushStatus } from "../lib/pushNotifications";
 
 export default function Settings() {
@@ -35,6 +35,11 @@ export default function Settings() {
   const [pushChecking, setPushChecking] = useState(true);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
+  // Estado de notificaciones email
+  const [emailSubscribed, setEmailSubscribed] = useState(true);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailChecking, setEmailChecking] = useState(true);
+
   useEffect(() => {
     async function cargar() {
       try {
@@ -61,7 +66,14 @@ export default function Settings() {
       }
       setPushChecking(false);
     }
+    async function checkEmail() {
+      setEmailChecking(true);
+      const active = await getEmailNotificationPreference();
+      setEmailSubscribed(active);
+      setEmailChecking(false);
+    }
     checkPush();
+    checkEmail();
   }, []);
 
   // Cargar lista de administradores
@@ -162,6 +174,26 @@ export default function Settings() {
       setInviteResult({ type: "error", message: "Error al cambiar notificaciones push." });
     } finally {
       setPushLoading(false);
+      setTimeout(() => setInviteResult(null), 5000);
+    }
+  };
+
+  // Manejar toggle de notificaciones email
+  const handleEmailToggle = async () => {
+    setEmailLoading(true);
+    try {
+      const newState = !emailSubscribed;
+      const result = await toggleEmailNotifications(newState);
+      if (result.success) {
+        setEmailSubscribed(newState);
+        setInviteResult({ type: "success", message: `Notificaciones de email ${newState ? "activadas" : "desactivadas"}` });
+      } else {
+        setInviteResult({ type: "error", message: result.error ?? "Error al cambiar notificaciones de email." });
+      }
+    } catch (err) {
+      setInviteResult({ type: "error", message: "Error al cambiar notificaciones de email." });
+    } finally {
+      setEmailLoading(false);
       setTimeout(() => setInviteResult(null), 5000);
     }
   };
@@ -295,10 +327,24 @@ export default function Settings() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-dg-success/10">
-                      <span className="w-1.5 h-1.5 rounded-full bg-dg-success" />
-                      <span className="text-[10px] font-bold uppercase text-dg-success">Activo</span>
-                    </div>
+                    {emailChecking ? (
+                      <div className="w-11 h-6 rounded-full bg-slate-800 flex items-center justify-center">
+                        <Loader2 className="w-3 h-3 text-dg-text-muted animate-spin" />
+                      </div>
+                    ) : (
+                      <div
+                        onClick={emailLoading ? undefined : handleEmailToggle}
+                        className={`w-11 h-6 rounded-full transition-colors flex items-center px-0.5 ${
+                          emailLoading ? 'opacity-50 cursor-wait' : 'cursor-pointer'
+                        } ${emailSubscribed ? 'bg-dg-accent' : 'bg-slate-800'}`}
+                      >
+                        {emailLoading ? (
+                          <Loader2 className={`w-5 h-5 animate-spin ${emailSubscribed ? 'translate-x-5 text-dg-bg' : 'text-dg-text-muted'}`} />
+                        ) : (
+                          <div className={`w-5 h-5 rounded-full transition-transform shadow-sm ${emailSubscribed ? 'translate-x-5 bg-dg-bg' : 'bg-dg-text-muted'}`} />
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </section>
