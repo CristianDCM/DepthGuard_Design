@@ -266,7 +266,7 @@ async function sendEmail(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "DepthGuard <onboarding@resend.dev>",
+      from: "DepthGuard <alertas@depthguard.app>",
       to,
       subject,
       html,
