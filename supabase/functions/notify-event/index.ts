@@ -1,11 +1,12 @@
 // supabase/functions/notify-event/index.ts
-// Edge Function: Enviar notificación push (FCM) + email (Resend) cuando
-// se inserta un evento de seguridad en la tabla historial.
+// Edge Function: Enviar notificación push (FCM) + email (Resend) + Telegram
+// cuando se inserta un evento de seguridad en la tabla historial.
 //
 // Invocada por: Database Webhook (INSERT en historial)
 // Secrets necesarios:
 //   FCM_PROJECT_ID, FCM_CLIENT_EMAIL, FCM_PRIVATE_KEY
 //   RESEND_API_KEY
+//   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 //   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (auto-inyectados)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
@@ -394,7 +395,7 @@ Deno.serve(async (req: Request) => {
       .filter(Boolean)
       .join(" | ") || "Nuevo evento de seguridad";
 
-    const results = { push: { sent: 0, failed: 0, cleaned: 0 }, email: { sent: 0, failed: 0 } };
+    const results = { push: { sent: 0, failed: 0, cleaned: 0 }, email: { sent: 0, failed: 0 }, telegram: { sent: 0, failed: 0 } };
 
     // ============ CANAL 1: Push FCM ============
     try {
@@ -464,6 +465,59 @@ Deno.serve(async (req: Request) => {
       }
     } catch (emailError) {
       console.error("[Email] Error en canal email:", emailError);
+    }
+
+    // ============ CANAL 3: Telegram ============
+    try {
+      const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
+      const chatId = Deno.env.get("TELEGRAM_CHAT_ID");
+
+      if (botToken && chatId) {
+        const emoji = evento.estado === "FRAUDE" ? "\u26a0\ufe0f" : "\ud83d\udc64";
+        const hora = new Date(evento.timestamp).toLocaleString("es-CO", {
+          timeZone: "America/Bogota",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+
+        const texto = [
+          `${emoji} <b>${titulo}</b>`,
+          "",
+          `<b>Camara:</b> ${evento.camera_id ?? "N/A"}`,
+          evento.nombre ? `<b>Persona:</b> ${evento.nombre}` : null,
+          evento.confianza ? `<b>Confianza:</b> ${Math.round(evento.confianza * 100)}%` : null,
+          evento.motivo ? `<b>Motivo:</b> ${evento.motivo}` : null,
+          `<b>Hora:</b> ${hora}`,
+          "",
+          `<a href="https://depthguard.app/event/${evento.id}">Ver evento</a>`,
+        ]
+          .filter((line) => line !== null)
+          .join("\n");
+
+        const tgRes = await fetch(
+          `https://api.telegram.org/bot${botToken}/sendMessage`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: texto,
+              parse_mode: "HTML",
+              disable_web_page_preview: true,
+            }),
+          }
+        );
+
+        if (tgRes.ok) {
+          results.telegram.sent++;
+        } else {
+          results.telegram.failed++;
+          console.error("[Telegram] Error:", await tgRes.text());
+        }
+      }
+    } catch (tgError) {
+      console.error("[Telegram] Error en canal Telegram:", tgError);
     }
 
     return json({ success: true, evento: evento.id, results });
