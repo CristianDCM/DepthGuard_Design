@@ -311,7 +311,7 @@ export default function Settings() {
                     </div>
                     {pushStatus === "denied" && (
                       <p className="text-[10px] text-dg-error bg-dg-error/10 border border-dg-error/20 rounded-lg px-3 py-2">
-                        ⚠️ Notificaciones bloqueadas por el navegador. Ve a la configuración del sitio para desbloquearlas.
+                         Notificaciones bloqueadas por el navegador. Ve a la configuración del sitio para desbloquearlas.
                       </p>
                     )}
                   </div>

@@ -407,7 +407,7 @@ function generarHTMLInforme(evento: Evento, fotoBase64: string): string {
     <!-- Header -->
     <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #111827;padding-bottom:12px;margin-bottom:16px;">
       <div>
-        <div style="font-size:20px;font-weight:800;letter-spacing:-0.5px;color:#111827;">🛡️ DepthGuard</div>
+        <div style="font-size:20px;font-weight:800;letter-spacing:-0.5px;color:#111827;"> DepthGuard</div>
         <div style="font-size:10px;color:#6b7280;margin-top:2px;">Sistema de Control de Acceso Biométrico 3D</div>
       </div>
       <div style="text-align:right;">

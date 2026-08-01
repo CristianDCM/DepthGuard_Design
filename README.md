@@ -1,4 +1,4 @@
-# 🛡️ DepthGuard Admin — Panel de Control
+#  DepthGuard Admin — Panel de Control
 
 > Frontend del sistema de control de acceso biométrico 3D con detección anti-spoofing.
 
@@ -17,7 +17,7 @@ Nodo Edge (PC Central)         Cloud (Supabase)         Frontend (Vercel)
 ┌────────────────┐        ┌──────────────────┐      ┌──────────────────┐
 │ RealSense 3D   │──JSON──│ PostgreSQL       │──RT──│ React Dashboard  │
 │ Webcam 2D      │        │ jsonb            │      │ Split-Screen     │
-│ Python Service │──FCM──▶│ Realtime         │      │ 5 tabs + modales │
+│ Python Service │──FCM──│ Realtime         │      │ 5 tabs + modales │
 └────────────────┘        └──────────────────┘      └──────────────────┘
 ```
 
