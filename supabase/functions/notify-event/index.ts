@@ -279,6 +279,65 @@ async function sendEmail(
 }
 
 // ==============================================
+// Rate Limiting: cooldowns por tipo de evento
+// ==============================================
+
+// Minutos de silencio después de notificar un evento del mismo tipo+cámara
+const COOLDOWN_MINUTOS: Record<string, number> = {
+  FRAUDE: 5,
+  DESCONOCIDO: 5,
+};
+
+/**
+ * Verifica si pasó suficiente tiempo desde la última notificación
+ * del mismo tipo + cámara. Si no ha pasado, retorna false (skip).
+ * Si ha pasado, actualiza el timestamp y retorna true (enviar).
+ */
+async function verificarCooldown(
+  supabase: any,
+  estado: string,
+  cameraId: string | null
+): Promise<boolean> {
+  const clave = `${estado}:${cameraId ?? "default"}`;
+  const cooldownMin = COOLDOWN_MINUTOS[estado] ?? 5;
+
+  try {
+    // Leer último envío para esta clave
+    const { data } = await supabase
+      .from("notificacion_cooldown")
+      .select("ultimo_envio")
+      .eq("clave", clave)
+      .maybeSingle();
+
+    if (data) {
+      const ultimoEnvio = new Date(data.ultimo_envio).getTime();
+      const ahora = Date.now();
+      const diffMin = (ahora - ultimoEnvio) / 60_000;
+
+      if (diffMin < cooldownMin) {
+        // Dentro del cooldown → no notificar
+        return false;
+      }
+    }
+
+    // Fuera del cooldown o primera vez → actualizar y notificar
+    await supabase
+      .from("notificacion_cooldown")
+      .upsert(
+        { clave, ultimo_envio: new Date().toISOString() },
+        { onConflict: "clave" }
+      );
+
+    return true;
+  } catch (err) {
+    // Si la tabla no existe o hay error, notificar de todos modos
+    // para no perder alertas críticas
+    console.warn("[Cooldown] Error verificando cooldown:", err);
+    return true;
+  }
+}
+
+// ==============================================
 // Handler principal
 // ==============================================
 
@@ -298,11 +357,32 @@ Deno.serve(async (req: Request) => {
       return json({ message: "Ignorado: ACCESO_PERMITIDO no genera notificación" });
     }
 
+    // Cliente Supabase con service_role (bypasea RLS)
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    // ============ RATE LIMITING ============
+    // Verificar cooldown ANTES de enviar cualquier notificación
+    const debeNotificar = await verificarCooldown(
+      supabase,
+      evento.estado,
+      evento.camera_id
+    );
+
+    if (!debeNotificar) {
+      return json({
+        message: `Rate limited: ${evento.estado}:${evento.camera_id} en cooldown`,
+        skipped: true,
+      });
+    }
+
     // Preparar contenido de notificación
     const titulo =
       evento.estado === "FRAUDE"
-        ? "Fraude Detectado"
-        : "Persona Desconocida";
+        ? "⚠️ Fraude Detectado"
+        : "👤 Persona Desconocida";
 
     const cuerpo = [
       evento.camera_id ? `Cámara: ${evento.camera_id}` : null,
@@ -313,12 +393,6 @@ Deno.serve(async (req: Request) => {
     ]
       .filter(Boolean)
       .join(" | ") || "Nuevo evento de seguridad";
-
-    // Cliente Supabase con service_role (bypasea RLS)
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
 
     const results = { push: { sent: 0, failed: 0, cleaned: 0 }, email: { sent: 0, failed: 0 } };
 
@@ -359,7 +433,6 @@ Deno.serve(async (req: Request) => {
             .delete()
             .in("id", expiredIds);
           results.push.cleaned = expiredIds.length;
-          console.log(`[Push] Limpiados ${expiredIds.length} tokens expirados.`);
         }
       }
     } catch (pushError) {
@@ -393,7 +466,6 @@ Deno.serve(async (req: Request) => {
       console.error("[Email] Error en canal email:", emailError);
     }
 
-    console.log("[notify-event] Resultados:", JSON.stringify(results));
     return json({ success: true, evento: evento.id, results });
   } catch (err) {
     console.error("[notify-event] Error general:", err);
