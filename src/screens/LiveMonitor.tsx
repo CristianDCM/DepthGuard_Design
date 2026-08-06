@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Video,
   Activity,
@@ -38,6 +38,7 @@ interface CameraPanelData {
   cameraType: CameraType;
   label: string;
   ultimoEvento: Evento | null;
+  lastFocusTime: number;
   eventosRecientes: Evento[];
 }
 
@@ -52,6 +53,7 @@ export default function LiveMonitor() {
     cameraType: "3D",
     label: "Entrada Principal",
     ultimoEvento: null,
+    lastFocusTime: 0,
     eventosRecientes: [],
   });
   const [panelSecundario, setPanelSecundario] = useState<CameraPanelData>({
@@ -59,6 +61,7 @@ export default function LiveMonitor() {
     cameraType: "2D",
     label: "Entrada Secundaria",
     ultimoEvento: null,
+    lastFocusTime: 0,
     eventosRecientes: [],
   });
   const [loading, setLoading] = useState(true);
@@ -120,17 +123,37 @@ export default function LiveMonitor() {
           const nuevoEvento = payload.new as Evento;
 
           if (nuevoEvento.camera_id === "entrada_principal") {
-            setPanelPrincipal((prev) => ({
-              ...prev,
-              ultimoEvento: nuevoEvento,
-              eventosRecientes: [nuevoEvento, ...prev.eventosRecientes].slice(0, 5),
-            }));
+            setPanelPrincipal((prev) => {
+              const isFraude = nuevoEvento.estado === "FRAUDE";
+              const timeSinceLastFocus = Date.now() - prev.lastFocusTime;
+              
+              const updateFocus = isFraude || timeSinceLastFocus > 5000;
+              const newUltimoEvento = updateFocus ? nuevoEvento : prev.ultimoEvento;
+              const newLastFocusTime = updateFocus ? Date.now() : prev.lastFocusTime;
+
+              return {
+                ...prev,
+                ultimoEvento: newUltimoEvento,
+                lastFocusTime: newLastFocusTime,
+                eventosRecientes: [nuevoEvento, ...prev.eventosRecientes].slice(0, 50),
+              };
+            });
           } else if (nuevoEvento.camera_id === "entrada_secundaria") {
-            setPanelSecundario((prev) => ({
-              ...prev,
-              ultimoEvento: nuevoEvento,
-              eventosRecientes: [nuevoEvento, ...prev.eventosRecientes].slice(0, 5),
-            }));
+            setPanelSecundario((prev) => {
+              const isFraude = nuevoEvento.estado === "FRAUDE";
+              const timeSinceLastFocus = Date.now() - prev.lastFocusTime;
+              
+              const updateFocus = isFraude || timeSinceLastFocus > 5000;
+              const newUltimoEvento = updateFocus ? nuevoEvento : prev.ultimoEvento;
+              const newLastFocusTime = updateFocus ? Date.now() : prev.lastFocusTime;
+
+              return {
+                ...prev,
+                ultimoEvento: newUltimoEvento,
+                lastFocusTime: newLastFocusTime,
+                eventosRecientes: [nuevoEvento, ...prev.eventosRecientes].slice(0, 50),
+              };
+            });
           }
         }
       )
@@ -217,6 +240,8 @@ export default function LiveMonitor() {
             principalActiva={principalActiva}
             secundariaActiva={secundariaActiva}
             edgeOnline={edgeOnline}
+            setPanelPrincipal={setPanelPrincipal}
+            setPanelSecundario={setPanelSecundario}
           />
         )}
       </main>
@@ -234,10 +259,15 @@ function CameraPanel({
   data,
   camaraActiva,
   edgeOnline,
+  layout = "compact",
+  onEventFocus,
 }: {
+  key?: React.Key;
   data: CameraPanelData;
   camaraActiva: boolean;
   edgeOnline: boolean;
+  layout?: "compact" | "expanded";
+  onEventFocus?: (evento: Evento) => void;
 }) {
   const { cameraId, cameraType, label, ultimoEvento, eventosRecientes } = data;
   const statusConfig = getStatusConfig(ultimoEvento);
@@ -254,7 +284,7 @@ function CameraPanel({
       }}
       className="space-y-4"
     >
-      {/* Camera Header */}
+      {/* Camera Header - Siempre arriba ocupando todo el ancho */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div
@@ -302,6 +332,11 @@ function CameraPanel({
           </div>
         </div>
       </div>
+
+      {/* Grid del contenido principal */}
+      <div className={layout === "expanded" ? "grid grid-cols-1 lg:grid-cols-12 gap-6 items-start" : "space-y-4"}>
+        {/* Columna Izquierda (o única si es compact) */}
+        <div className={layout === "expanded" ? "lg:col-span-8 space-y-4" : "space-y-4"}>
 
       {/* Preview en Vivo: WebRTC P2P (primero) con fallback automático a Snapshot */}
       {camaraActiva && !webrtcFailed ? (
@@ -381,7 +416,10 @@ function CameraPanel({
           )}
         </div>
       </div>
+      </div>
 
+      {/* Columna Derecha (o apilada si es compact) */}
+      <div className={layout === "expanded" ? "lg:col-span-4 space-y-4" : "space-y-4"}>
       {/* Anti-spoofing Metrics (solo si hay evento con métricas) */}
       {ultimoEvento?.metricas_json && (
         <div className="cyber-card p-4">
@@ -442,17 +480,19 @@ function CameraPanel({
             {eventosRecientes.length} registros
           </span>
         </div>
-        <div className="divide-y divide-dg-border">
+        <div className="divide-y divide-dg-border max-h-[450px] overflow-y-auto custom-scrollbar">
           <AnimatePresence mode="popLayout">
             {eventosRecientes.length === 0 ? (
               <div className="p-6 text-center text-dg-text-muted text-xs">
                 Sin eventos registrados
               </div>
             ) : (
-              eventosRecientes.slice(0, 4).map((evento) => (
-                <div key={evento.id}>
-                  <MiniEventRow evento={evento} />
-                </div>
+              eventosRecientes.map((evento) => (
+                <MiniEventRow 
+                  key={evento.id} 
+                  evento={evento} 
+                  onClick={() => onEventFocus && onEventFocus(evento)}
+                />
               ))
             )}
           </AnimatePresence>
@@ -481,6 +521,8 @@ function CameraPanel({
           {cameraType}
         </div>
       </div>
+      </div>
+      </div>
     </motion.div>
   );
 }
@@ -489,7 +531,7 @@ function CameraPanel({
 // Sub-componentes
 // ============================================
 
-function MiniEventRow({ evento }: { evento: Evento }) {
+function MiniEventRow({ evento, onClick }: { key?: React.Key; evento: Evento; onClick?: () => void }) {
   const config = getEventMiniConfig(evento);
   return (
     <motion.div
@@ -497,7 +539,8 @@ function MiniEventRow({ evento }: { evento: Evento }) {
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 10 }}
-      className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors"
+      onClick={onClick}
+      className={`flex items-center gap-3 px-4 py-3 transition-colors ${onClick ? 'cursor-pointer hover:bg-white/5' : ''}`}
     >
       <div
         className="w-7 h-7 rounded-md flex items-center justify-center shrink-0"
@@ -740,16 +783,20 @@ function AdaptiveCameraGrid({
   principalActiva,
   secundariaActiva,
   edgeOnline,
+  setPanelPrincipal,
+  setPanelSecundario,
 }: {
   panelPrincipal: CameraPanelData;
   panelSecundario: CameraPanelData;
   principalActiva: boolean;
   secundariaActiva: boolean;
   edgeOnline: boolean;
+  setPanelPrincipal: React.Dispatch<React.SetStateAction<CameraPanelData>>;
+  setPanelSecundario: React.Dispatch<React.SetStateAction<CameraPanelData>>;
 }) {
   const panels = [
-    { data: panelPrincipal, activa: principalActiva },
-    { data: panelSecundario, activa: secundariaActiva },
+    { data: panelPrincipal, activa: principalActiva, setter: setPanelPrincipal },
+    { data: panelSecundario, activa: secundariaActiva, setter: setPanelSecundario },
   ];
 
   const activePanels = panels.filter((p) => p.activa);
@@ -764,7 +811,7 @@ function AdaptiveCameraGrid({
       <div
         className={`grid gap-6 ${
           isSingleCamera
-            ? "grid-cols-1 max-w-3xl mx-auto"
+            ? "grid-cols-1 w-full"
             : "grid-cols-1 lg:grid-cols-2"
         }`}
       >
@@ -774,6 +821,14 @@ function AdaptiveCameraGrid({
             data={p.data}
             camaraActiva={p.activa}
             edgeOnline={edgeOnline}
+            layout={isSingleCamera ? "expanded" : "compact"}
+            onEventFocus={(evento) => {
+              p.setter((prev) => ({ 
+                ...prev, 
+                ultimoEvento: evento,
+                lastFocusTime: Date.now() // Protege el foco por 5s cuando el usuario hace clic manually
+              }));
+            }}
           />
         ))}
       </div>
