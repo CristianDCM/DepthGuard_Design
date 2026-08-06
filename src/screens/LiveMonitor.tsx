@@ -120,17 +120,39 @@ export default function LiveMonitor() {
           const nuevoEvento = payload.new as Evento;
 
           if (nuevoEvento.camera_id === "entrada_principal") {
-            setPanelPrincipal((prev) => ({
-              ...prev,
-              ultimoEvento: nuevoEvento,
-              eventosRecientes: [nuevoEvento, ...prev.eventosRecientes].slice(0, 5),
-            }));
+            setPanelPrincipal((prev) => {
+              const isFraude = nuevoEvento.estado === "FRAUDE";
+              const timeSinceLastEvent = prev.ultimoEvento 
+                ? Date.now() - new Date(prev.ultimoEvento.timestamp).getTime() 
+                : 99999;
+              
+              const newUltimoEvento = (isFraude || timeSinceLastEvent > 5000) 
+                ? nuevoEvento 
+                : prev.ultimoEvento;
+
+              return {
+                ...prev,
+                ultimoEvento: newUltimoEvento,
+                eventosRecientes: [nuevoEvento, ...prev.eventosRecientes].slice(0, 50),
+              };
+            });
           } else if (nuevoEvento.camera_id === "entrada_secundaria") {
-            setPanelSecundario((prev) => ({
-              ...prev,
-              ultimoEvento: nuevoEvento,
-              eventosRecientes: [nuevoEvento, ...prev.eventosRecientes].slice(0, 5),
-            }));
+            setPanelSecundario((prev) => {
+              const isFraude = nuevoEvento.estado === "FRAUDE";
+              const timeSinceLastEvent = prev.ultimoEvento 
+                ? Date.now() - new Date(prev.ultimoEvento.timestamp).getTime() 
+                : 99999;
+              
+              const newUltimoEvento = (isFraude || timeSinceLastEvent > 5000) 
+                ? nuevoEvento 
+                : prev.ultimoEvento;
+
+              return {
+                ...prev,
+                ultimoEvento: newUltimoEvento,
+                eventosRecientes: [nuevoEvento, ...prev.eventosRecientes].slice(0, 50),
+              };
+            });
           }
         }
       )
@@ -217,6 +239,8 @@ export default function LiveMonitor() {
             principalActiva={principalActiva}
             secundariaActiva={secundariaActiva}
             edgeOnline={edgeOnline}
+            setPanelPrincipal={setPanelPrincipal}
+            setPanelSecundario={setPanelSecundario}
           />
         )}
       </main>
@@ -234,10 +258,14 @@ function CameraPanel({
   data,
   camaraActiva,
   edgeOnline,
+  layout = "compact",
+  onEventFocus,
 }: {
   data: CameraPanelData;
   camaraActiva: boolean;
   edgeOnline: boolean;
+  layout?: "compact" | "expanded";
+  onEventFocus?: (evento: Evento) => void;
 }) {
   const { cameraId, cameraType, label, ultimoEvento, eventosRecientes } = data;
   const statusConfig = getStatusConfig(ultimoEvento);
@@ -252,8 +280,10 @@ function CameraPanel({
       transition={{
         delay: cameraId === "entrada_principal" ? 0 : 0.15,
       }}
-      className="space-y-4"
+      className={layout === "expanded" ? "grid grid-cols-1 lg:grid-cols-12 gap-6 items-start" : "space-y-4"}
     >
+      {/* Columna Izquierda (o única si es compact) */}
+      <div className={layout === "expanded" ? "lg:col-span-8 space-y-4" : "space-y-4"}>
       {/* Camera Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -381,7 +411,10 @@ function CameraPanel({
           )}
         </div>
       </div>
+      </div>
 
+      {/* Columna Derecha (o apilada si es compact) */}
+      <div className={layout === "expanded" ? "lg:col-span-4 space-y-4 sticky top-24" : "space-y-4"}>
       {/* Anti-spoofing Metrics (solo si hay evento con métricas) */}
       {ultimoEvento?.metricas_json && (
         <div className="cyber-card p-4">
@@ -442,15 +475,19 @@ function CameraPanel({
             {eventosRecientes.length} registros
           </span>
         </div>
-        <div className="divide-y divide-dg-border">
+        <div className="divide-y divide-dg-border max-h-[300px] overflow-y-auto custom-scrollbar">
           <AnimatePresence mode="popLayout">
             {eventosRecientes.length === 0 ? (
               <div className="p-6 text-center text-dg-text-muted text-xs">
                 Sin eventos registrados
               </div>
             ) : (
-              eventosRecientes.slice(0, 4).map((evento) => (
-                <div key={evento.id}>
+              eventosRecientes.map((evento) => (
+                <div 
+                  key={evento.id} 
+                  onClick={() => onEventFocus && onEventFocus(evento)}
+                  className="cursor-pointer"
+                >
                   <MiniEventRow evento={evento} />
                 </div>
               ))
@@ -480,6 +517,7 @@ function CameraPanel({
           {cameraId === "entrada_principal" ? "CAM-01" : "CAM-02"} ·{" "}
           {cameraType}
         </div>
+      </div>
       </div>
     </motion.div>
   );
@@ -740,16 +778,20 @@ function AdaptiveCameraGrid({
   principalActiva,
   secundariaActiva,
   edgeOnline,
+  setPanelPrincipal,
+  setPanelSecundario,
 }: {
   panelPrincipal: CameraPanelData;
   panelSecundario: CameraPanelData;
   principalActiva: boolean;
   secundariaActiva: boolean;
   edgeOnline: boolean;
+  setPanelPrincipal: React.Dispatch<React.SetStateAction<CameraPanelData>>;
+  setPanelSecundario: React.Dispatch<React.SetStateAction<CameraPanelData>>;
 }) {
   const panels = [
-    { data: panelPrincipal, activa: principalActiva },
-    { data: panelSecundario, activa: secundariaActiva },
+    { data: panelPrincipal, activa: principalActiva, setter: setPanelPrincipal },
+    { data: panelSecundario, activa: secundariaActiva, setter: setPanelSecundario },
   ];
 
   const activePanels = panels.filter((p) => p.activa);
@@ -774,6 +816,10 @@ function AdaptiveCameraGrid({
             data={p.data}
             camaraActiva={p.activa}
             edgeOnline={edgeOnline}
+            layout={isSingleCamera ? "expanded" : "compact"}
+            onEventFocus={(evento) => {
+              p.setter((prev) => ({ ...prev, ultimoEvento: evento }));
+            }}
           />
         ))}
       </div>
