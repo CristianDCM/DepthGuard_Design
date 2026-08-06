@@ -751,7 +751,7 @@ function LiveSnapshotPreview({
         <img
           src={snapshotUrl}
           alt="Preview en vivo de la cámara"
-          className="w-full aspect-video object-cover bg-black"
+          className="w-full aspect-video object-contain bg-black"
           onError={() => setImgError(true)}
         />
       ) : (

@@ -252,7 +252,7 @@ export default function WebRTCPlayer({
         autoPlay
         playsInline
         muted
-        className={`w-full aspect-video object-cover bg-black transition-opacity duration-500 ${
+        className={`w-full aspect-video object-contain bg-black transition-opacity duration-500 ${
           status === "conectado" ? "opacity-100" : "opacity-0 absolute"
         }`}
       />
