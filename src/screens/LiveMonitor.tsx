@@ -211,10 +211,55 @@ export default function LiveMonitor() {
             <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <CameraPanel data={panelPrincipal} camaraActiva={principalActiva} edgeOnline={edgeOnline} />
-            <CameraPanel data={panelSecundario} camaraActiva={secundariaActiva} edgeOnline={edgeOnline} />
-          </div>
+          {(() => {
+            // Layout adaptativo: mostrar solo cámaras activas
+            const panels: { data: CameraPanelData; activa: boolean }[] = [
+              { data: panelPrincipal, activa: principalActiva },
+              { data: panelSecundario, activa: secundariaActiva },
+            ];
+
+            const activePanels = panels.filter((p) => p.activa);
+            const inactivePanels = panels.filter((p) => !p.activa);
+
+            // Si hay cámaras activas, mostrarlas primero (y en ancho completo si es solo 1)
+            const panelsToShow = activePanels.length > 0 ? activePanels : panels;
+            const isSingleCamera = panelsToShow.length === 1;
+
+            return (
+              <div className="space-y-6">
+                <div
+                  className={`grid gap-6 ${
+                    isSingleCamera
+                      ? "grid-cols-1 max-w-3xl mx-auto"
+                      : "grid-cols-1 lg:grid-cols-2"
+                  }`}
+                >
+                  {panelsToShow.map((p) => (
+                    <CameraPanel
+                      key={p.data.cameraId}
+                      data={p.data}
+                      camaraActiva={p.activa}
+                      edgeOnline={edgeOnline}
+                    />
+                  ))}
+                </div>
+
+                {/* Cámaras inactivas: mostrar como indicador compacto */}
+                {activePanels.length > 0 && inactivePanels.length > 0 && (
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-dg-border">
+                    <Video className="w-4 h-4 text-dg-text-muted/50" />
+                    <span className="text-xs text-dg-text-muted">
+                      {inactivePanels
+                        .map((p) => p.data.label)
+                        .join(", ")}{" "}
+                      — desconectada
+                    </span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-dg-error/60" />
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         )}
       </main>
 
