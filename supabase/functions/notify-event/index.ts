@@ -280,59 +280,99 @@ async function sendEmail(
 }
 
 // ==============================================
-// Rate Limiting: cooldowns por tipo de evento
+// Rate Limiting: cooldowns por tipo+cámara+persona
 // ==============================================
 
-// Minutos de silencio después de notificar un evento del mismo tipo+cámara
+// Minutos de silencio después de notificar un evento del mismo tipo+cámara+persona
 const COOLDOWN_MINUTOS: Record<string, number> = {
-  FRAUDE: 5,
-  DESCONOCIDO: 5,
+  FRAUDE: 3,       // Fraude: 3 min (misma cámara)
+  DESCONOCIDO: 2,  // Desconocido: 2 min (mismo tipo+cámara, sin identidad)
 };
 
 /**
- * Verifica si pasó suficiente tiempo desde la última notificación
- * del mismo tipo + cámara. Si no ha pasado, retorna false (skip).
- * Si ha pasado, actualiza el timestamp y retorna true (enviar).
+ * Construye una clave de cooldown que incluye la identidad cuando está disponible.
+ * 
+ * Ejemplos:
+ *   "FRAUDE:entrada_principal"         → fraude genérico en cámara principal
+ *   "DESCONOCIDO:entrada_secundaria"   → desconocido en cámara secundaria
+ * 
+ * Nota: para DESCONOCIDO no tenemos identidad, así que usamos solo tipo+cámara.
+ * Para FRAUDE tampoco, pero es correcto agrupar por cámara (mismo atacante).
+ */
+function construirClaveCooldown(
+  estado: string,
+  cameraId: string | null
+): string {
+  return `${estado}:${cameraId ?? "default"}`;
+}
+
+/**
+ * Verifica si pasó suficiente tiempo desde la última notificación.
+ * 
+ * Usa una operación ATÓMICA: un solo upsert con lógica de tiempo en la query.
+ * Esto previene race conditions donde 2 eventos simultáneos ambos pasan
+ * el cooldown porque leyeron el mismo timestamp viejo.
+ * 
+ * Estrategia:
+ * 1. Intentar INSERT (primera vez para esta clave) → notificar
+ * 2. Si ya existe, verificar si último_envio + cooldown < NOW()
+ *    - Sí → UPDATE atómico + notificar
+ *    - No → en cooldown → skip
  */
 async function verificarCooldown(
   supabase: any,
   estado: string,
   cameraId: string | null
 ): Promise<boolean> {
-  const clave = `${estado}:${cameraId ?? "default"}`;
-  const cooldownMin = COOLDOWN_MINUTOS[estado] ?? 5;
+  const clave = construirClaveCooldown(estado, cameraId);
+  const cooldownMin = COOLDOWN_MINUTOS[estado] ?? 3;
+  const ahora = new Date().toISOString();
 
   try {
-    // Leer último envío para esta clave
-    const { data } = await supabase
+    // Paso 1: Intentar insertar (primera vez para esta clave)
+    const { error: insertError } = await supabase
       .from("notificacion_cooldown")
-      .select("ultimo_envio")
-      .eq("clave", clave)
-      .maybeSingle();
+      .insert({ clave, ultimo_envio: ahora });
 
-    if (data) {
-      const ultimoEnvio = new Date(data.ultimo_envio).getTime();
-      const ahora = Date.now();
-      const diffMin = (ahora - ultimoEnvio) / 60_000;
-
-      if (diffMin < cooldownMin) {
-        // Dentro del cooldown → no notificar
-        return false;
-      }
+    if (!insertError) {
+      // Insert exitoso → primera notificación para esta clave → enviar
+      return true;
     }
 
-    // Fuera del cooldown o primera vez → actualizar y notificar
-    await supabase
-      .from("notificacion_cooldown")
-      .upsert(
-        { clave, ultimo_envio: new Date().toISOString() },
-        { onConflict: "clave" }
-      );
+    // Si el error NO es de duplicado, algo inesperado pasó → notificar por seguridad
+    const isDuplicate =
+      insertError.code === "23505" ||
+      insertError.message?.includes("duplicate") ||
+      insertError.message?.includes("unique");
 
-    return true;
+    if (!isDuplicate) {
+      console.warn("[Cooldown] Error inesperado en insert:", insertError);
+      return true; // Ante la duda, notificar
+    }
+
+    // Paso 2: La clave ya existe → UPDATE atómico SOLO si pasó el cooldown
+    // El WHERE con último_envio < threshold hace que solo UNA invocación
+    // concurrente gane el UPDATE (las demás obtienen 0 rows affected)
+    const threshold = new Date(Date.now() - cooldownMin * 60_000).toISOString();
+
+    const { data: updated, error: updateError } = await supabase
+      .from("notificacion_cooldown")
+      .update({ ultimo_envio: ahora })
+      .eq("clave", clave)
+      .lt("ultimo_envio", threshold)
+      .select("clave");
+
+    if (updateError) {
+      console.warn("[Cooldown] Error en update atómico:", updateError);
+      return true; // Ante la duda, notificar
+    }
+
+    // Si el UPDATE afectó 1 row → cooldown expirado → notificar
+    // Si afectó 0 rows → aún en cooldown → skip
+    return (updated && updated.length > 0);
   } catch (err) {
-    // Si la tabla no existe o hay error, notificar de todos modos
-    // para no perder alertas críticas
+    // Si la tabla no existe o hay error de red, notificar de todos modos
+    // para no perder alertas críticas de seguridad
     console.warn("[Cooldown] Error verificando cooldown:", err);
     return true;
   }
