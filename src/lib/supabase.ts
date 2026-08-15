@@ -199,6 +199,55 @@ export async function getHistorial(filtro?: EstadoEvento, busqueda?: string) {
   return data as Evento[];
 }
 
+/** Obtener historial con paginación real (Fase 2) */
+export async function getHistorialPaginado(page: number = 0, limit: number = 50, filtro?: EstadoEvento, busqueda?: string, fechaDesde?: string, fechaHasta?: string) {
+  let query = supabase
+    .from("historial")
+    .select("*", { count: "exact" })
+    .order("timestamp", { ascending: false });
+
+  if (filtro) {
+    query = query.eq("estado", filtro);
+  }
+
+  if (busqueda) {
+    query = query.or(`nombre.ilike.%${busqueda}%,motivo.ilike.%${busqueda}%`);
+  }
+
+  if (fechaDesde) {
+    query = query.gte("timestamp", `${fechaDesde}T00:00:00`);
+  }
+
+  if (fechaHasta) {
+    query = query.lte("timestamp", `${fechaHasta}T23:59:59`);
+  }
+
+  const from = page * limit;
+  const to = from + limit - 1;
+
+  const { data, count, error } = await query.range(from, to);
+  if (error) throw error;
+  return { data: data as Evento[], total: count ?? 0 };
+}
+
+/** Obtener eventos de los últimos 7 días para gráficas de tendencias (Fase 1/4) */
+export async function getTendenciasSemanales() {
+  const hace7Dias = new Date();
+  hace7Dias.setDate(hace7Dias.getDate() - 6); // 7 días contando hoy
+  hace7Dias.setHours(0, 0, 0, 0);
+
+  const { data, error } = await supabase
+    .from("historial")
+    .select("estado, timestamp, motivo")
+    .gte("timestamp", hace7Dias.toISOString())
+    .order("timestamp", { ascending: false }) // Descendente para no truncar los de hoy si hay más de 1500
+    .limit(1500); // Límite seguro para evitar saturación
+
+  if (error) throw error;
+  // Volvemos a ordenar ascendente para procesar en orden cronológico en el Dashboard
+  return data.reverse();
+}
+
 /** Obtener evento por ID */
 export async function getEventoPorId(id: string) {
   const { data, error } = await supabase

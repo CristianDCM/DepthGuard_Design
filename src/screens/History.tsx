@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, CheckCircle, AlertTriangle, HelpCircle, ChevronRight, History as HistoryIcon } from "lucide-react";
+import { Search, CheckCircle, AlertTriangle, HelpCircle, ChevronRight, History as HistoryIcon, Download, Calendar, X } from "lucide-react";
 import { motion } from "motion/react";
 import Navigation from "../components/Navigation";
-import { getHistorial, type Evento, type EstadoEvento } from "../lib/supabase";
+import { getHistorialPaginado, type Evento, type EstadoEvento } from "../lib/supabase";
+import { exportToCSV } from "../lib/exportUtils";
 
 export default function History() {
   const navigate = useNavigate();
@@ -11,10 +12,18 @@ export default function History() {
   const [activeFilter, setActiveFilter] = useState<"Todos" | "Autorizados" | "Fraude" | "Desconocido">("Todos");
   const [events, setEvents] = useState<Evento[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [fechaDesde, setFechaDesde] = useState("");
+  const [fechaHasta, setFechaHasta] = useState("");
+  const limit = 50;
+
+  const hasFechaFilter = fechaDesde !== "" || fechaHasta !== "";
 
   useEffect(() => {
-    async function cargar() {
+    async function cargarInicial() {
       setLoading(true);
+      setPage(0);
       try {
         const filtroMap: Record<string, EstadoEvento | undefined> = {
           Todos: undefined,
@@ -22,8 +31,9 @@ export default function History() {
           Fraude: "FRAUDE",
           Desconocido: "DESCONOCIDO",
         };
-        const data = await getHistorial(filtroMap[activeFilter], searchQuery || undefined);
-        setEvents(data);
+        const res = await getHistorialPaginado(0, limit, filtroMap[activeFilter], searchQuery || undefined, fechaDesde || undefined, fechaHasta || undefined);
+        setEvents(res.data);
+        setHasMore(res.data.length === limit);
       } catch (err) {
         console.error("Error cargando historial:", err);
       } finally {
@@ -31,9 +41,32 @@ export default function History() {
       }
     }
     // Debounce la búsqueda
-    const timer = setTimeout(cargar, 300);
+    const timer = setTimeout(cargarInicial, 300);
     return () => clearTimeout(timer);
-  }, [activeFilter, searchQuery]);
+  }, [activeFilter, searchQuery, fechaDesde, fechaHasta]);
+
+  async function cargarMas() {
+    const nextPg = page + 1;
+    try {
+      const filtroMap: Record<string, EstadoEvento | undefined> = {
+        Todos: undefined,
+        Autorizados: "ACCESO_PERMITIDO",
+        Fraude: "FRAUDE",
+        Desconocido: "DESCONOCIDO",
+      };
+      const res = await getHistorialPaginado(nextPg, limit, filtroMap[activeFilter], searchQuery || undefined, fechaDesde || undefined, fechaHasta || undefined);
+      setEvents(prev => [...prev, ...res.data]);
+      setPage(nextPg);
+      setHasMore(res.data.length === limit);
+    } catch (err) {
+      console.error("Error cargando más eventos:", err);
+    }
+  }
+
+  function handleExportCSV() {
+    const filename = `historial_${activeFilter}_${new Date().toISOString().split('T')[0]}.csv`;
+    exportToCSV(events, filename);
+  }
 
   function getEventConfig(evento: Evento) {
     switch (evento.estado) {
@@ -78,18 +111,59 @@ export default function History() {
               <HistoryIcon className="w-6 h-6 text-dg-accent" />
               <h1 className="text-xl font-bold tracking-tight font-headline">Historial</h1>
             </div>
+            <button 
+              onClick={handleExportCSV}
+              disabled={events.length === 0}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dg-card border border-dg-border text-dg-text-muted hover:text-white hover:border-dg-accent transition-all text-xs font-bold disabled:opacity-50"
+            >
+              <Download className="w-3.5 h-3.5" /> CSV
+            </button>
           </div>
           
           <div className="px-4 pb-4 space-y-3">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-dg-text-muted w-4 h-4" />
-              <input 
-                type="text" 
-                placeholder="Buscar accesos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-dg-card border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-accent/50 placeholder:text-dg-text-muted"
-              />
+            <div className="flex flex-col md:flex-row gap-2 md:items-center">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-dg-text-muted w-4 h-4" />
+                <input 
+                  type="text" 
+                  placeholder="Buscar accesos..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-dg-card border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-accent/50 placeholder:text-dg-text-muted"
+                />
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="relative flex-1 md:flex-none">
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-dg-text-muted w-4 h-4 pointer-events-none z-10" />
+                  <input
+                    type="date"
+                    value={fechaDesde}
+                    onChange={(e) => setFechaDesde(e.target.value)}
+                    className={`w-full md:w-[145px] bg-dg-card border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-accent/50 appearance-none [color-scheme:dark] relative [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${fechaDesde ? 'text-white' : 'text-dg-text-muted'}`}
+                    placeholder="Desde"
+                  />
+                </div>
+                <span className="text-dg-text-muted text-sm font-medium">—</span>
+                <div className="relative flex-1 md:flex-none">
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-dg-text-muted w-4 h-4 pointer-events-none z-10" />
+                  <input
+                    type="date"
+                    value={fechaHasta}
+                    onChange={(e) => setFechaHasta(e.target.value)}
+                    className={`w-full md:w-[145px] bg-dg-card border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-accent/50 appearance-none [color-scheme:dark] relative [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${fechaHasta ? 'text-white' : 'text-dg-text-muted'}`}
+                    placeholder="Hasta"
+                  />
+                </div>
+                {hasFechaFilter && (
+                  <button
+                    onClick={() => { setFechaDesde(""); setFechaHasta(""); }}
+                    className="p-2.5 rounded-xl bg-dg-error/10 text-dg-error hover:bg-dg-error/20 transition-colors shrink-0"
+                    title="Limpiar fechas"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
               <FilterChip label="Todos" active={activeFilter === "Todos"} onClick={() => setActiveFilter("Todos")} />
@@ -141,6 +215,17 @@ export default function History() {
               })}
             </div>
           ))
+        )}
+
+        {!loading && hasMore && events.length > 0 && (
+          <div className="pt-4 pb-8 flex justify-center">
+            <button 
+              onClick={cargarMas}
+              className="px-6 py-2 rounded-full border border-dg-accent/50 text-dg-accent font-bold text-sm hover:bg-dg-accent/10 transition-colors"
+            >
+              Cargar más eventos
+            </button>
+          </div>
         )}
       </main>
 
