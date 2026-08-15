@@ -48,61 +48,39 @@ interface CameraPanelData {
 
 export default function LiveMonitor() {
   const [estado, setEstado] = useState<EstadoSistema | null>(null);
-  const [panelPrincipal, setPanelPrincipal] = useState<CameraPanelData>({
+  const [panel, setPanel] = useState<CameraPanelData>({
     cameraId: "entrada_principal",
     cameraType: "3D",
-    label: "Entrada Principal",
-    ultimoEvento: null,
-    lastFocusTime: 0,
-    eventosRecientes: [],
-  });
-  const [panelSecundario, setPanelSecundario] = useState<CameraPanelData>({
-    cameraId: "entrada_secundaria",
-    cameraType: "2D",
-    label: "Entrada Secundaria",
+    label: "Cámara",
     ultimoEvento: null,
     lastFocusTime: 0,
     eventosRecientes: [],
   });
   const [loading, setLoading] = useState(true);
 
-  // Cargar datos iniciales
+  // Cargar datos iniciales — detecta la primera cámara del heartbeat
   useEffect(() => {
     async function cargarDatos() {
       try {
-        const [estadoData, eventosPrincipal, eventosSecundario] =
-          await Promise.all([
-            getEstadoSistema(),
-            getEventosPorCamara("entrada_principal", 5),
-            getEventosPorCamara("entrada_secundaria", 5),
-          ]);
+        const estadoData = await getEstadoSistema();
 
         if (estadoData) {
           setEstado(estadoData);
 
-          // Actualizar tipo de cámara desde el heartbeat real
-          const camPrincipal = estadoData.camaras.find(c => c.camera_id === "entrada_principal");
-          const camSecundaria = estadoData.camaras.find(c => c.camera_id === "entrada_secundaria");
-
-          if (camPrincipal) {
-            setPanelPrincipal(prev => ({ ...prev, cameraType: camPrincipal.camera_type }));
-          }
-          if (camSecundaria) {
-            setPanelSecundario(prev => ({ ...prev, cameraType: camSecundaria.camera_type }));
+          // Detectar la cámara conectada (la primera del array)
+          const cam = estadoData.camaras[0];
+          if (cam) {
+            const eventos = await getEventosPorCamara(cam.camera_id, 5);
+            setPanel({
+              cameraId: cam.camera_id,
+              cameraType: cam.camera_type,
+              label: "Cámara",
+              ultimoEvento: eventos[0] ?? null,
+              lastFocusTime: 0,
+              eventosRecientes: eventos,
+            });
           }
         }
-
-        setPanelPrincipal((prev) => ({
-          ...prev,
-          ultimoEvento: eventosPrincipal[0] ?? null,
-          eventosRecientes: eventosPrincipal,
-        }));
-
-        setPanelSecundario((prev) => ({
-          ...prev,
-          ultimoEvento: eventosSecundario[0] ?? null,
-          eventosRecientes: eventosSecundario,
-        }));
       } catch (err) {
         console.error("Error cargando monitor:", err);
       } finally {
@@ -112,7 +90,7 @@ export default function LiveMonitor() {
     cargarDatos();
   }, []);
 
-  // Suscripción Realtime — escucha INSERTs en historial y rutea al panel correcto
+  // Suscripción Realtime — escucha INSERTs en historial
   useEffect(() => {
     const channel = supabase
       .channel("live-monitor-realtime")
@@ -122,39 +100,24 @@ export default function LiveMonitor() {
         (payload) => {
           const nuevoEvento = payload.new as Evento;
 
-          if (nuevoEvento.camera_id === "entrada_principal") {
-            setPanelPrincipal((prev) => {
-              const isFraude = nuevoEvento.estado === "FRAUDE";
-              const timeSinceLastFocus = Date.now() - prev.lastFocusTime;
-              
-              const updateFocus = isFraude || timeSinceLastFocus > 5000;
-              const newUltimoEvento = updateFocus ? nuevoEvento : prev.ultimoEvento;
-              const newLastFocusTime = updateFocus ? Date.now() : prev.lastFocusTime;
+          setPanel((prev) => {
+            // Solo procesar eventos de la cámara que estamos mostrando
+            if (nuevoEvento.camera_id !== prev.cameraId) return prev;
 
-              return {
-                ...prev,
-                ultimoEvento: newUltimoEvento,
-                lastFocusTime: newLastFocusTime,
-                eventosRecientes: [nuevoEvento, ...prev.eventosRecientes].slice(0, 50),
-              };
-            });
-          } else if (nuevoEvento.camera_id === "entrada_secundaria") {
-            setPanelSecundario((prev) => {
-              const isFraude = nuevoEvento.estado === "FRAUDE";
-              const timeSinceLastFocus = Date.now() - prev.lastFocusTime;
-              
-              const updateFocus = isFraude || timeSinceLastFocus > 5000;
-              const newUltimoEvento = updateFocus ? nuevoEvento : prev.ultimoEvento;
-              const newLastFocusTime = updateFocus ? Date.now() : prev.lastFocusTime;
+            const isFraude = nuevoEvento.estado === "FRAUDE";
+            const timeSinceLastFocus = Date.now() - prev.lastFocusTime;
+            
+            const updateFocus = isFraude || timeSinceLastFocus > 5000;
+            const newUltimoEvento = updateFocus ? nuevoEvento : prev.ultimoEvento;
+            const newLastFocusTime = updateFocus ? Date.now() : prev.lastFocusTime;
 
-              return {
-                ...prev,
-                ultimoEvento: newUltimoEvento,
-                lastFocusTime: newLastFocusTime,
-                eventosRecientes: [nuevoEvento, ...prev.eventosRecientes].slice(0, 50),
-              };
-            });
-          }
+            return {
+              ...prev,
+              ultimoEvento: newUltimoEvento,
+              lastFocusTime: newLastFocusTime,
+              eventosRecientes: [nuevoEvento, ...prev.eventosRecientes].slice(0, 50),
+            };
+          });
         }
       )
       .subscribe();
@@ -169,7 +132,18 @@ export default function LiveMonitor() {
     const interval = setInterval(async () => {
       try {
         const estadoData = await getEstadoSistema();
-        if (estadoData) setEstado(estadoData);
+        if (estadoData) {
+          setEstado(estadoData);
+          // Actualizar tipo de cámara si cambió
+          const cam = estadoData.camaras[0];
+          if (cam) {
+            setPanel(prev => ({
+              ...prev,
+              cameraId: cam.camera_id,
+              cameraType: cam.camera_type,
+            }));
+          }
+        }
       } catch {
         /* silenciar */
       }
@@ -178,17 +152,9 @@ export default function LiveMonitor() {
   }, []);
 
   const edgeOnline = isEdgeOnline(estado?.ultimo_heartbeat ?? null);
-  const camaras = estado?.camaras ?? [];
-
-  // Buscar estado real de cada cámara desde el array del heartbeat
-  const camEstadoPrincipal = camaras.find(c => c.camera_id === "entrada_principal");
-  const camEstadoSecundario = camaras.find(c => c.camera_id === "entrada_secundaria");
-
-  const principalActiva = camEstadoPrincipal
-    ? isCamaraActiva(camEstadoPrincipal, estado?.ultimo_heartbeat ?? null)
-    : false;
-  const secundariaActiva = camEstadoSecundario
-    ? isCamaraActiva(camEstadoSecundario, estado?.ultimo_heartbeat ?? null)
+  const cam = (estado?.camaras ?? [])[0];
+  const camaraActiva = cam
+    ? isCamaraActiva(cam, estado?.ultimo_heartbeat ?? null)
     : false;
 
   return (
@@ -203,13 +169,13 @@ export default function LiveMonitor() {
           </div>
           {/* Edge Status Pill */}
           <div
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
+            className={`flex items-center gap-1.5 px-2 py-1 rounded-full border ${
               edgeOnline
                 ? "bg-dg-accent/10 border-dg-accent/20"
                 : "bg-dg-error/10 border-dg-error/20"
             }`}
           >
-            <Server className={`w-3.5 h-3.5 ${edgeOnline ? "text-dg-accent" : "text-dg-error"}`} />
+            <Server className={`w-3 h-3 ${edgeOnline ? "text-dg-accent" : "text-dg-error"}`} />
             <span
               className={`w-1.5 h-1.5 rounded-full ${
                 edgeOnline
@@ -218,11 +184,11 @@ export default function LiveMonitor() {
               }`}
             />
             <span
-              className={`text-[10px] font-bold tracking-widest uppercase ${
+              className={`text-[8px] font-bold tracking-widest uppercase ${
                 edgeOnline ? "text-dg-accent" : "text-dg-error"
               }`}
             >
-              {edgeOnline ? "Edge Online" : "Edge Offline"}
+              {edgeOnline ? "Online" : "Offline"}
             </span>
           </div>
         </div>
@@ -234,14 +200,18 @@ export default function LiveMonitor() {
             <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
-          <AdaptiveCameraGrid
-            panelPrincipal={panelPrincipal}
-            panelSecundario={panelSecundario}
-            principalActiva={principalActiva}
-            secundariaActiva={secundariaActiva}
+          <CameraPanel
+            data={panel}
+            camaraActiva={camaraActiva}
             edgeOnline={edgeOnline}
-            setPanelPrincipal={setPanelPrincipal}
-            setPanelSecundario={setPanelSecundario}
+            layout="expanded"
+            onEventFocus={(evento) => {
+              setPanel((prev) => ({ 
+                ...prev, 
+                ultimoEvento: evento,
+                lastFocusTime: Date.now()
+              }));
+            }}
           />
         )}
       </main>
@@ -769,80 +739,6 @@ function LiveSnapshotPreview({
           Actualización cada 2s · Resolución reducida
         </span>
       </div>
-    </div>
-  );
-}
-
-// ============================================
-// Grid Adaptativo
-// ============================================
-
-function AdaptiveCameraGrid({
-  panelPrincipal,
-  panelSecundario,
-  principalActiva,
-  secundariaActiva,
-  edgeOnline,
-  setPanelPrincipal,
-  setPanelSecundario,
-}: {
-  panelPrincipal: CameraPanelData;
-  panelSecundario: CameraPanelData;
-  principalActiva: boolean;
-  secundariaActiva: boolean;
-  edgeOnline: boolean;
-  setPanelPrincipal: React.Dispatch<React.SetStateAction<CameraPanelData>>;
-  setPanelSecundario: React.Dispatch<React.SetStateAction<CameraPanelData>>;
-}) {
-  const panels = [
-    { data: panelPrincipal, activa: principalActiva, setter: setPanelPrincipal },
-    { data: panelSecundario, activa: secundariaActiva, setter: setPanelSecundario },
-  ];
-
-  const activePanels = panels.filter((p) => p.activa);
-  const inactivePanels = panels.filter((p) => !p.activa);
-
-  // Si hay cámaras activas, mostrarlas primero (y en ancho completo si es solo 1)
-  const panelsToShow = activePanels.length > 0 ? activePanels : panels;
-  const isSingleCamera = panelsToShow.length === 1;
-
-  return (
-    <div className="space-y-6">
-      <div
-        className={`grid gap-6 ${
-          isSingleCamera
-            ? "grid-cols-1 w-full"
-            : "grid-cols-1 lg:grid-cols-2"
-        }`}
-      >
-        {panelsToShow.map((p) => (
-          <CameraPanel
-            key={p.data.cameraId}
-            data={p.data}
-            camaraActiva={p.activa}
-            edgeOnline={edgeOnline}
-            layout={isSingleCamera ? "expanded" : "compact"}
-            onEventFocus={(evento) => {
-              p.setter((prev) => ({ 
-                ...prev, 
-                ultimoEvento: evento,
-                lastFocusTime: Date.now() // Protege el foco por 5s cuando el usuario hace clic manually
-              }));
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Cámaras inactivas: mostrar como indicador compacto */}
-      {activePanels.length > 0 && inactivePanels.length > 0 && (
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-dg-border">
-          <Video className="w-4 h-4 text-dg-text-muted/50" />
-          <span className="text-xs text-dg-text-muted">
-            {inactivePanels.map((p) => p.data.label).join(", ")} — desconectada
-          </span>
-          <span className="w-1.5 h-1.5 rounded-full bg-dg-error/60" />
-        </div>
-      )}
     </div>
   );
 }
