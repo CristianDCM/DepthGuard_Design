@@ -23,6 +23,18 @@
     @apply bg-dg-bg text-white font-sans;
     min-height: 100vh;
   }
+  
+  .recharts-responsive-container,
+  .recharts-responsive-container *,
+  .recharts-responsive-container:focus,
+  .recharts-wrapper,
+  .recharts-wrapper *,
+  .recharts-wrapper:focus,
+  .recharts-surface,
+  .recharts-surface:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
 }
 
 @layer components {
@@ -38,3 +50,17 @@
     @apply border border-dg-border text-white font-bold py-3 px-6 rounded-dg transition-all active:scale-95 hover:bg-white/5;
   }
 }
+
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
+

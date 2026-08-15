@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { ArrowLeft, Video, ExternalLink, Fingerprint, ShieldAlert, UserSearch, Plus, FileText, Download } from "lucide-react";
 import { motion } from "motion/react";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from "recharts";
 import Navigation from "../components/Navigation";
 import { getEventoPorId, type Evento } from "../lib/supabase";
 
@@ -229,12 +230,48 @@ export default function EventDetail() {
 
             <div className="cyber-card p-5 space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="font-headline font-bold text-white text-base">Análisis Biométrico</h2>
+                <h2 className="font-headline font-bold text-white text-base">Análisis Biométrico 3D</h2>
                 <Fingerprint className={`w-6 h-6 ${isFraud ? 'text-dg-error' : isUnknown ? 'text-yellow-500' : 'text-dg-accent'}`} />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+              {metricas && (
+                <div className="h-64 w-full bg-black/20 rounded-xl p-2 border border-white/5 relative">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart cx="50%" cy="50%" outerRadius="70%" data={[
+                      { metric: "Varianza", value: Math.min(((metricas.varianza ?? 0) / 3) * 100, 100) },
+                      { metric: "Rango 3D", value: Math.min(((metricas.rango_3d ?? 0) / 10) * 100, 100) },
+                      { metric: "Pixeles", value: Math.min(((metricas.pixeles_validos ?? 0)) * 100, 100) },
+                      { metric: "Confianza", value: confianzaPct ?? 0 },
+                    ]}>
+                      <PolarGrid stroke="#333" />
+                      <PolarAngleAxis dataKey="metric" tick={{ fill: '#888', fontSize: 10, fontWeight: 'bold' }} />
+                      <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                      <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px', fontSize: '12px' }} />
+                      <Radar 
+                        name="Huella 3D" 
+                        dataKey="value" 
+                        stroke={isFraud ? "#ef4444" : "#a3ff00"} 
+                        fill={isFraud ? "#ef4444" : "#a3ff00"} 
+                        fillOpacity={0.4} 
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                  {isFraud && (
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-dg-error/20 border border-dg-error/30 text-[9px] font-bold text-dg-error uppercase rounded-md backdrop-blur-sm">
+                      Firma Plana Detectada
+                    </div>
+                  )}
+                  {isAuthorized && (
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-dg-success/20 border border-dg-success/30 text-[9px] font-bold text-dg-success uppercase rounded-md backdrop-blur-sm">
+                      Volumen Facial Confirmado
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2 border-t border-white/5">
                 <MetricItem 
-                  label="Confianza" 
+                  label="Confianza Facial" 
                   value={confianzaPct != null ? `${confianzaPct}%` : "N/A"} 
                   progress={confianzaPct ?? 0} 
                   color={isFraud ? "bg-dg-error" : isUnknown ? "bg-yellow-500" : "bg-dg-accent"}
@@ -252,7 +289,7 @@ export default function EventDetail() {
                   color={isFraud ? "bg-dg-error" : "bg-dg-accent"}
                 />
                 <MetricItem 
-                  label="Distancia" 
+                  label="Distancia Física" 
                   value={metricas?.distancia ? `${metricas.distancia} cm` : "—"} 
                   progress={Math.min((metricas?.distancia ?? 0) / 150 * 100, 100)} 
                   color="bg-blue-400"

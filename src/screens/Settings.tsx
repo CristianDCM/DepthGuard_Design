@@ -255,15 +255,19 @@ export default function Settings() {
                 <h2 className="text-xs font-bold uppercase tracking-widest text-dg-accent">Estado del Sistema</h2>
                 <div className="space-y-4">
                   <StatusRow label="Nodo Edge" icon={Server} connected={servidorConectado} />
-                  {(estado?.camaras ?? []).map((cam) => (
-                    <div key={cam.camera_id}>
-                      <StatusRow 
-                        label={`${cam.camera_id === "entrada_principal" ? "Cámara Principal" : "Cámara Secundaria"} (${cam.camera_type})`}
-                        icon={Video}
-                        connected={isCamaraActiva(cam, estado?.ultimo_heartbeat ?? null)}
-                      />
-                    </div>
-                  ))}
+                  {(() => {
+                    const cam = (estado?.camaras ?? [])[0];
+                    if (!cam) return null;
+                    return (
+                      <div>
+                        <StatusRow 
+                          label={`Cámara (${cam.camera_type})`}
+                          icon={Video}
+                          connected={isCamaraActiva(cam, estado?.ultimo_heartbeat ?? null)}
+                        />
+                      </div>
+                    );
+                  })()}
                   <StatusRow label="Push" icon={Bell} connected={pushSubscribed} />
                   <StatusRow label="Base de Datos" icon={Database} connected={true} />
                 </div>
