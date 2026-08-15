@@ -67,8 +67,8 @@ export default function LiveMonitor() {
         if (estadoData) {
           setEstado(estadoData);
 
-          // Detectar la cámara conectada (la primera del array)
-          const cam = estadoData.camaras[0];
+          // Detectar la cámara conectada (la que esté activa)
+          const cam = estadoData.camaras.find(c => c.activa) || estadoData.camaras[0];
           if (cam) {
             const eventos = await getEventosPorCamara(cam.camera_id, 5);
             setPanel({
@@ -134,8 +134,8 @@ export default function LiveMonitor() {
         const estadoData = await getEstadoSistema();
         if (estadoData) {
           setEstado(estadoData);
-          // Actualizar tipo de cámara si cambió
-          const cam = estadoData.camaras[0];
+          // Actualizar tipo de cámara si cambió, priorizando la activa
+          const cam = estadoData.camaras.find(c => c.activa) || estadoData.camaras[0];
           if (cam) {
             setPanel(prev => ({
               ...prev,
@@ -152,7 +152,7 @@ export default function LiveMonitor() {
   }, []);
 
   const edgeOnline = isEdgeOnline(estado?.ultimo_heartbeat ?? null);
-  const cam = (estado?.camaras ?? [])[0];
+  const cam = (estado?.camaras ?? []).find(c => c.activa) || (estado?.camaras ?? [])[0];
   const camaraActiva = cam
     ? isCamaraActiva(cam, estado?.ultimo_heartbeat ?? null)
     : false;
