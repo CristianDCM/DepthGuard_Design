@@ -101,7 +101,7 @@ export default function RegisterStart() {
       // Guardar cámara activa para el WebRTC
       const camara = estado.camaras?.find(c => c.activa) || estado.camaras?.[0];
       if (camara) {
-        setActiveCameraId(camara.id as CameraId);
+        setActiveCameraId(camara.camera_id as CameraId);
       }
 
       // Verificar que no exista un usuario con el mismo nombre
