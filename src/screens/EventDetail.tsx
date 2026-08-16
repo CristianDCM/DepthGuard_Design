@@ -50,7 +50,7 @@ export default function EventDetail() {
   const metricas = evento.metricas_json;
   const confianzaPct = evento.confianza != null ? Math.round(evento.confianza * 100) : null;
   const headerTitle = isFraud ? "Detalle de Fraude" : "Detalle del Evento";
-  const timestamp = new Date(evento.timestamp).toLocaleString("es", { dateStyle: "short", timeStyle: "medium" });
+  const timestamp = new Date(evento.timestamp).toLocaleString("es", { dateStyle: "short", timeStyle: "medium", hour12: true });
 
   // ============================================
   // Generación de informe PDF
@@ -362,6 +362,7 @@ function generarHTMLInforme(evento: Evento, fotoBase64: string): string {
   const timestamp = new Date(evento.timestamp).toLocaleString("es", {
     dateStyle: "long",
     timeStyle: "medium",
+    hour12: true,
   });
 
   const estadoColor = isFraud ? "#ef4444" : isUnknown ? "#eab308" : "#16a34a";
@@ -498,7 +499,7 @@ function generarHTMLInforme(evento: Evento, fotoBase64: string): string {
     <!-- Footer -->
     <div style="margin-top:20px;padding-top:10px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
       <div style="font-size:9px;color:#9ca3af;">
-        Generado automáticamente por DepthGuard · ${new Date().toLocaleString("es")}
+        Generado automáticamente por DepthGuard · ${new Date().toLocaleString("es", { dateStyle: "short", timeStyle: "medium", hour12: true })}
       </div>
       <div style="font-size:9px;color:#9ca3af;">
         Proyecto de Grado 2026

@@ -628,6 +628,8 @@ function formatTime(timestamp: string) {
   return new Date(timestamp).toLocaleTimeString("es", {
     hour: "2-digit",
     minute: "2-digit",
+    second: "2-digit",
+    hour12: true
   });
 }
 
@@ -711,6 +713,7 @@ function LiveSnapshotPreview({
               hour: "2-digit",
               minute: "2-digit",
               second: "2-digit",
+              hour12: true
             })}
           </span>
         )}

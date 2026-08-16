@@ -234,7 +234,7 @@ async function sendEmail(
         </tr>
         <tr>
           <td style="color:#9ca3af;padding:6px 0;font-size:13px;">Hora</td>
-          <td style="color:#ffffff;padding:6px 0;font-size:13px;text-align:right;">${new Date(evento.timestamp).toLocaleString("es-CO", { timeZone: "America/Bogota" })}</td>
+          <td style="color:#ffffff;padding:6px 0;font-size:13px;text-align:right;">${new Date(evento.timestamp).toLocaleString("es-CO", { timeZone: "America/Bogota", hour12: true })}</td>
         </tr>
       </table>
     </div>
@@ -519,6 +519,7 @@ Deno.serve(async (req: Request) => {
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
+          hour12: true,
         });
 
         const texto = [

@@ -191,7 +191,7 @@ export default function Dashboard() {
   }
 
   function formatTime(timestamp: string) {
-    return new Date(timestamp).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" });
+    return new Date(timestamp).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit", hour12: true });
   }
 
   return (

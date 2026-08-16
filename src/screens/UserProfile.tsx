@@ -137,7 +137,7 @@ export default function UserProfile() {
                         alt="Capture"
                       />
                       <div className="absolute bottom-1 right-1 bg-dg-bg/80 text-[8px] px-1 rounded font-mono text-white">
-                        {new Date(evento.timestamp).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })}
+                        {new Date(evento.timestamp).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit", hour12: true })}
                       </div>
                     </div>
                   ))}
