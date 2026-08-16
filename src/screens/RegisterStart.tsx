@@ -425,7 +425,7 @@ export default function RegisterStart() {
                 <UserPlus className="w-6 h-6 text-dg-accent" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white tracking-tight font-headline">Registrar Nuevo Usuario</h2>
+                <h2 className="text-xl font-bold text-white tracking-tight font-headline">Escaneando Rostro</h2>
                 {usuarioCreado && (
                   <p className="text-[10px] text-dg-text-muted font-medium mt-0.5">
                     {usuarioCreado.nombre} · ID: {usuarioCreado.id.substring(0, 8)}
@@ -434,81 +434,38 @@ export default function RegisterStart() {
               </div>
             </div>
 
-            <div className="space-y-6 pb-10">
-              <div className="space-y-3 pt-2">
-                <div className="flex gap-2 w-full max-w-sm mx-auto px-4">
-                  {ANGULOS.map((a, i) => {
-                    const isCompleted = i < anguloActual;
-                    const isActive = i === anguloActual;
-                    return (
-                      <div key={a.step} className="relative flex-1 h-1.5 rounded-full overflow-hidden bg-dg-border/30">
-                        {isCompleted && (
-                          <div className="absolute inset-0 bg-dg-accent shadow-[0_0_10px_rgba(163,255,0,0.8)]" />
-                        )}
-                        {isActive && (
-                          <div className="absolute inset-0 bg-dg-accent animate-pulse opacity-80 shadow-[0_0_8px_rgba(163,255,0,0.5)]" />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="text-center h-4">
-                  <p className="text-[11px] uppercase font-bold tracking-widest text-dg-accent animate-pulse drop-shadow-[0_0_8px_rgba(163,255,0,0.5)]">
-                    Fase {Math.min(anguloActual + 1, ANGULOS.length)}: {ANGULOS[anguloActual]?.label || "Finalizando"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="cyber-card p-6 text-center mb-8 relative overflow-hidden">
+            <div className="space-y-5 pb-10">
+              {/* Video feed — tamaño mediano, centrado */}
+              <div className="max-w-md mx-auto rounded-xl overflow-hidden border border-dg-border/60 bg-black shadow-[0_0_30px_rgba(0,0,0,0.5)]">
                 {activeCameraId && !webrtcFailed ? (
-                  <div className="w-40 h-40 md:w-48 md:h-48 mx-auto rounded-full overflow-hidden relative mb-6 border-2 border-dg-accent shadow-[0_0_30px_rgba(163,255,0,0.2)] flex items-center justify-center bg-black">
-                    <div className="min-w-[180%] min-h-[180%] flex items-center justify-center">
-                      <div className="w-full">
-                        <WebRTCPlayer 
-                          cameraId={activeCameraId} 
-                          edgeOnline={true} 
-                          onFallback={() => setWebrtcFailed(true)} 
-                        />
-                      </div>
-                    </div>
-                    {/* Anillo de escaneo animado */}
-                    <div className="absolute inset-0 rounded-full border border-dg-accent/50 animate-ping opacity-20 pointer-events-none" />
-                  </div>
+                  <WebRTCPlayer 
+                    cameraId={activeCameraId} 
+                    edgeOnline={true} 
+                    onFallback={() => setWebrtcFailed(true)}
+                    minimal
+                  />
                 ) : (
-                  <div className="mb-4 flex justify-center">
-                    <RotateCw className="w-12 h-12 text-dg-accent animate-spin-slow" />
+                  <div className="aspect-video flex items-center justify-center">
+                    <RotateCw className="w-10 h-10 text-dg-accent animate-spin-slow" />
                   </div>
                 )}
-                
-                <h3 className="text-white font-bold text-lg mb-1">
-                  {anguloActual < ANGULOS.length ? ANGULOS[anguloActual]?.instruccion : "Finalizando..."}
-                </h3>
-                <p className="text-dg-text-muted text-xs mb-4">
-                  Mantenga el rostro visible para la cámara
-                </p>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-dg-accent/10 border border-dg-accent/20">
-                  <Hourglass className="w-3.5 h-3.5 text-dg-accent animate-pulse" />
-                  <span className="text-[10px] font-bold text-dg-accent uppercase tracking-wider">
-                    Capturando ángulo {anguloActual < ANGULOS.length ? ANGULOS[anguloActual]?.label : "..."}
-                  </span>
-                </div>
               </div>
 
-              <div className="space-y-3">
-                <button 
-                  disabled
-                  className="btn-primary w-full py-4 flex items-center justify-center gap-2 opacity-80"
-                >
-                  <div className="w-5 h-5 border-2 border-dg-bg border-t-transparent rounded-full animate-spin" />
-                  Capturando embeddings reales...
-                </button>
-                <button 
-                  onClick={handleCancelScanning}
-                  className="btn-secondary w-full py-4"
-                >
-                  Cancelar
-                </button>
+              {/* Indicador de estado sutil */}
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-dg-accent animate-pulse shadow-[0_0_8px_rgba(163,255,0,0.6)]" />
+                <span className="text-[11px] text-dg-text-muted font-medium tracking-wide">
+                  Paso {Math.min(anguloActual + 1, ANGULOS.length)} de {ANGULOS.length} — Siga las instrucciones en pantalla
+                </span>
               </div>
+
+              {/* Botón cancelar */}
+              <button 
+                onClick={handleCancelScanning}
+                className="btn-secondary w-full py-4"
+              >
+                Cancelar Registro
+              </button>
             </div>
           </>
         )}

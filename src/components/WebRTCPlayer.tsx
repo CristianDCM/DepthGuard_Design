@@ -62,6 +62,8 @@ interface WebRTCPlayerProps {
   cameraId: CameraId;
   edgeOnline: boolean;
   onFallback: () => void;
+  /** Oculta overlays (EN VIVO, WEBRTC P2P, FPS). Ideal para registro. */
+  minimal?: boolean;
 }
 
 // ──────────────────────────────────────────────
@@ -72,6 +74,7 @@ export default function WebRTCPlayer({
   cameraId,
   edgeOnline,
   onFallback,
+  minimal = false,
 }: WebRTCPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [status, setStatus] = useState<ConnectionStatus>("iniciando");
@@ -281,8 +284,8 @@ export default function WebRTCPlayer({
         </div>
       )}
 
-      {/* Header del preview — solo visible cuando hay video */}
-      {status === "conectado" && (
+      {/* Header del preview — solo visible cuando hay video y NO es minimal */}
+      {status === "conectado" && !minimal && (
         <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 py-2 bg-gradient-to-b from-black/70 to-transparent">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_6px_#ef4444]" />
@@ -299,8 +302,8 @@ export default function WebRTCPlayer({
         </div>
       )}
 
-      {/* Footer sutil */}
-      {status === "conectado" && (
+      {/* Footer sutil — solo cuando NO es minimal */}
+      {status === "conectado" && !minimal && (
         <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5 bg-gradient-to-t from-black/60 to-transparent">
           <span className="text-[9px] text-white/40 font-medium">
             Streaming en tiempo real · ~30 FPS
