@@ -471,12 +471,18 @@ export default function RegisterStart() {
 
               <div className="cyber-card p-6 text-center mb-8 relative overflow-hidden">
                 {activeCameraId && !webrtcFailed ? (
-                  <div className="w-full aspect-video bg-black rounded-xl overflow-hidden relative mb-4 border border-dg-border shadow-[0_0_20px_rgba(163,255,0,0.1)]">
-                    <WebRTCPlayer 
-                      cameraId={activeCameraId} 
-                      edgeOnline={true} 
-                      onFallback={() => setWebrtcFailed(true)} 
-                    />
+                  <div className="w-40 h-40 md:w-48 md:h-48 mx-auto rounded-full overflow-hidden relative mb-6 border-2 border-dg-accent shadow-[0_0_30px_rgba(163,255,0,0.2)] flex items-center justify-center bg-black">
+                    <div className="min-w-[180%] min-h-[180%] flex items-center justify-center">
+                      <div className="w-full">
+                        <WebRTCPlayer 
+                          cameraId={activeCameraId} 
+                          edgeOnline={true} 
+                          onFallback={() => setWebrtcFailed(true)} 
+                        />
+                      </div>
+                    </div>
+                    {/* Anillo de escaneo animado */}
+                    <div className="absolute inset-0 rounded-full border border-dg-accent/50 animate-ping opacity-20 pointer-events-none" />
                   </div>
                 ) : (
                   <div className="mb-4 flex justify-center">
