@@ -380,9 +380,14 @@ function CameraPanel({
           </div>
           {/* Timestamp */}
           {ultimoEvento && (
-            <div className="mt-3 flex items-center justify-between text-[10px] text-dg-text-muted font-medium border-t border-dg-border/50 pt-2">
-              <span>{formatTime(ultimoEvento.timestamp)}</span>
-              <span>{formatRelativeTime(ultimoEvento.timestamp)}</span>
+            <div className="mt-3 text-[10px] text-dg-text-muted font-medium border-t border-dg-border/50 pt-2 text-right">
+              {new Date(ultimoEvento.timestamp).toLocaleString("es", {
+                day: "2-digit",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true
+              })}
             </div>
           )}
         </div>
