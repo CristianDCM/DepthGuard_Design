@@ -14,6 +14,7 @@ import {
   WifiOff,
 } from "lucide-react";
 import { motion } from "motion/react";
+import WebRTCPlayer from "../components/WebRTCPlayer";
 import {
   crearUsuario,
   insertarComandoRegistro,
@@ -26,6 +27,7 @@ import {
   type Usuario,
   type ComandoEdge,
   type EstadoComando,
+  type CameraId,
 } from "../lib/supabase";
 
 // ============================================
@@ -55,6 +57,10 @@ export default function RegisterStart() {
   // Resultado
   const [usuarioCreado, setUsuarioCreado] = useState<Usuario | null>(null);
   const [comandoId, setComandoId] = useState<string | null>(null);
+
+  // WebRTC state
+  const [activeCameraId, setActiveCameraId] = useState<CameraId | null>(null);
+  const [webrtcFailed, setWebrtcFailed] = useState(false);
 
   // Cleanup ref for Realtime subscription
   const cleanupRef = useRef<(() => void) | null>(null);
@@ -89,6 +95,12 @@ export default function RegisterStart() {
         setError("El nodo edge no está activo. Encienda el sistema DepthGuard antes de registrar.");
         setIsSubmitting(false);
         return;
+      }
+
+      // Guardar cámara activa para el WebRTC
+      const camara = estado.camaras?.find(c => c.activa) || estado.camaras?.[0];
+      if (camara) {
+        setActiveCameraId(camara.id as CameraId);
       }
 
       // Verificar que no exista un usuario con el mismo nombre
@@ -457,9 +469,20 @@ export default function RegisterStart() {
               </div>
 
               <div className="cyber-card p-6 text-center mb-8 relative overflow-hidden">
-                <div className="mb-4 flex justify-center">
-                  <RotateCw className="w-12 h-12 text-dg-accent animate-spin-slow" />
-                </div>
+                {activeCameraId && !webrtcFailed ? (
+                  <div className="w-full aspect-video bg-black rounded-xl overflow-hidden relative mb-4 border border-dg-border shadow-[0_0_20px_rgba(163,255,0,0.1)]">
+                    <WebRTCPlayer 
+                      cameraId={activeCameraId} 
+                      edgeOnline={true} 
+                      onFallback={() => setWebrtcFailed(true)} 
+                    />
+                  </div>
+                ) : (
+                  <div className="mb-4 flex justify-center">
+                    <RotateCw className="w-12 h-12 text-dg-accent animate-spin-slow" />
+                  </div>
+                )}
+                
                 <h3 className="text-white font-bold text-lg mb-1">
                   {anguloActual < ANGULOS.length ? ANGULOS[anguloActual]?.instruccion : "Finalizando..."}
                 </h3>
