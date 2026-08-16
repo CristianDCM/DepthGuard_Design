@@ -87,6 +87,7 @@ export default function RegisterStart() {
 
     setError("");
     setIsSubmitting(true);
+    setWebrtcFailed(false);
 
     try {
       // Verificar que el edge esté online
