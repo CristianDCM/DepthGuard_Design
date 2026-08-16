@@ -331,18 +331,14 @@ export default function RegisterStart() {
                 </div>
               </div>
 
-              <div className="space-y-6 pt-2">
-                <div className="flex justify-between items-center max-w-sm mx-auto">
+              <div className="space-y-4 pt-4">
+                <div className="flex gap-2 w-full max-w-xs mx-auto">
                   {ANGULOS.map((a) => (
-                    <div key={a.step} className="flex flex-col items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-dg-card border border-dg-border flex items-center justify-center text-xs text-dg-text-muted font-bold">
-                        {a.step}
-                      </div>
-                    </div>
+                    <div key={a.step} className="h-1 flex-1 rounded-full bg-dg-border/40" />
                   ))}
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-dg-text-muted font-medium">Paso 0 de 5</p>
+                  <p className="text-[10px] text-dg-text-muted uppercase tracking-widest font-bold">5 Fases de Captura</p>
                 </div>
               </div>
 
@@ -439,34 +435,28 @@ export default function RegisterStart() {
             </div>
 
             <div className="space-y-6 pb-10">
-              <div className="flex justify-between items-center relative px-2">
-                {/* Progress line background */}
-                <div className="absolute top-[18px] -translate-y-1/2 left-8 right-8 h-[2px] bg-dg-border z-0" />
-                {/* Progress line filled */}
-                <div
-                  className="absolute top-[18px] -translate-y-1/2 left-8 h-[2px] bg-dg-accent z-0 transition-all duration-500"
-                  style={{ width: `${(anguloActual / (ANGULOS.length)) * (100 - 16)}%` }}
-                />
-                
-                {ANGULOS.map((a, i) => (
-                  <div key={a.step}>
-                    <StepIndicator
-                      step={a.step}
-                      label={a.label}
-                      completed={i < anguloActual}
-                      active={i === anguloActual}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              <div className="text-center mt-6 flex flex-col gap-1">
-                <p className="text-dg-text-muted text-[10px] uppercase font-bold tracking-widest">
-                  Paso {Math.min(anguloActual + 1, ANGULOS.length)} de {ANGULOS.length}
-                </p>
-                <p className="text-dg-text-muted/50 text-[9px] font-medium">
-                  Captura en progreso — datos reales del pipeline IA
-                </p>
+              <div className="space-y-3 pt-2">
+                <div className="flex gap-2 w-full max-w-sm mx-auto px-4">
+                  {ANGULOS.map((a, i) => {
+                    const isCompleted = i < anguloActual;
+                    const isActive = i === anguloActual;
+                    return (
+                      <div key={a.step} className="relative flex-1 h-1.5 rounded-full overflow-hidden bg-dg-border/30">
+                        {isCompleted && (
+                          <div className="absolute inset-0 bg-dg-accent shadow-[0_0_10px_rgba(163,255,0,0.8)]" />
+                        )}
+                        {isActive && (
+                          <div className="absolute inset-0 bg-dg-accent animate-pulse opacity-80 shadow-[0_0_8px_rgba(163,255,0,0.5)]" />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="text-center h-4">
+                  <p className="text-[11px] uppercase font-bold tracking-widest text-dg-accent animate-pulse drop-shadow-[0_0_8px_rgba(163,255,0,0.5)]">
+                    Fase {Math.min(anguloActual + 1, ANGULOS.length)}: {ANGULOS[anguloActual]?.label || "Finalizando"}
+                  </p>
+                </div>
               </div>
 
               <div className="cyber-card p-6 text-center mb-8 relative overflow-hidden">
@@ -625,27 +615,6 @@ export default function RegisterStart() {
           </div>
         )}
       </motion.div>
-    </div>
-  );
-}
-
-// ============================================
-// Sub-componente
-// ============================================
-
-function StepIndicator({ step, label, completed, active }: { step: number, label: string, completed?: boolean, active?: boolean }) {
-  return (
-    <div className="flex flex-col items-center relative z-10 gap-2">
-      <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-        completed ? "bg-dg-accent text-dg-bg" : 
-        active ? "bg-dg-bg border-2 border-dg-accent text-dg-accent shadow-[0_0_15px_rgba(163,255,0,0.2)]" : 
-        "bg-dg-card border border-dg-border text-dg-text-muted"
-      }`}>
-        {completed ? <Check className="w-5 h-5" /> : <span className="text-sm font-bold">{step}</span>}
-      </div>
-      <span className={`text-[8px] font-bold uppercase tracking-tighter ${active || completed ? "text-dg-accent" : "text-dg-text-muted/60"}`}>
-        {label}
-      </span>
     </div>
   );
 }
