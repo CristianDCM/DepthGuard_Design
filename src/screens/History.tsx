@@ -122,14 +122,14 @@ export default function History() {
           
           <div className="px-4 pb-4 space-y-3">
             <div className="flex flex-col md:flex-row gap-2 md:items-center">
-              <div className="relative flex-1">
+              <div className="relative flex-1 md:max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-dg-text-muted w-4 h-4" />
                 <input 
                   type="text" 
                   placeholder="Buscar accesos..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-dg-card border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-accent/50 placeholder:text-dg-text-muted"
+                  className="w-full bg-dg-card border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-accent/50 placeholder:text-dg-text-muted text-white"
                 />
               </div>
               <div className="flex items-center gap-1.5">
