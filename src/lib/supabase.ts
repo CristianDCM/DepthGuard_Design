@@ -265,7 +265,7 @@ export async function getUsuarios() {
   const { data, error } = await supabase
     .from("usuarios")
     .select("*")
-    .order("nombre");
+    .order("fecha_registro", { ascending: false });
 
   if (error) throw error;
   return data as Usuario[];
