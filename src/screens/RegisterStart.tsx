@@ -12,6 +12,8 @@ import {
   ArrowLeft,
   AlertTriangle,
   WifiOff,
+  ShieldCheck,
+  FileCheck2,
 } from "lucide-react";
 import { motion } from "motion/react";
 import WebRTCPlayer from "../components/WebRTCPlayer";
@@ -44,11 +46,12 @@ const ANGULOS = [
 
 export default function RegisterStart() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<"form" | "waiting_edge" | "scanning" | "success" | "error">("form");
+  const [step, setStep] = useState<"form" | "consent" | "waiting_edge" | "scanning" | "success" | "error">("form");
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
 
   // Scanning state — driven by real edge progress
   const [anguloActual, setAnguloActual] = useState(0);
@@ -79,7 +82,8 @@ export default function RegisterStart() {
   // Lógica del formulario
   // ============================================
 
-  const handleStartRegistration = async () => {
+  // Paso 1: Validar formulario y avanzar al consentimiento
+  const handleGoToConsent = async () => {
     if (!name.trim()) {
       setError("El nombre completo es obligatorio");
       return;
@@ -87,10 +91,9 @@ export default function RegisterStart() {
 
     setError("");
     setIsSubmitting(true);
-    setWebrtcFailed(false);
 
     try {
-      // Verificar que el edge esté online
+      // Pre-validaciones antes de mostrar consentimiento
       const estado = await getEstadoSistema();
       if (!isEdgeOnline(estado.ultimo_heartbeat)) {
         setError("El nodo edge no está activo. Encienda el sistema DepthGuard antes de registrar.");
@@ -98,13 +101,11 @@ export default function RegisterStart() {
         return;
       }
 
-      // Guardar cámara activa para el WebRTC
       const camara = estado.camaras?.find(c => c.activa) || estado.camaras?.[0];
       if (camara) {
         setActiveCameraId(camara.camera_id as CameraId);
       }
 
-      // Verificar que no exista un usuario con el mismo nombre
       const usuariosExistentes = await getUsuarios();
       const duplicado = usuariosExistentes.find(
         (u) => u.nombre.toLowerCase().trim() === name.trim().toLowerCase()
@@ -115,7 +116,26 @@ export default function RegisterStart() {
         return;
       }
 
-      // 1. Crear usuario en Supabase (con 0 ángulos)
+      // Todo validado — pasar al consentimiento
+      setConsentChecked(false);
+      setStep("consent");
+    } catch (err: any) {
+      console.error("Error validando:", err);
+      setError(err.message ?? "Error de validación. Intente de nuevo.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Paso 2: Aceptar consentimiento y crear usuario + enviar comando
+  const handleAcceptConsent = async () => {
+    if (!consentChecked) return;
+
+    setIsSubmitting(true);
+    setWebrtcFailed(false);
+
+    try {
+      // 1. Crear usuario en Supabase con registro de consentimiento
       const nuevoUsuario = await crearUsuario(name.trim(), notes.trim());
       setUsuarioCreado(nuevoUsuario);
 
@@ -133,6 +153,7 @@ export default function RegisterStart() {
     } catch (err: any) {
       console.error("Error iniciando registro:", err);
       setError(err.message ?? "Error al crear el usuario. Intente de nuevo.");
+      setStep("form");
     } finally {
       setIsSubmitting(false);
     }
@@ -344,18 +365,18 @@ export default function RegisterStart() {
 
               <div className="flex flex-col gap-3 pt-4">
                 <button 
-                  onClick={handleStartRegistration}
+                  onClick={handleGoToConsent}
                   disabled={isSubmitting}
                   className="btn-primary w-full py-4 flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>
                       <div className="w-5 h-5 border-2 border-dg-bg border-t-transparent rounded-full animate-spin" />
-                      Creando usuario...
+                      Validando...
                     </>
                   ) : (
                     <>
-                      <Video className="w-5 h-5" /> Iniciar Registro
+                      <Video className="w-5 h-5" /> Continuar
                     </>
                   )}
                 </button>
@@ -365,6 +386,118 @@ export default function RegisterStart() {
                   className="btn-secondary w-full py-4 disabled:opacity-50"
                 >
                   Cancelar
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ============ CONSENTIMIENTO ============ */}
+        {step === "consent" && (
+          <>
+            <div className="flex items-center gap-4 mb-6 shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-dg-accent/10 flex items-center justify-center">
+                <ShieldCheck className="w-6 h-6 text-dg-accent" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white tracking-tight font-headline">Autorización Biométrica</h2>
+                <p className="text-[10px] text-dg-text-muted font-medium mt-0.5">
+                  {name.trim()} · Paso obligatorio
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-5 pb-10">
+              {/* Texto legal */}
+              <div className="bg-dg-card border border-dg-border rounded-2xl p-5 space-y-4">
+                <div className="flex items-center gap-3 mb-1">
+                  <FileCheck2 className="w-5 h-5 text-dg-accent shrink-0" />
+                  <h3 className="text-sm font-bold text-white">Consentimiento para Tratamiento de Datos Biométricos</h3>
+                </div>
+
+                <div className="text-xs text-dg-text-muted leading-relaxed space-y-3">
+                  <p>
+                    Autorizo de manera <span className="text-white font-medium">libre, voluntaria, previa, expresa e informada</span> la 
+                    captura, procesamiento y almacenamiento de mi geometría facial con el fin exclusivo de 
+                    habilitar el control de acceso biométrico mediante el sistema <span className="text-white font-medium">DepthGuard</span>.
+                  </p>
+
+                  <p className="font-semibold text-dg-text-muted/90">Se me ha informado que:</p>
+
+                  <ul className="space-y-2 pl-1">
+                    <li className="flex gap-2">
+                      <span className="text-dg-accent font-bold">1.</span>
+                      <span><span className="text-white font-medium">Dato sensible:</span> La biometría facial constituye un dato personal sensible conforme a la Ley 1581 de 2012. Su entrega es de carácter estrictamente voluntario.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-dg-accent font-bold">2.</span>
+                      <span><span className="text-white font-medium">Finalidad exclusiva:</span> Mis datos biométricos serán utilizados únicamente para la verificación de identidad en puntos de acceso controlados por este sistema.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-dg-accent font-bold">3.</span>
+                      <span><span className="text-white font-medium">Seguridad:</span> Mi rostro no será almacenado como fotografía. Será transformado de manera irreversible en vectores matemáticos (embeddings), garantizando que no pueda reconstruirse mi imagen facial a partir de los datos almacenados.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-dg-accent font-bold">4.</span>
+                      <span><span className="text-white font-medium">Derechos:</span> Como titular, tengo derecho a conocer, actualizar, rectificar y solicitar la supresión de mis datos biométricos en cualquier momento ante el responsable del tratamiento.</span>
+                    </li>
+                  </ul>
+
+                  <p className="pt-1 border-t border-dg-border/50">
+                    Al aceptar y participar activamente en el escaneo facial (girando mi rostro en las direcciones solicitadas), 
+                    <span className="text-white font-medium"> reafirmo de manera inequívoca mi voluntad y consentimiento</span>.
+                  </p>
+                </div>
+              </div>
+
+              {/* Checkbox */}
+              <label className="flex items-start gap-3 cursor-pointer group p-3 rounded-xl border border-dg-border/50 hover:border-dg-accent/30 transition-colors">
+                <div className="relative mt-0.5 shrink-0">
+                  <input 
+                    type="checkbox" 
+                    checked={consentChecked}
+                    onChange={(e) => setConsentChecked(e.target.checked)}
+                    className="sr-only"
+                  />
+                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                    consentChecked 
+                      ? 'bg-dg-accent border-dg-accent' 
+                      : 'border-dg-border group-hover:border-dg-text-muted'
+                  }`}>
+                    {consentChecked && <Check className="w-3.5 h-3.5 text-dg-bg" strokeWidth={3} />}
+                  </div>
+                </div>
+                <span className="text-xs text-dg-text-muted leading-relaxed">
+                  He leído y comprendido la información anterior. 
+                  <span className="text-white font-medium"> Otorgo mi consentimiento expreso e informado</span> para 
+                  el tratamiento de mis datos biométricos faciales.
+                </span>
+              </label>
+
+              {/* Botones */}
+              <div className="flex flex-col gap-3 pt-2">
+                <button 
+                  onClick={handleAcceptConsent}
+                  disabled={!consentChecked || isSubmitting}
+                  className="btn-primary w-full py-4 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-dg-bg border-t-transparent rounded-full animate-spin" />
+                      Iniciando registro...
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="w-5 h-5" /> Aceptar y Comenzar Escaneo
+                    </>
+                  )}
+                </button>
+                <button 
+                  onClick={() => { setStep("form"); setConsentChecked(false); }}
+                  disabled={isSubmitting}
+                  className="btn-secondary w-full py-4 disabled:opacity-50"
+                >
+                  Volver
                 </button>
               </div>
             </div>
