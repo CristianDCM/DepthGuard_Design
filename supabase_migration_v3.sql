@@ -45,10 +45,11 @@ CREATE TABLE public.estado_sistema (
 CREATE TABLE public.suscripciones_push (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   token_fcm text NOT NULL UNIQUE,
-  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
   dispositivo text,
   created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT suscripciones_push_pkey PRIMARY KEY (id)
+  user_id uuid,
+  CONSTRAINT suscripciones_push_pkey PRIMARY KEY (id),
+  CONSTRAINT suscripciones_push_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
 CREATE TABLE public.comandos_edge (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -62,4 +63,9 @@ CREATE TABLE public.comandos_edge (
   updated_at timestamp with time zone DEFAULT now(),
   CONSTRAINT comandos_edge_pkey PRIMARY KEY (id),
   CONSTRAINT comandos_edge_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.usuarios(id)
+);
+CREATE TABLE public.notificacion_cooldown (
+  clave text NOT NULL,
+  ultimo_envio timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT notificacion_cooldown_pkey PRIMARY KEY (clave)
 );
