@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, AlertTriangle, HelpCircle, Video, History, Users, Home, Server, FilterX } from "lucide-react";
+import { CheckCircle, AlertTriangle, HelpCircle, Video, History, Users, Home, Server, FilterX, CalendarDays } from "lucide-react";
 import { motion } from "motion/react";
 import Navigation from "../components/Navigation";
 import { supabase, getEstadisticasHoy, getUltimosEventos, getEstadoSistema, isEdgeOnline, isCamaraActiva, getTendenciasSemanales, type Evento, type EstadoSistema } from "../lib/supabase";
@@ -14,6 +14,7 @@ export default function Dashboard() {
   const [estado, setEstado] = useState<EstadoSistema | null>(null);
   const [rawTendencias, setRawTendencias] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [periodoSeleccionado, setPeriodoSeleccionado] = useState<7 | 14 | 30>(7);
 
   // Estados para filtros cruzados
   const [filtroDia, setFiltroDia] = useState<string | null>(null);
@@ -28,7 +29,7 @@ export default function Dashboard() {
         const [estadisticas, ultimos, tendenciasData] = await Promise.all([
           getEstadisticasHoy(),
           getUltimosEventos(6),
-          getTendenciasSemanales()
+          getTendenciasSemanales(periodoSeleccionado)
         ]);
         setStats(estadisticas);
         setEvents(ultimos);
@@ -49,9 +50,17 @@ export default function Dashboard() {
       }
     }
     cargarDatos();
-  }, []);
+  }, [periodoSeleccionado]);
 
-  // Motor de Agrupación con Filtros Cruzados
+  // Al cambiar período, limpiar filtros cruzados
+  useEffect(() => {
+    setFiltroDia(null);
+    setFiltroMotivo(null);
+    setFiltroHora(null);
+    setOrigenFiltro(null);
+  }, [periodoSeleccionado]);
+
+  // Motor de Agrupación con Filtros Cruzados (soporta 7/14/30 días)
   const { tendencias, heatmapMatrix, motivosFraude, hasFilters, filteredKPIs } = useMemo(() => {
     const hasFilters = filtroDia !== null || filtroMotivo !== null || filtroHora !== null;
     if (rawTendencias.length === 0) return { tendencias: [], heatmapMatrix: { matrix: [], max: 0 }, motivosFraude: [], hasFilters, filteredKPIs: null };
@@ -63,41 +72,66 @@ export default function Dashboard() {
     const diasMap: Record<string, { accesos: number, fraudes: number, desconocidos: number }> = {};
     const motivosCount: Record<string, number> = {};
     const nombresDias = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-    const matrixData: { dia: string; horas: number[] }[] = [];
-    
-    for (let i = 6; i >= 0; i--) {
+    const mesesCortos = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+
+    // Heatmap: siempre 7 filas (día de la semana), agrega cuando período > 7d
+    const matrixData: { dia: string; horas: number[] }[] = nombresDias.map(d => ({ dia: d, horas: new Array(24).fill(0) }));
+
+    // AreaChart: generar etiquetas dinámicas según período
+    const diasOrdenados: string[] = [];
+    const fechaToLabel = new Map<string, string>(); // "2026-08-21" -> label
+
+    for (let i = periodoSeleccionado - 1; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
-        const diaName = nombresDias[d.getDay()];
-        diasMap[diaName] = { accesos: 0, fraudes: 0, desconocidos: 0 };
-        matrixData.push({ dia: diaName, horas: new Array(24).fill(0) });
+        const isoKey = d.toISOString().split('T')[0];
+        let label: string;
+        if (periodoSeleccionado <= 7) {
+            label = nombresDias[d.getDay()];
+        } else if (periodoSeleccionado <= 14) {
+            label = `${nombresDias[d.getDay()]} ${d.getDate()}`;
+        } else {
+            label = `${d.getDate()} ${mesesCortos[d.getMonth()]}`;
+        }
+        diasMap[label] = { accesos: 0, fraudes: 0, desconocidos: 0 };
+        diasOrdenados.push(label);
+        fechaToLabel.set(isoKey, label);
     }
 
     rawTendencias.forEach(ev => {
         const date = new Date(ev.timestamp);
         const diaName = nombresDias[date.getDay()];
+        const isoKey = date.toISOString().split('T')[0];
+        const areaLabel = fechaToLabel.get(isoKey) ?? diaName;
         const hora = date.getHours();
         const motivo = ev.motivo || "Desconocido";
 
-        const pasaFiltroDia = filtroDia ? diaName === filtroDia : true;
+        // Filtro por día: si viene de 'tendencia' compara con label del AreaChart, si de 'heatmap' compara con día de la semana
+        const pasaFiltroDia = filtroDia
+          ? (origenFiltro === 'heatmap' ? diaName === filtroDia : areaLabel === filtroDia)
+          : true;
         const pasaFiltroMotivo = filtroMotivo ? (ev.estado === "FRAUDE" && motivo === filtroMotivo) : true;
         const pasaFiltroHora = filtroHora !== null ? hora === filtroHora : true;
 
-        if (pasaFiltroMotivo && pasaFiltroHora && diasMap[diaName]) {
-            if (ev.estado === "ACCESO_PERMITIDO") diasMap[diaName].accesos++;
-            if (ev.estado === "FRAUDE") diasMap[diaName].fraudes++;
-            if (ev.estado === "DESCONOCIDO") diasMap[diaName].desconocidos++;
+        // AreaChart: agrupa por label (afectado por filtro motivo y hora, no por filtroDia)
+        if (pasaFiltroMotivo && pasaFiltroHora && diasMap[areaLabel]) {
+            if (ev.estado === "ACCESO_PERMITIDO") diasMap[areaLabel].accesos++;
+            if (ev.estado === "FRAUDE") diasMap[areaLabel].fraudes++;
+            if (ev.estado === "DESCONOCIDO") diasMap[areaLabel].desconocidos++;
         }
 
+        // Heatmap: agrupa por día de la semana (afectado por filtroDia y motivo)
         if (pasaFiltroDia && pasaFiltroMotivo) {
             const diaRow = matrixData.find(d => d.dia === diaName);
             if (diaRow) diaRow.horas[hora]++;
         }
 
+        // Donut: filtra por día y hora
         if (pasaFiltroDia && pasaFiltroHora && ev.estado === "FRAUDE") {
             motivosCount[motivo] = (motivosCount[motivo] || 0) + 1;
         }
 
+        // KPIs filtrados
         if (hasFilters && pasaFiltroDia && pasaFiltroHora && pasaFiltroMotivo) {
             if (ev.estado === "ACCESO_PERMITIDO") sumAccesos++;
             if (ev.estado === "FRAUDE") sumFraudes++;
@@ -120,13 +154,13 @@ export default function Dashboard() {
     })).sort((a, b) => b.value - a.value);
 
     return {
-       tendencias: Object.keys(diasMap).map(k => ({ date: k, ...diasMap[k] })),
+       tendencias: diasOrdenados.map(k => ({ date: k, ...diasMap[k] })),
        heatmapMatrix: { matrix: matrixData, max: maxHeat },
        motivosFraude: motivosArr,
        hasFilters,
        filteredKPIs: hasFilters ? { accesos: sumAccesos, fraudes: sumFraudes, desconocidos: sumDesconocidos } : null
     };
-  }, [rawTendencias, filtroDia, filtroMotivo, filtroHora]);
+  }, [rawTendencias, filtroDia, filtroMotivo, filtroHora, periodoSeleccionado, origenFiltro]);
 
   const limpiarFiltros = () => {
     setFiltroDia(null);
@@ -248,13 +282,34 @@ export default function Dashboard() {
               ))}
             </div>
 
+            {/* Selector de Período */}
+            <div className="flex items-center gap-2">
+              <CalendarDays className="w-4 h-4 text-dg-text-muted" />
+              <span className="text-[10px] uppercase tracking-widest text-dg-text-muted font-bold">Período</span>
+              <div className="flex gap-1 ml-1">
+                {([7, 14, 30] as const).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPeriodoSeleccionado(p)}
+                    className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md transition-all ${
+                      periodoSeleccionado === p
+                        ? 'bg-dg-accent text-black'
+                        : 'bg-white/5 text-dg-text-muted hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    {p}d
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Gráficos Semanales */}
+              {/* Gráficos Analíticos */}
               <section className="space-y-4 order-2 lg:order-1 flex flex-col">
 
                 <div className="cyber-card p-4">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-muted">Tendencia Semanal {filtroDia && <span className="text-dg-accent ml-2">(Filtrado: {filtroDia})</span>}</h2>
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-muted">Tendencia {periodoSeleccionado === 7 ? 'Semanal' : periodoSeleccionado === 14 ? '14 Días' : 'Mensual'} {filtroDia && <span className="text-dg-accent ml-2">(Filtrado: {filtroDia})</span>}</h2>
                     <button onClick={() => { setFiltroDia(null); setOrigenFiltro(null); }} className={`text-dg-accent hover:text-white transition-colors p-1 bg-dg-accent/10 rounded-md hover:bg-dg-error hover:bg-opacity-20 hover:text-dg-error ${origenFiltro === 'tendencia' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} title="Limpiar filtro">
                       <FilterX className="w-3.5 h-3.5" />
                     </button>

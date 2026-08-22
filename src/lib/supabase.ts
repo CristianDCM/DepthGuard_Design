@@ -231,17 +231,19 @@ export async function getHistorialPaginado(page: number = 0, limit: number = 50,
 }
 
 /** Obtener eventos de los últimos 7 días para gráficas de tendencias (Fase 1/4) */
-export async function getTendenciasSemanales() {
-  const hace7Dias = new Date();
-  hace7Dias.setDate(hace7Dias.getDate() - 6); // 7 días contando hoy
-  hace7Dias.setHours(0, 0, 0, 0);
+export async function getTendenciasSemanales(dias: number = 7) {
+  const desde = new Date();
+  desde.setDate(desde.getDate() - (dias - 1)); // dias contando hoy
+  desde.setHours(0, 0, 0, 0);
+
+  const limite = Math.ceil((dias / 7) * 1500); // Escalar límite proporcionalmente
 
   const { data, error } = await supabase
     .from("historial")
     .select("estado, timestamp, motivo")
-    .gte("timestamp", hace7Dias.toISOString())
-    .order("timestamp", { ascending: false }) // Descendente para no truncar los de hoy si hay más de 1500
-    .limit(1500); // Límite seguro para evitar saturación
+    .gte("timestamp", desde.toISOString())
+    .order("timestamp", { ascending: false }) // Descendente para no truncar los de hoy
+    .limit(limite);
 
   if (error) throw error;
   // Volvemos a ordenar ascendente para procesar en orden cronológico en el Dashboard
