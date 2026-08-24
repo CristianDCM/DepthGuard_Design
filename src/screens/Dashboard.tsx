@@ -372,21 +372,55 @@ export default function Dashboard() {
                   )}
                 </div>
 
-                <div className="cyber-card p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-muted">Tendencia {periodoLabel} {filtroDia && <span className="text-dg-accent ml-2">(Filtrado: {filtroDia})</span>}</h2>
-                    <button onClick={() => { setFiltroDia(null); setOrigenFiltro(null); }} className={`text-dg-accent hover:text-white transition-colors p-1 bg-dg-accent/10 rounded-md hover:bg-dg-error hover:bg-opacity-20 hover:text-dg-error ${origenFiltro === 'tendencia' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} title="Limpiar filtro">
-                      <FilterX className="w-3.5 h-3.5" />
+                {/* Chips de filtros activos */}
+                {(filtroDia || filtroHora !== null || filtroMotivo) && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <FilterX className="w-3.5 h-3.5 text-dg-text-muted" />
+                    <span className="text-[10px] uppercase tracking-widest text-dg-text-muted font-bold">Filtros</span>
+                    {filtroDia && (
+                      <button
+                        onClick={() => { setFiltroDia(null); setOrigenFiltro(null); }}
+                        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-dg-accent/15 text-dg-accent border border-dg-accent/30 hover:bg-dg-error/20 hover:text-dg-error hover:border-dg-error/30 transition-all"
+                      >
+                        Día: {filtroDia} <span className="text-[8px] opacity-70">✕</span>
+                      </button>
+                    )}
+                    {filtroHora !== null && (
+                      <button
+                        onClick={() => { setFiltroHora(null); if (!filtroDia) setOrigenFiltro(null); }}
+                        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-dg-accent/15 text-dg-accent border border-dg-accent/30 hover:bg-dg-error/20 hover:text-dg-error hover:border-dg-error/30 transition-all"
+                      >
+                        Hora: {filtroHora}:00 <span className="text-[8px] opacity-70">✕</span>
+                      </button>
+                    )}
+                    {filtroMotivo && (
+                      <button
+                        onClick={() => { setFiltroMotivo(null); setOrigenFiltro(null); }}
+                        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-dg-accent/15 text-dg-accent border border-dg-accent/30 hover:bg-dg-error/20 hover:text-dg-error hover:border-dg-error/30 transition-all"
+                      >
+                        {filtroMotivo} <span className="text-[8px] opacity-70">✕</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={() => { setFiltroDia(null); setFiltroHora(null); setFiltroMotivo(null); setOrigenFiltro(null); }}
+                      className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-white/5 text-dg-text-muted hover:bg-dg-error/20 hover:text-dg-error transition-all"
+                    >
+                      Limpiar todo
                     </button>
+                  </div>
+                )}
+
+                <div className="cyber-card p-4">
+                  <div className="mb-4">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-muted">Tendencia {periodoLabel}</h2>
                   </div>
                   <div className="h-48 w-full">
                     <ResponsiveContainer width="100%" height="100%" className="focus:outline-none">
                       <AreaChart style={{ outline: 'none' }} data={tendencias} margin={{ top: 5, right: 0, left: -20, bottom: 0 }} onClick={(e: any) => {
-                        if (origenFiltro && origenFiltro !== 'tendencia') return;
                         if (e && e.activeLabel) {
                           setFiltroDia(prev => {
                             const next = prev === e.activeLabel ? null : e.activeLabel;
-                            setOrigenFiltro(next ? 'tendencia' : null);
+                            setOrigenFiltro(next ? 'tendencia' : (filtroHora !== null || filtroMotivo) ? origenFiltro : null);
                             return next;
                           });
                         }
@@ -417,11 +451,8 @@ export default function Dashboard() {
                 </div>
 
                 <div className="cyber-card p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-muted">Patrón de Actividad ({periodoLabel}) {filtroHora !== null && <span className="text-dg-accent ml-2">(Filtrado: {filtroHora}:00)</span>}</h2>
-                    <button onClick={() => { setFiltroHora(null); setFiltroDia(null); setOrigenFiltro(null); }} className={`text-dg-accent hover:text-white transition-colors p-1 bg-dg-accent/10 rounded-md hover:bg-dg-error hover:bg-opacity-20 hover:text-dg-error ${origenFiltro === 'heatmap' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} title="Limpiar filtro">
-                      <FilterX className="w-3.5 h-3.5" />
-                    </button>
+                  <div className="mb-4">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-muted">Patrón de Actividad ({periodoLabel})</h2>
                   </div>
                   <div className="w-full overflow-x-auto no-scrollbar pb-2 relative">
                     {heatmapMatrix.matrix.length === 0 ? (
@@ -436,13 +467,10 @@ export default function Dashboard() {
                             return (
                               <div
                                 key={i}
-                                className={`flex-1 text-center cursor-pointer transition-all ${filtroHora === i ? 'opacity-100 font-bold text-white bg-white/10 rounded' : 'opacity-60 hover:opacity-100'} ${origenFiltro && origenFiltro !== 'heatmap' ? 'pointer-events-none opacity-30' : ''}`}
+                                className={`flex-1 text-center cursor-pointer transition-all ${filtroHora === i ? 'opacity-100 font-bold text-white bg-white/10 rounded' : 'opacity-60 hover:opacity-100'}`}
                                 onClick={() => {
-                                  if (origenFiltro && origenFiltro !== 'heatmap') return;
                                   setFiltroHora(prev => {
                                     const next = prev === i ? null : i;
-                                    if (!next && !filtroDia) setOrigenFiltro(null);
-                                    else setOrigenFiltro('heatmap');
                                     return next;
                                   });
                                 }}
@@ -457,13 +485,10 @@ export default function Dashboard() {
                         {heatmapMatrix.matrix.map((row) => (
                           <div key={row.dia} className="flex gap-1 items-center">
                             <span
-                              className={`w-8 text-[10px] text-dg-text-muted font-bold text-right pr-1.5 uppercase cursor-pointer hover:text-white transition-colors ${filtroDia === row.dia ? 'text-white' : ''} ${origenFiltro && origenFiltro !== 'heatmap' ? 'pointer-events-none opacity-30' : ''}`}
+                              className={`w-8 text-[10px] text-dg-text-muted font-bold text-right pr-1.5 uppercase cursor-pointer hover:text-white transition-colors ${filtroDia === row.dia ? 'text-white' : ''}`}
                               onClick={() => {
-                                if (origenFiltro && origenFiltro !== 'heatmap') return;
                                 setFiltroDia(prev => {
                                   const next = prev === row.dia ? null : row.dia;
-                                  if (!next && !filtroHora) setOrigenFiltro(null);
-                                  else setOrigenFiltro('heatmap');
                                   return next;
                                 });
                               }}
@@ -479,7 +504,6 @@ export default function Dashboard() {
                                   <div
                                     key={j}
                                     onClick={() => {
-                                      if (origenFiltro && origenFiltro !== 'heatmap') return;
                                       let nextDia = row.dia;
                                       let nextHora = j;
                                       setFiltroDia(prev => {
@@ -488,12 +512,10 @@ export default function Dashboard() {
                                       });
                                       setFiltroHora(prev => {
                                         nextHora = prev === j ? null : j;
-                                        if (!nextDia && nextHora === null) setOrigenFiltro(null);
-                                        else setOrigenFiltro('heatmap');
                                         return nextHora;
                                       });
                                     }}
-                                    className={`flex-1 aspect-square rounded-[3px] bg-[#4ade80] transition-all duration-300 hover:ring-1 hover:ring-white cursor-crosshair relative group ${filtroDia === row.dia && filtroHora === j ? 'ring-2 ring-white z-10' : ''} ${origenFiltro && origenFiltro !== 'heatmap' ? 'pointer-events-none opacity-30' : ''}`}
+                                    className={`flex-1 aspect-square rounded-[3px] bg-[#4ade80] transition-all duration-300 hover:ring-1 hover:ring-white cursor-crosshair relative group ${filtroDia === row.dia && filtroHora === j ? 'ring-2 ring-white z-10' : ''}`}
                                     style={{ opacity: baseOpacity }}
                                   >
                                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1.5 bg-[#0f0f23] border border-[#2a2a4a] text-white text-[10px] rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
@@ -514,11 +536,8 @@ export default function Dashboard() {
 
                 {/* Donut Chart: Vectores de Ataque */}
                 <div className="cyber-card p-4 flex-1 flex flex-col">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-muted">Vectores de Ataque ({periodoLabel}) {filtroMotivo && <span className="text-dg-accent ml-2">(Filtrado)</span>}</h2>
-                    <button onClick={() => { setFiltroMotivo(null); setOrigenFiltro(null); }} className={`text-dg-accent hover:text-white transition-colors p-1 bg-dg-accent/10 rounded-md hover:bg-dg-error hover:bg-opacity-20 hover:text-dg-error ${origenFiltro === 'dona' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} title="Limpiar filtro">
-                      <FilterX className="w-3.5 h-3.5" />
-                    </button>
+                  <div className="mb-4">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-muted">Vectores de Ataque ({periodoLabel})</h2>
                   </div>
                   <div className="h-auto md:h-40 w-full flex flex-col md:flex-row items-center gap-6 md:gap-0 flex-1 justify-center">
                     {motivosFraude.length === 0 ? (
@@ -538,14 +557,12 @@ export default function Dashboard() {
                                 dataKey="value"
                                 stroke="none"
                                 onClick={(entry) => {
-                                  if (origenFiltro && origenFiltro !== 'dona') return;
                                   setFiltroMotivo(prev => {
                                     const next = prev === entry.name ? null : entry.name;
-                                    setOrigenFiltro(next ? 'dona' : null);
                                     return next;
                                   });
                                 }}
-                                className={`cursor-pointer ${origenFiltro && origenFiltro !== 'dona' ? 'pointer-events-none' : ''}`}
+                                className="cursor-pointer"
                               >
                                 {motivosFraude.map((entry, index) => (
                                   <Cell key={`cell-${index}`} fill={entry.color} opacity={filtroMotivo && filtroMotivo !== entry.name ? 0.3 : 1} />
@@ -568,12 +585,10 @@ export default function Dashboard() {
                             return (
                               <div
                                 key={i}
-                                className={`flex flex-col gap-1 cursor-pointer hover:bg-white/5 py-1 px-2 -mx-2 rounded-md transition-colors ${filtroMotivo && filtroMotivo !== m.name ? 'opacity-30' : ''} ${origenFiltro && origenFiltro !== 'dona' ? 'pointer-events-none opacity-30' : ''}`}
+                                className={`flex flex-col gap-1 cursor-pointer hover:bg-white/5 py-1 px-2 -mx-2 rounded-md transition-colors ${filtroMotivo && filtroMotivo !== m.name ? 'opacity-30' : ''}`}
                                 onClick={() => {
-                                  if (origenFiltro && origenFiltro !== 'dona') return;
                                   setFiltroMotivo(prev => {
                                     const next = prev === m.name ? null : m.name;
-                                    setOrigenFiltro(next ? 'dona' : null);
                                     return next;
                                   });
                                 }}
