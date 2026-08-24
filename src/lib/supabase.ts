@@ -231,23 +231,53 @@ export async function getHistorialPaginado(page: number = 0, limit: number = 50,
 }
 
 /** Obtener eventos de los últimos 7 días para gráficas de tendencias (Fase 1/4) */
-export async function getTendenciasSemanales(dias: number = 7) {
-  const desde = new Date();
-  desde.setDate(desde.getDate() - (dias - 1)); // dias contando hoy
-  desde.setHours(0, 0, 0, 0);
+export async function getTendenciasSemanales(opciones: { dias?: number; desde?: string; hasta?: string } = { dias: 7 }) {
+  let desde: Date;
+  let hasta: Date;
 
-  const limite = Math.ceil((dias / 7) * 1500); // Escalar límite proporcionalmente
+  if (opciones.desde && opciones.hasta) {
+    // Rango personalizado
+    desde = new Date(opciones.desde + "T00:00:00");
+    hasta = new Date(opciones.hasta + "T23:59:59.999");
+  } else {
+    // Preset (últimos N días)
+    const dias = opciones.dias || 7;
+    hasta = new Date();
+    desde = new Date();
+    desde.setDate(desde.getDate() - (dias - 1));
+    desde.setHours(0, 0, 0, 0);
+  }
 
-  const { data, error } = await supabase
-    .from("historial")
-    .select("estado, timestamp, motivo")
-    .gte("timestamp", desde.toISOString())
-    .order("timestamp", { ascending: false }) // Descendente para no truncar los de hoy
-    .limit(limite);
+  // Tope de seguridad para no saturar el navegador.
+  // El filtro de fecha (.gte/.lte) ya limita los datos reales.
+  const MAX_EVENTOS = 10_000;
 
-  if (error) throw error;
+  let todosLosEventos: any[] = [];
+  let fetched = 0;
+  const pageSize = 1000; // Máximo que Supabase devuelve por defecto (config: max_rows)
+
+  // Paginación automática: Supabase limita cada request a 1000 filas.
+  while (fetched < MAX_EVENTOS) {
+    const { data, error } = await supabase
+      .from("historial")
+      .select("estado, timestamp, motivo")
+      .gte("timestamp", desde.toISOString())
+      .lte("timestamp", hasta.toISOString())
+      .order("timestamp", { ascending: false })
+      .range(fetched, fetched + pageSize - 1);
+
+    if (error) throw error;
+    if (!data || data.length === 0) break; // No hay más datos
+
+    todosLosEventos = todosLosEventos.concat(data);
+    fetched += data.length;
+
+    // Si trajo menos del pageSize, ya sacamos todos los registros disponibles
+    if (data.length < pageSize) break;
+  }
+
   // Volvemos a ordenar ascendente para procesar en orden cronológico en el Dashboard
-  return data.reverse();
+  return todosLosEventos.reverse();
 }
 
 /** Obtener evento por ID */
