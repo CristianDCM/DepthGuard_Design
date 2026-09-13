@@ -83,6 +83,15 @@ export interface CamaraEstado {
   camera_type: CameraType;
   activa: boolean;
   modelo: string;
+  /**
+   * URL del frame de preview en vivo, publicada por el heartbeat del edge.
+   *
+   * Con el bucket de capturas en privado, el frontend ya NO puede construir
+   * esta URL a partir del nombre del fichero: es una URL firmada que caduca y
+   * que el edge renueva en cada latido. Opcional para que un edge todavía sin
+   * actualizar siga funcionando con la URL pública de siempre.
+   */
+  preview_url?: string;
 }
 
 /** Estado global del nodo edge (PC central) */
