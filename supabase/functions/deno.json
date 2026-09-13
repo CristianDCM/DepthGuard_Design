@@ -1,0 +1,13 @@
+{
+  "// nota": "Las Edge Functions corren en Deno, no en el navegador. Este archivo las separa del tsconfig de la app, que antes intentaba verificarlas y producia 34 errores falsos ('Cannot find name Deno', imports por URL).",
+  "compilerOptions": {
+    "lib": ["deno.window", "dom"],
+    "strict": true
+  },
+  "tasks": {
+    "check": "deno check --all ./**/index.ts"
+  },
+  "imports": {
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.49.1"
+  }
+}
