@@ -13,6 +13,7 @@ export default function EventDetail() {
   const [evento, setEvento] = useState<Evento | null>(null);
   const [loading, setLoading] = useState(true);
   const [generandoPdf, setGenerandoPdf] = useState(false);
+  const [errorInforme, setErrorInforme] = useState<string | null>(null);
 
   useEffect(() => {
     async function cargar() {
@@ -81,9 +82,12 @@ export default function EventDetail() {
       // Abrir ventana de impresión
       const ventana = window.open("", "_blank", "width=800,height=1000");
       if (!ventana) {
-        alert("Permite las ventanas emergentes para descargar el informe.");
+        setErrorInforme(
+          "El navegador bloqueó la ventana emergente. Permite las ventanas emergentes para este sitio y vuelve a intentarlo."
+        );
         return;
       }
+      setErrorInforme(null);
 
       ventana.document.write(htmlContent);
       ventana.document.close();
@@ -106,8 +110,8 @@ export default function EventDetail() {
       <header className="sticky top-0 z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between w-full">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate(-1)} className="active:scale-95 transition-transform">
-              <ArrowLeft className="w-6 h-6 text-dg-accent" />
+            <button onClick={() => navigate(-1)} aria-label="Volver a la pantalla anterior" className="active:scale-95 transition-transform">
+              <ArrowLeft className="w-6 h-6 text-dg-accent" aria-hidden="true" />
             </button>
             <h1 className="font-headline font-bold tracking-tight text-lg text-white">{headerTitle}</h1>
           </div>
@@ -258,12 +262,12 @@ export default function EventDetail() {
                     </RadarChart>
                   </ResponsiveContainer>
                   {isFraud && (
-                    <div className="absolute top-2 left-2 px-2 py-1 bg-dg-error/20 border border-dg-error/30 text-[9px] font-bold text-dg-error uppercase rounded-md backdrop-blur-sm">
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-dg-error/20 border border-dg-error/30 text-[10px] font-bold text-dg-error uppercase rounded-md backdrop-blur-sm">
                       Firma Plana Detectada
                     </div>
                   )}
                   {isAuthorized && (
-                    <div className="absolute top-2 left-2 px-2 py-1 bg-dg-success/20 border border-dg-success/30 text-[9px] font-bold text-dg-success uppercase rounded-md backdrop-blur-sm">
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-dg-success/20 border border-dg-success/30 text-[10px] font-bold text-dg-success uppercase rounded-md backdrop-blur-sm">
                       Volumen Facial Confirmado
                     </div>
                   )}
@@ -311,11 +315,20 @@ export default function EventDetail() {
                   </>
                 ) : (
                   <>
-                    <Download className="w-5 h-5" />
+                    <Download className="w-5 h-5" aria-hidden="true" />
                     Descargar Informe
                   </>
                 )}
               </button>
+
+              {errorInforme && (
+                <p
+                  role="alert"
+                  className="text-xs text-dg-warning bg-dg-warning/5 border border-dg-warning/30 rounded-dg p-3 text-center"
+                >
+                  {errorInforme}
+                </p>
+              )}
               <button 
                 onClick={() => navigate(-1)}
                 className="btn-secondary w-full py-4"

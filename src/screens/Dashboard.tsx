@@ -382,7 +382,7 @@ export default function Dashboard() {
                         onClick={() => { setFiltroDia(null); setOrigenFiltro(null); }}
                         className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-dg-accent/15 text-dg-accent border border-dg-accent/30 hover:bg-dg-error/20 hover:text-dg-error hover:border-dg-error/30 transition-all"
                       >
-                        Día: {filtroDia} <span className="text-[8px] opacity-70">✕</span>
+                        Día: {filtroDia} <span className="text-[10px] opacity-70">✕</span>
                       </button>
                     )}
                     {filtroHora !== null && (
@@ -390,7 +390,7 @@ export default function Dashboard() {
                         onClick={() => { setFiltroHora(null); if (!filtroDia) setOrigenFiltro(null); }}
                         className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-dg-accent/15 text-dg-accent border border-dg-accent/30 hover:bg-dg-error/20 hover:text-dg-error hover:border-dg-error/30 transition-all"
                       >
-                        Hora: {filtroHora}:00 <span className="text-[8px] opacity-70">✕</span>
+                        Hora: {filtroHora}:00 <span className="text-[10px] opacity-70">✕</span>
                       </button>
                     )}
                     {filtroMotivo && (
@@ -398,7 +398,7 @@ export default function Dashboard() {
                         onClick={() => { setFiltroMotivo(null); setOrigenFiltro(null); }}
                         className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-dg-accent/15 text-dg-accent border border-dg-accent/30 hover:bg-dg-error/20 hover:text-dg-error hover:border-dg-error/30 transition-all"
                       >
-                        {filtroMotivo} <span className="text-[8px] opacity-70">✕</span>
+                        {filtroMotivo} <span className="text-[10px] opacity-70">✕</span>
                       </button>
                     )}
                     <button
@@ -639,7 +639,7 @@ export default function Dashboard() {
                             <Video className="w-5 h-5 text-blue-400" />
                             <div>
                               <span className="text-sm font-medium">Cámara</span>
-                              <span className="text-[8px] ml-2 px-1.5 py-0.5 rounded bg-white/5 text-dg-text-muted font-bold">{cam.camera_type}</span>
+                              <span className="text-[10px] ml-2 px-1.5 py-0.5 rounded bg-white/5 text-dg-text-muted font-bold">{cam.camera_type}</span>
                             </div>
                           </div>
                           <span className={`text-xs font-bold flex items-center gap-1 ${activa ? 'text-dg-accent' : 'text-dg-error'}`}>
@@ -700,7 +700,7 @@ export default function Dashboard() {
                                 <p className={`text-base font-semibold ${config.color}`}>{config.title}</p>
                                 <div className="flex items-center gap-2 shrink-0">
                                   {evento.camera_id && (
-                                    <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${evento.camera_type === "3D"
+                                    <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${evento.camera_type === "3D"
                                         ? "bg-dg-accent/10 text-dg-accent"
                                         : "bg-blue-500/10 text-blue-400"
                                       }`}>

@@ -288,7 +288,7 @@ export default function RegisterStart() {
             <h1 className="text-xl font-bold tracking-tight font-headline">Usuarios</h1>
           </div>
         </header>
-        <main className="p-4 space-y-3">
+        <main className="p-4 space-y-3 max-w-7xl mx-auto w-full">
           <div className="cyber-card h-20 w-full" />
           <div className="cyber-card h-20 w-full" />
         </main>
@@ -296,10 +296,12 @@ export default function RegisterStart() {
 
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm z-40" />
 
+      {/* Hoja inferior en movil; en escritorio se centra como tarjeta en
+          lugar de estirarse de borde a borde de la pantalla. */}
       <motion.div 
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
-        className="fixed bottom-0 left-0 right-0 z-50 bg-dg-bg rounded-t-2xl border-t border-x border-dg-border p-6 shadow-[0px_-24px_48px_rgba(0,0,0,0.6)] max-h-[92vh] overflow-y-auto"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-dg-bg rounded-t-2xl border-t border-x border-dg-border p-6 shadow-[0px_-24px_48px_rgba(0,0,0,0.6)] max-h-[92vh] overflow-y-auto md:max-w-2xl md:mx-auto md:bottom-8 md:rounded-2xl md:border"
       >
         <div className="w-12 h-1 bg-dg-border rounded-full mx-auto mb-8 shrink-0" />
         

@@ -14,7 +14,10 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-dg-bg border-t border-dg-border px-2 pb-safe">
+    <nav
+      aria-label="Navegación principal"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-dg-bg border-t border-dg-border px-2 pb-safe"
+    >
       <div className="flex items-center justify-around h-16 max-w-7xl mx-auto">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
@@ -22,12 +25,13 @@ export default function Navigation() {
             <Link
               key={item.name}
               to={item.path}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 transition-colors",
                 isActive ? "text-dg-accent" : "text-dg-text-muted hover:text-dg-accent"
               )}
             >
-              <item.icon className={cn("w-5 h-5", isActive && "fill-dg-accent/20")} />
+              <item.icon aria-hidden="true" className={cn("w-5 h-5", isActive && "fill-dg-accent/20")} />
               <span className="text-[10px] font-bold uppercase tracking-tighter">
                 {item.name}
               </span>

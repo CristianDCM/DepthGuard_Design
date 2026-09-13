@@ -453,17 +453,17 @@ export default function Settings() {
                             <div className="flex items-center gap-2">
                               <p className="text-sm font-medium text-white truncate">{admin.email}</p>
                               {admin.id === callerId && (
-                                <span className="text-[9px] font-bold uppercase tracking-widest text-dg-accent bg-dg-accent/10 px-1.5 py-0.5 rounded">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-dg-accent bg-dg-accent/10 px-1.5 py-0.5 rounded">
                                   Tú
                                 </span>
                               )}
                               {admin.role === "owner" && (
-                                <span className="text-[9px] font-bold uppercase tracking-widest text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded">
                                   Propietario
                                 </span>
                               )}
                               {!admin.confirmed && (
-                                <span className="text-[9px] font-bold uppercase tracking-widest text-dg-warning bg-dg-warning/10 px-1.5 py-0.5 rounded">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-dg-warning bg-dg-warning/10 px-1.5 py-0.5 rounded">
                                   Pendiente
                                 </span>
                               )}
@@ -496,9 +496,10 @@ export default function Settings() {
                             ) : (
                               <button
                                 onClick={() => setConfirmDeleteId(admin.id)}
-                                className="p-1.5 text-dg-text-muted/50 hover:text-dg-error transition-colors opacity-0 group-hover:opacity-100"
+                                aria-label={`Eliminar al administrador ${admin.email}`}
+                                className="p-1.5 text-dg-text-muted/50 hover:text-dg-error transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-4 h-4" aria-hidden="true" />
                               </button>
                             )}
                           </div>

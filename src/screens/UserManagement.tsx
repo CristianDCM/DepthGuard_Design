@@ -80,19 +80,19 @@ export default function UserManagement() {
             <div className="bg-dg-card/50 border border-dg-border rounded-xl p-3 flex justify-around text-center max-w-2xl">
               <div>
                 <p className="text-dg-accent font-bold text-sm">{users.length}</p>
-                <p className="text-[9px] text-dg-text-muted uppercase tracking-wider">Registrados</p>
+                <p className="text-[10px] text-dg-text-muted uppercase tracking-wider">Registrados</p>
               </div>
               <div className="w-[1px] bg-dg-border" />
               <div>
                 <p className="text-white font-bold text-sm">{totalAccesos}</p>
-                <p className="text-[9px] text-dg-text-muted uppercase tracking-wider">Accesos</p>
+                <p className="text-[10px] text-dg-text-muted uppercase tracking-wider">Accesos</p>
               </div>
               <div className="w-[1px] bg-dg-border" />
               <div>
                 <p className="text-white font-bold text-sm flex items-center justify-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-dg-accent animate-pulse" /> {estadoCount.activos} / {estadoCount.inactivos}
                 </p>
-                <p className="text-[9px] text-dg-text-muted uppercase tracking-wider">Activos / Inactivos</p>
+                <p className="text-[10px] text-dg-text-muted uppercase tracking-wider">Activos / Inactivos</p>
               </div>
             </div>
           </div>
@@ -107,7 +107,10 @@ export default function UserManagement() {
             <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
           </div>
         ) : filteredUsers.length > 0 ? (
-          filteredUsers.map((user, index) => (
+          // En escritorio la lista pasa a rejilla: en una sola columna las
+          // tarjetas se estiraban a todo el ancho y desperdiciaban la pantalla.
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+            {filteredUsers.map((user, index) => (
             <motion.div
               key={user.id}
               initial={{ opacity: 0, x: -10 }}
@@ -126,9 +129,10 @@ export default function UserManagement() {
                   </h3>
                   <button 
                     onClick={(e) => { e.stopPropagation(); navigate(`/users/delete/${user.id}`); }}
+                    aria-label={`Eliminar a ${user.nombre}`}
                     className="text-dg-error/50 hover:text-dg-error transition-colors"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4" aria-hidden="true" />
                   </button>
                 </div>
                 <p className="text-xs text-dg-text-muted truncate">Registrado: {formatDate(user.fecha_registro)} • {user.num_angulos} ángulos</p>
@@ -141,7 +145,8 @@ export default function UserManagement() {
                 </button>
               </div>
             </motion.div>
-          ))
+            ))}
+          </div>
         ) : (
           <div className="text-center py-12 text-dg-text-muted">
             <p className="text-sm">No se encontraron usuarios que coincidan con "{searchQuery}"</p>
