@@ -204,6 +204,7 @@ export default function LiveMonitor() {
             data={panel}
             camaraActiva={camaraActiva}
             edgeOnline={edgeOnline}
+            previewUrl={cam?.preview_url}
             layout="expanded"
             onEventFocus={(evento) => {
               setPanel((prev) => ({ 
@@ -229,6 +230,7 @@ function CameraPanel({
   data,
   camaraActiva,
   edgeOnline,
+  previewUrl,
   layout = "compact",
   onEventFocus,
 }: {
@@ -236,6 +238,8 @@ function CameraPanel({
   data: CameraPanelData;
   camaraActiva: boolean;
   edgeOnline: boolean;
+  /** URL firmada del preview, publicada por el edge en estado_sistema */
+  previewUrl?: string;
   layout?: "compact" | "expanded";
   onEventFocus?: (evento: Evento) => void;
 }) {
@@ -316,7 +320,11 @@ function CameraPanel({
           onFallback={() => setWebrtcFailed(true)}
         />
       ) : (
-        <LiveSnapshotPreview camaraActiva={camaraActiva} cameraId={cameraId} />
+        <LiveSnapshotPreview
+          camaraActiva={camaraActiva}
+          cameraId={cameraId}
+          previewUrl={previewUrl}
+        />
       )}
 
       {/* Status Card — el evento actual */}
@@ -660,27 +668,51 @@ function formatRelativeTime(timestamp: string) {
 // ============================================
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? "";
-const SNAPSHOT_PATH = "storage/v1/object/public/capturas/live_preview.jpg";
+
+/**
+ * URL pública heredada del preview. Solo sirve mientras el bucket `capturas`
+ * siga siendo público — es decir, mientras cualquiera con la URL pueda ver la
+ * cámara en vivo. Se usa como fallback para que un edge todavía sin
+ * actualizar siga mostrando imagen.
+ */
+const SNAPSHOT_PATH_PUBLICO = "storage/v1/object/public/capturas/live_preview.jpg";
+
+/** Añade el parámetro de cache-busting respetando la query ya existente. */
+function conCacheBusting(url: string, ts: number): string {
+  return `${url}${url.includes("?") ? "&" : "?"}t=${ts}`;
+}
 
 function LiveSnapshotPreview({
   camaraActiva,
   cameraId,
+  previewUrl,
 }: {
   camaraActiva: boolean;
   cameraId: CameraId;
+  /** URL firmada publicada por el edge en estado_sistema.camaras */
+  previewUrl?: string;
 }) {
   const [snapshotUrl, setSnapshotUrl] = useState<string | null>(null);
   const [imgError, setImgError] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<number>(0);
 
-  // Polling: actualizar URL cada 2s con cache-busting
-  // Solo cargar el snapshot si ESTA cámara está activa
+  // Polling: refrescar la imagen cada 2s con cache-busting.
+  //
+  // La URL BASE la publica el edge (firmada, con caducidad) y se renueva sola
+  // en cada heartbeat; aquí solo se le añade el timestamp para que el
+  // navegador no sirva el frame anterior desde caché.
+  //
+  // Si el edge todavía no publica preview_url, se cae a la URL pública
+  // heredada para no quedarnos sin imagen durante la migración.
   useEffect(() => {
-    if (!camaraActiva || !SUPABASE_URL) return;
+    if (!camaraActiva) return;
+
+    const base = previewUrl || (SUPABASE_URL ? `${SUPABASE_URL}/${SNAPSHOT_PATH_PUBLICO}` : "");
+    if (!base) return;
 
     const updateUrl = () => {
       const ts = Date.now();
-      setSnapshotUrl(`${SUPABASE_URL}/${SNAPSHOT_PATH}?t=${ts}`);
+      setSnapshotUrl(conCacheBusting(base, ts));
       setLastUpdate(ts);
       setImgError(false);
     };
@@ -690,7 +722,7 @@ function LiveSnapshotPreview({
 
     const interval = setInterval(updateUrl, 2000);
     return () => clearInterval(interval);
-  }, [camaraActiva]);
+  }, [camaraActiva, previewUrl]);
 
   // Cámara inactiva — placeholder de desconectada
   if (!camaraActiva) {

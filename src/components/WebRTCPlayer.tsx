@@ -47,6 +47,14 @@ const ICE_SERVERS: RTCIceServer[] = [
 // Timeout para fallback si WebRTC no conecta (ms)
 const WEBRTC_TIMEOUT_MS = 10_000;
 
+/**
+ * Canal de señalización privado (hallazgo C2). Debe activarse a la vez que
+ * WEBRTC_CANAL_PRIVADO en el .env del edge, y después de aplicar
+ * supabase/rls_realtime.sql.
+ */
+const CANAL_PRIVADO =
+  (import.meta.env.VITE_WEBRTC_CANAL_PRIVADO ?? "false").toString().toLowerCase() === "true";
+
 // ──────────────────────────────────────────────
 // Tipos
 // ──────────────────────────────────────────────
@@ -131,8 +139,26 @@ export default function WebRTCPlayer({
         }
       };
 
-      // Suscripción a Supabase Broadcast para señalización
-      canal = supabase.channel(canalNombre);
+      // Suscripción a Supabase Broadcast para señalización.
+      //
+      // Con CANAL_PRIVADO el canal es PRIVADO: Supabase evalúa la RLS de
+      // realtime.messages antes de dejar entrar o publicar, así que solo un
+      // usuario con sesión iniciada puede pedir vídeo. El canal público es el
+      // hallazgo C2: su nombre es predecible (webrtc-signaling-{cameraId}) y
+      // cualquiera que se suscribiera obtenía la cámara en vivo.
+      //
+      // Va tras una variable de entorno porque el edge tiene su propio flag
+      // (WEBRTC_CANAL_PRIVADO) y los dos extremos deben cambiar A LA VEZ: no
+      // está documentado que un cliente privado y uno público se vean en el
+      // mismo topic, y dar por hecho que sí dejaría el monitor sin vídeo.
+      //
+      // setAuth() es imprescindible para el canal privado: sin él la conexión
+      // Realtime no lleva el JWT de la sesión y la RLS no tiene identidad
+      // contra la que evaluar. En canal público es inocuo.
+      await supabase.realtime.setAuth();
+      canal = CANAL_PRIVADO
+        ? supabase.channel(canalNombre, { config: { private: true } })
+        : supabase.channel(canalNombre);
 
       // Manejar mensajes del edge (answer + ice_candidates)
       canal.on("broadcast", { event: "signal" }, async (msg) => {
