@@ -24,8 +24,8 @@ export function exportToCSV<T extends object>(data: T[], filename: string): bool
     ),
   ];
 
-  // uFEFF = BOM para que Excel detecte UTF-8
-  const blob = new Blob(["﻿" + csvRows.join("\n")], {
+  // \uFEFF = BOM: sin el, Excel abre el CSV como ANSI y rompe los acentos.
+  const blob = new Blob(["\uFEFF" + csvRows.join("\n")], {
     type: "text/csv;charset=utf-8;",
   });
 
