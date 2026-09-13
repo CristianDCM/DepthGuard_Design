@@ -52,6 +52,31 @@ npm run build         # Build de producción
 El workflow `CI` ejecuta typecheck, pruebas y build en cada push y pull
 request a `main`.
 
+## Despliegue
+
+Son dos destinos distintos y conviene no confundirlos:
+
+| Qué | Dónde | Cómo |
+|---|---|---|
+| Frontend (React, Service Worker, cabeceras de `vercel.json`) | Vercel | Automático en cada merge a `main` |
+| Edge Functions (`supabase/functions/`) | Supabase | Workflow `Desplegar Edge Functions` |
+
+**`git push` no despliega las Edge Functions.** Vercel sí se actualiza solo,
+y eso da la falsa impresión de que todo el proyecto está desplegado. El
+workflow `deploy-functions.yml` cierra ese hueco: se dispara al cambiar
+`supabase/functions/**` o `supabase/config.toml`, y despliega únicamente las
+funciones modificadas.
+
+Requiere el secreto `SUPABASE_ACCESS_TOKEN` (se genera en
+https://supabase.com/dashboard/account/tokens). Para desplegarlas todas a
+mano —por ejemplo, para recuperar producción tras un cambio hecho fuera del
+repositorio— se ejecuta el workflow desde la pestaña Actions.
+
+`supabase/config.toml` declara el `verify_jwt` de cada función. No es
+opcional: sin él la CLI aplicaría `verify_jwt = true` por defecto y
+`notify-event` dejaría de funcionar, porque es un webhook que invoca la
+propia base de datos sin ningún JWT.
+
 ### Pruebas
 
 46 pruebas sobre la lógica verificable de forma determinista:

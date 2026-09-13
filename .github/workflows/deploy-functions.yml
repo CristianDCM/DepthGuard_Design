@@ -1,0 +1,122 @@
+# Despliegue de las Edge Functions de Supabase.
+#
+# Por qué existe: `git push` NO despliega las Edge Functions. Vercel sí se
+# actualiza solo con cada merge, y eso creaba una falsa sensación de que todo
+# el proyecto estaba desplegado. En realidad supabase/functions/ llegó a
+# quedarse casi un mes por detrás del repositorio, con el resultado de que una
+# corrección ya mergeada seguía sin tener efecto en producción.
+#
+# Solo despliega las funciones cuyos archivos han cambiado en el push. Así un
+# cambio en una función nunca arrastra a las demás, y este workflow no puede
+# sobrescribir en bloque lo que haya en producción.
+#
+# Requiere el secreto SUPABASE_ACCESS_TOKEN
+# (https://supabase.com/dashboard/account/tokens)
+name: Desplegar Edge Functions
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "supabase/functions/**"
+      - "supabase/config.toml"
+  # Permite forzar el despliegue de todas las funciones a mano, por ejemplo
+  # para recuperar producción tras un cambio hecho fuera del repositorio.
+  workflow_dispatch:
+    inputs:
+      desplegar_todas:
+        description: "Desplegar todas las funciones, no solo las modificadas"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Desplegar a Supabase
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+    steps:
+      - name: Comprobar que el token está configurado
+        run: |
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
+            echo "::error title=Falta SUPABASE_ACCESS_TOKEN::Crea el secreto en Settings > Secrets and variables > Actions. Genera el token en https://supabase.com/dashboard/account/tokens"
+            exit 1
+          fi
+
+      - name: Descargar el repositorio
+        uses: actions/checkout@v5
+        with:
+          # Dos commits: hacen falta para comparar con el estado anterior.
+          fetch-depth: 2
+
+      - name: Instalar la CLI de Supabase
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Determinar qué funciones desplegar
+        id: objetivo
+        run: |
+          set -euo pipefail
+
+          listar_todas() {
+            find supabase/functions -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort
+          }
+
+          ANTES="${{ github.event.before }}"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            FUNCIONES=$(listar_todas)
+            echo "Despliegue manual: todas las funciones."
+          elif [ -z "$ANTES" ] || [ "$ANTES" = "0000000000000000000000000000000000000000" ] \
+               || ! git cat-file -e "$ANTES^{commit}" 2>/dev/null; then
+            # Sin un commit anterior con el que comparar (rama nueva, historial
+            # recortado o force-push): no se puede saber qué cambió.
+            FUNCIONES=$(listar_todas)
+            echo "No hay commit anterior con el que comparar: se despliegan todas."
+          elif ! git diff --quiet "$ANTES" "${{ github.sha }}" -- supabase/config.toml supabase/functions/deno.json; then
+            # config.toml define verify_jwt y deno.json el mapa de importaciones:
+            # ambos afectan a TODAS las funciones, así que hay que reaplicarlos
+            # en bloque. Sin esto, un cambio en deno.json no desplegaría nada.
+            FUNCIONES=$(listar_todas)
+            echo "Cambió config.toml o deno.json: se redespliegan todas."
+          else
+            # Solo las funciones tocadas en este push.
+            FUNCIONES=$(git diff --name-only "$ANTES" "${{ github.sha }}" -- 'supabase/functions/**' \
+              | cut -d/ -f3 | sort -u)
+            echo "Funciones modificadas en este push."
+          fi
+
+          echo "Objetivo:"
+          echo "$FUNCIONES" | sed 's/^/  - /'
+          echo "funciones<<FIN" >> "$GITHUB_OUTPUT"
+          echo "$FUNCIONES" >> "$GITHUB_OUTPUT"
+          echo "FIN" >> "$GITHUB_OUTPUT"
+
+      - name: Desplegar
+        run: |
+          set -euo pipefail
+          DESPLEGADAS=0
+          while IFS= read -r fn; do
+            [ -z "$fn" ] && continue
+            if [ ! -d "supabase/functions/$fn" ]; then
+              echo "::notice::Se omite '$fn': la carpeta ya no existe (función eliminada del repositorio)."
+              continue
+            fi
+            echo "::group::Desplegando $fn"
+            # verify_jwt sale de supabase/config.toml, nunca del valor por
+            # defecto: notify-event es un webhook y debe quedarse sin JWT.
+            supabase functions deploy "$fn"
+            echo "::endgroup::"
+            DESPLEGADAS=$((DESPLEGADAS + 1))
+          done <<< "${{ steps.objetivo.outputs.funciones }}"
+
+          if [ "$DESPLEGADAS" -eq 0 ]; then
+            echo "::notice::No había ninguna función que desplegar."
+          else
+            echo "::notice::$DESPLEGADAS función(es) desplegada(s)."
+          fi

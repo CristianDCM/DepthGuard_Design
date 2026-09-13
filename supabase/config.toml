@@ -1,0 +1,39 @@
+# Configuración del proyecto Supabase.
+#
+# Este archivo es lo que hace seguro el despliegue automático de las Edge
+# Functions. Sin él, `supabase functions deploy` aplica verify_jwt = true por
+# defecto a todas, y notify-event dejaría de funcionar: es un webhook que
+# invoca la propia base de datos al insertar en historial, sin ningún JWT.
+
+project_id = "nfdgwanztbwbwcjtsgoy"
+
+# ---------------------------------------------------------------------------
+# Edge Functions
+#
+# verify_jwt debe coincidir con lo que hay en producción. Comprobado contra
+# el proyecto el 2026-09-13.
+# ---------------------------------------------------------------------------
+
+# Webhook de base de datos (INSERT en historial). NO lleva JWT: la llamada
+# viene de Postgres, no de un usuario.
+[functions.notify-event]
+verify_jwt = false
+
+# Invocadas desde el panel con la sesión del administrador.
+[functions.invite-admin]
+verify_jwt = true
+
+[functions.list-admins]
+verify_jwt = true
+
+[functions.delete-admin]
+verify_jwt = true
+
+[functions.set-owner]
+verify_jwt = true
+
+# Trabajo programado de retención. Exige JWT en el gateway y, además, un
+# token propio en la cabecera x-retencion-token: la clave anon también es un
+# JWT válido y es pública, así que verify_jwt por sí solo no autoriza nada.
+[functions.retencion]
+verify_jwt = true
