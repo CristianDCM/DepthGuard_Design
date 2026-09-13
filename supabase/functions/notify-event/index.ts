@@ -147,15 +147,28 @@ async function sendFCM(
       body: JSON.stringify({
         message: {
           token,
-          notification: { title, body },
-          webpush: {
-            fcm_options: {
-              link: `/event/${eventId}`,
-            },
-          },
+          // IMPORTANTE (notificaciones duplicadas):
+          // NO incluir el bloque `notification`. Cuando el push lo trae, el SDK
+          // de Firebase en el Service Worker muestra la notificacion por su
+          // cuenta Y ADEMAS invoca onBackgroundMessage, que la vuelve a mostrar
+          // -> el usuario recibe DOS notificaciones del mismo evento.
+          // Enviamos "data-only" para que el Service Worker sea el unico que
+          // llama a showNotification().
           data: {
             event_id: eventId,
             event_type: eventType,
+            title,
+            body,
+            url: `/event/${eventId}`,
+          },
+          webpush: {
+            headers: {
+              // Entrega inmediata y colapso por evento en el propio servicio push
+              Urgency: "high",
+              TTL: "86400",
+              // Topic (RFC 8030): solo [A-Za-z0-9_-], max 32 chars
+              Topic: `dg-${eventId}`.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 32),
+            },
           },
         },
       }),
@@ -422,8 +435,8 @@ Deno.serve(async (req: Request) => {
     // Preparar contenido de notificación
     const titulo =
       evento.estado === "FRAUDE"
-        ? "⚠️ Fraude Detectado"
-        : "👤 Persona Desconocida";
+        ? "Fraude Detectado"
+        : "Persona Desconocida";
 
     const cuerpo = [
       evento.camera_id ? `Cámara: ${evento.camera_id}` : null,
@@ -513,7 +526,6 @@ Deno.serve(async (req: Request) => {
       const chatId = Deno.env.get("TELEGRAM_CHAT_ID");
 
       if (botToken && chatId) {
-        const emoji = evento.estado === "FRAUDE" ? "\u26a0\ufe0f" : "\ud83d\udc64";
         const hora = new Date(evento.timestamp).toLocaleString("es-CO", {
           timeZone: "America/Bogota",
           hour: "2-digit",
@@ -523,7 +535,7 @@ Deno.serve(async (req: Request) => {
         });
 
         const texto = [
-          `${emoji} <b>${titulo}</b>`,
+          `<b>${titulo}</b>`,
           "",
           `<b>Camara:</b> ${evento.camera_id ?? "N/A"}`,
           evento.nombre ? `<b>Persona:</b> ${evento.nombre}` : null,

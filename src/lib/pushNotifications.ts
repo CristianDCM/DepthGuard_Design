@@ -9,6 +9,46 @@ import { getFirebaseMessaging, VAPID_KEY } from "./firebase";
 
 export type PushStatus = "granted" | "denied" | "default" | "unsupported";
 
+/** Ruta del Service Worker de FCM (debe estar en la raíz del sitio). */
+const SW_URL = "/firebase-messaging-sw.js";
+
+/**
+ * Obtiene el registro del Service Worker de FCM.
+ *
+ * Se lo pasamos explícitamente a getToken() para que el SDK de Firebase NO
+ * cree su propio registro en paralelo. Con dos registros activos el mismo
+ * dispositivo puede acabar con dos suscripciones push y recibir la
+ * notificación duplicada.
+ */
+async function getSwRegistration(): Promise<ServiceWorkerRegistration | null> {
+  if (!("serviceWorker" in navigator)) return null;
+  try {
+    // register() es idempotente: si ya existe, devuelve el registro existente.
+    const registration = await navigator.serviceWorker.register(SW_URL);
+    // Esperar a que haya un SW activo antes de pedir el token.
+    await navigator.serviceWorker.ready;
+    return registration;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Obtiene el token FCM actual usando el Service Worker ya registrado.
+ */
+async function getCurrentToken(): Promise<string | null> {
+  const messaging = await getFirebaseMessaging();
+  if (!messaging) return null;
+
+  const registration = await getSwRegistration();
+  if (!registration) return null;
+
+  return await getToken(messaging, {
+    vapidKey: VAPID_KEY,
+    serviceWorkerRegistration: registration,
+  });
+}
+
 /**
  * Verifica el estado actual del permiso de notificaciones.
  */
@@ -31,22 +71,35 @@ export async function subscribeToPush(): Promise<string | null> {
     const permission = await Notification.requestPermission();
     if (permission !== "granted") return null;
 
-    const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY });
+    const currentToken = await getCurrentToken();
     if (!currentToken) return null;
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
+    const dispositivo = navigator.userAgent;
+
     const { error } = await supabase.from("suscripciones_push").upsert(
       {
         token_fcm: currentToken,
         user_id: user.id,
-        dispositivo: navigator.userAgent,
+        dispositivo,
       },
       { onConflict: "token_fcm" }
     );
 
     if (error) return null;
+
+    // Limpiar tokens antiguos de ESTE mismo dispositivo.
+    // Al reinstalar la PWA, borrar datos del sitio o rotar el token FCM,
+    // la fila anterior queda huérfana pero sigue siendo entregable durante
+    // un tiempo: el teléfono recibiría la misma notificación dos veces.
+    await supabase
+      .from("suscripciones_push")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("dispositivo", dispositivo)
+      .neq("token_fcm", currentToken);
 
     return currentToken;
   } catch {
@@ -62,7 +115,7 @@ export async function unsubscribeFromPush(): Promise<void> {
     const messaging = await getFirebaseMessaging();
     if (!messaging) return;
 
-    const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY });
+    const currentToken = await getCurrentToken();
     if (currentToken) {
       await supabase.from("suscripciones_push").delete().eq("token_fcm", currentToken);
       await deleteToken(messaging);
@@ -77,10 +130,7 @@ export async function unsubscribeFromPush(): Promise<void> {
  */
 export async function isSubscribed(): Promise<boolean> {
   try {
-    const messaging = await getFirebaseMessaging();
-    if (!messaging) return false;
-
-    const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY });
+    const currentToken = await getCurrentToken();
     if (!currentToken) return false;
 
     const { data } = await supabase
