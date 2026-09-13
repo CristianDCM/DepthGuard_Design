@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from "recharts";
 import Navigation from "../components/Navigation";
 import { getEventoPorId, type Evento } from "../lib/supabase";
+import { escapeHtml } from "../lib/sanitize";
 
 export default function EventDetail() {
   const { id } = useParams<{ id: string }>();
@@ -386,19 +387,25 @@ function generarHTMLInforme(evento: Evento, fotoBase64: string): string {
     </table>
   `;
 
-  const fotoHTML = fotoBase64
-    ? `<img src="${fotoBase64}" style="width:100%;max-height:200px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;" />`
+  // Solo se incrusta si es realmente un data URI de imagen (lo produce
+  // FileReader.readAsDataURL); cualquier otra cosa se descarta.
+  const fotoSegura = /^data:image\/[a-z+.-]+;base64,[A-Za-z0-9+/=]+$/i.test(fotoBase64)
+    ? fotoBase64
+    : "";
+
+  const fotoHTML = fotoSegura
+    ? `<img src="${fotoSegura}" alt="Captura del evento" style="width:100%;max-height:200px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;" />`
     : `<div style="width:100%;height:120px;background:#f3f4f6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:13px;">Sin captura disponible</div>`;
 
   const usuarioHTML = isAuthorized && evento.nombre
     ? `
       <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-top:12px;display:flex;align-items:center;gap:12px;">
         <div style="width:40px;height:40px;border-radius:50%;background:${estadoColor}18;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:${estadoColor};border:2px solid ${estadoColor}44;">
-          ${evento.nombre.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase()}
+          ${escapeHtml(evento.nombre.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase())}
         </div>
         <div>
-          <div style="font-weight:700;font-size:14px;color:#111827;">${evento.nombre}</div>
-          <div style="font-size:10px;color:#6b7280;font-family:monospace;">ID: ${evento.usuario_id?.substring(0, 8) ?? "—"}</div>
+          <div style="font-weight:700;font-size:14px;color:#111827;">${escapeHtml(evento.nombre)}</div>
+          <div style="font-size:10px;color:#6b7280;font-family:monospace;">ID: ${escapeHtml(evento.usuario_id?.substring(0, 8) ?? "—")}</div>
         </div>
       </div>
     `
@@ -408,7 +415,7 @@ function generarHTMLInforme(evento: Evento, fotoBase64: string): string {
     ? `
       <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px;margin-top:12px;">
         <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#ef4444;margin-bottom:6px;">Motivo de Detección</div>
-        <div style="font-size:13px;color:#1f2937;line-height:1.4;">${evento.motivo ?? "Superficie plana detectada"}</div>
+        <div style="font-size:13px;color:#1f2937;line-height:1.4;">${escapeHtml(evento.motivo ?? "Superficie plana detectada")}</div>
       </div>
     `
     : "";
@@ -427,7 +434,7 @@ function generarHTMLInforme(evento: Evento, fotoBase64: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Informe DepthGuard — ${evento.id.substring(0, 8)}</title>
+  <title>Informe DepthGuard — ${escapeHtml(evento.id.substring(0, 8))}</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -450,7 +457,7 @@ function generarHTMLInforme(evento: Evento, fotoBase64: string): string {
       </div>
       <div style="text-align:right;">
         <div style="font-size:10px;color:#6b7280;">Informe de Evento</div>
-        <div style="font-size:10px;font-family:monospace;color:#9ca3af;">#${evento.id.substring(0, 8)}</div>
+        <div style="font-size:10px;font-family:monospace;color:#9ca3af;">#${escapeHtml(evento.id.substring(0, 8))}</div>
       </div>
     </div>
 
@@ -468,15 +475,15 @@ function generarHTMLInforme(evento: Evento, fotoBase64: string): string {
       </tr>
       <tr>
         <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;color:#6b7280;">Cámara</td>
-        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;font-weight:600;">${evento.camera_id ?? "entrada_principal"} (${evento.camera_type ?? "3D"})</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;font-weight:600;">${escapeHtml(evento.camera_id ?? "entrada_principal")} (${escapeHtml(evento.camera_type ?? "3D")})</td>
       </tr>
       <tr>
         <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;color:#6b7280;">Verificación</td>
-        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;font-weight:600;">${evento.verification_level ?? "3D_antispoofing"}</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;font-weight:600;">${escapeHtml(evento.verification_level ?? "3D_antispoofing")}</td>
       </tr>
       <tr>
         <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:11px;color:#6b7280;">ID Evento</td>
-        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:10px;font-family:monospace;">${evento.id}</td>
+        <td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:10px;font-family:monospace;">${escapeHtml(evento.id)}</td>
       </tr>
     </table>
 

@@ -1,9 +1,8 @@
 # DepthGuard - robots.txt
 # https://depthguard.app
+#
+# Panel de administracion de un sistema de control de acceso:
+# no debe indexarse en buscadores.
 
 User-agent: *
-Allow: /
-Disallow: /auth/callback
-
-# Sitemap
-Sitemap: https://depthguard.app/sitemap.xml
+Disallow: /
