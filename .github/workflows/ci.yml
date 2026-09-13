@@ -1,0 +1,44 @@
+# Integración continua: verifica que el proyecto compila y que los tests pasan
+# antes de mezclar cualquier cambio en main.
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Typecheck, tests y build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v5
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Verificación de tipos
+        run: npm run lint
+
+      - name: Tests unitarios
+        run: npm run test:run
+
+      - name: Build de producción
+        run: npm run build
+
+      - name: Auditoría de dependencias
+        # Informativa: no bloquea el merge por vulnerabilidades de desarrollo.
+        run: npm audit --audit-level=high || true

@@ -1,49 +1,46 @@
+import { toCsvCell } from "./sanitize";
+
 /**
  * Exporta un arreglo de objetos a un archivo CSV.
+ *
+ * Los valores se pasan por `toCsvCell`, que además de escapar comillas
+ * neutraliza la inyección de fórmulas: una celda que empiece por `=`, `+`,
+ * `-` o `@` sería ejecutada por Excel al abrir el archivo.
+ *
  * @param data Arreglo de objetos (ej. Eventos del historial)
  * @param filename Nombre del archivo a descargar (incluir .csv)
+ * @returns `true` si se generó la descarga, `false` si no había datos.
  */
-export function exportToCSV(data: any[], filename: string) {
-  if (!data || data.length === 0) {
-    alert("No hay datos para exportar.");
-    return;
-  }
+export function exportToCSV<T extends object>(data: T[], filename: string): boolean {
+  if (!data || data.length === 0) return false;
 
   // Extraer cabeceras (keys) del primer objeto
   const headers = Object.keys(data[0]);
 
-  // Construir el contenido CSV
-  const csvRows = [];
-  
-  // Fila de cabeceras
-  csvRows.push(headers.join(","));
+  const csvRows = [
+    headers.map(toCsvCell).join(","),
+    ...data.map((row) =>
+      headers.map((header) => toCsvCell((row as Record<string, unknown>)[header])).join(",")
+    ),
+  ];
 
-  // Filas de datos
-  for (const row of data) {
-    const values = headers.map(header => {
-      const val = row[header];
-      // Si el valor es un objeto (ej. metricas_json), serializarlo a string
-      if (val !== null && typeof val === "object") {
-        return `"${JSON.stringify(val).replace(/"/g, '""')}"`;
-      }
-      // Escapar comillas dobles y comas envolviendo en comillas
-      const valStr = String(val ?? "");
-      return `"${valStr.replace(/"/g, '""')}"`;
-    });
-    csvRows.push(values.join(","));
-  }
+  // \uFEFF = BOM: sin el, Excel abre el CSV como ANSI y rompe los acentos.
+  const blob = new Blob(["\uFEFF" + csvRows.join("\n")], {
+    type: "text/csv;charset=utf-8;",
+  });
 
-  const csvContent = csvRows.join("\n");
-  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" }); // uFEFF = BOM para Excel (UTF-8)
-  
-  const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
-  
-  link.setAttribute("href", url);
-  link.setAttribute("download", filename);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
   link.style.visibility = "hidden";
-  
+
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+
+  // Liberar el blob: sin esto queda retenido en memoria hasta recargar.
+  URL.revokeObjectURL(url);
+
+  return true;
 }

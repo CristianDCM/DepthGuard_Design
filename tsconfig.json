@@ -22,5 +22,10 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  // El typecheck del navegador cubre solo la app. Las Edge Functions corren
+  // en Deno (APIs e imports por URL propios) y se verifican aparte con
+  // `deno check`, ver supabase/functions/deno.json.
+  "include": ["src", "vite.config.ts", "vitest.config.ts"],
+  "exclude": ["node_modules", "dist", "supabase"]
 }

@@ -59,8 +59,8 @@ export default function UserProfile() {
       <header className="fixed top-0 w-full z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between w-full">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate(-1)} className="active:scale-95 transition-transform">
-              <ArrowLeft className="w-6 h-6 text-dg-accent" />
+            <button onClick={() => navigate(-1)} aria-label="Volver a la pantalla anterior" className="active:scale-95 transition-transform">
+              <ArrowLeft className="w-6 h-6 text-dg-accent" aria-hidden="true" />
             </button>
             <h1 className="font-headline font-bold text-xl tracking-wider text-white">Perfil de Usuario</h1>
           </div>
@@ -136,7 +136,7 @@ export default function UserProfile() {
                         src={evento.foto_url!} 
                         alt="Capture"
                       />
-                      <div className="absolute bottom-1 right-1 bg-dg-bg/80 text-[8px] px-1 rounded font-mono text-white">
+                      <div className="absolute bottom-1 right-1 bg-dg-bg/80 text-[10px] px-1 rounded font-mono text-white">
                         {new Date(evento.timestamp).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit", hour12: true })}
                       </div>
                     </div>

@@ -184,7 +184,7 @@ export default function LiveMonitor() {
               }`}
             />
             <span
-              className={`text-[8px] font-bold tracking-widest uppercase ${
+              className={`text-[10px] font-bold tracking-widest uppercase ${
                 edgeOnline ? "text-dg-accent" : "text-dg-error"
               }`}
             >
@@ -276,7 +276,7 @@ function CameraPanel({
             </h2>
             <div className="flex items-center gap-2 mt-0.5">
               <span
-                className={`text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${
+                className={`text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${
                   cameraType === "3D"
                     ? "bg-dg-accent/10 text-dg-accent"
                     : "bg-blue-500/10 text-blue-400"
@@ -285,7 +285,7 @@ function CameraPanel({
                 {cameraType === "3D" ? "Anti-spoofing 3D" : "Verificación 2D"}
               </span>
               <span
-                className={`flex items-center gap-1 text-[9px] font-bold uppercase ${
+                className={`flex items-center gap-1 text-[10px] font-bold uppercase ${
                   camaraActiva ? "text-dg-success" : "text-dg-error"
                 }`}
               >
@@ -348,7 +348,7 @@ function CameraPanel({
                     <User className="w-4 h-4 text-dg-accent" />
                   </div>
                   <div>
-                    <div className="text-[9px] text-dg-text-muted uppercase font-bold tracking-wider">
+                    <div className="text-[10px] text-dg-text-muted uppercase font-bold tracking-wider">
                       Sujeto
                     </div>
                     <div className="text-sm font-bold text-white">
@@ -366,7 +366,7 @@ function CameraPanel({
             {/* Confidence Badge */}
             {ultimoEvento?.confianza != null && (
               <div className="bg-dg-bg px-3 py-2 rounded-lg border border-dg-border flex flex-col items-end shrink-0">
-                <span className="text-[9px] text-dg-text-muted font-bold uppercase">
+                <span className="text-[10px] text-dg-text-muted font-bold uppercase">
                   Confianza
                 </span>
                 <span
@@ -452,7 +452,7 @@ function CameraPanel({
           <h4 className="text-[10px] font-bold text-dg-text-muted uppercase tracking-[0.15em]">
             Últimos Eventos
           </h4>
-          <span className="text-[9px] text-dg-text-muted font-medium">
+          <span className="text-[10px] text-dg-text-muted font-medium">
             {eventosRecientes.length} registros
           </span>
         </div>
@@ -483,7 +483,7 @@ function CameraPanel({
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-dg-accent rounded-full border border-dg-card animate-pulse" />
           </div>
           <div>
-            <div className="text-[8px] font-bold text-dg-text-muted uppercase tracking-wider">
+            <div className="text-[10px] font-bold text-dg-text-muted uppercase tracking-wider">
               Supabase Realtime
             </div>
             <div className="text-[10px] font-bold text-dg-accent flex items-center gap-1">
@@ -492,7 +492,7 @@ function CameraPanel({
             </div>
           </div>
         </div>
-        <div className="text-[9px] px-2 py-1 rounded bg-white/5 font-mono text-dg-text-muted">
+        <div className="text-[10px] px-2 py-1 rounded bg-white/5 font-mono text-dg-text-muted">
           {cameraId === "entrada_principal" ? "CAM-01" : "CAM-02"} ·{" "}
           {cameraType}
         </div>
@@ -540,7 +540,7 @@ function MiniEventRow({ evento, onClick }: { key?: React.Key; evento: Evento; on
           {formatTime(evento.timestamp)}
         </span>
         {evento.confianza != null && (
-          <p className="text-[9px] font-bold text-dg-text-muted/60">
+          <p className="text-[10px] font-bold text-dg-text-muted/60">
             {Math.round(evento.confianza * 100)}%
           </p>
         )}
@@ -715,7 +715,7 @@ function LiveSnapshotPreview({
           </span>
         </div>
         {lastUpdate > 0 && (
-          <span className="text-[9px] text-white/50 font-mono">
+          <span className="text-[10px] text-white/50 font-mono">
             {new Date(lastUpdate).toLocaleTimeString("es", {
               hour: "2-digit",
               minute: "2-digit",
@@ -745,7 +745,7 @@ function LiveSnapshotPreview({
 
       {/* Footer sutil */}
       <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5 bg-gradient-to-t from-black/60 to-transparent">
-        <span className="text-[9px] text-white/40 font-medium">
+        <span className="text-[10px] text-white/40 font-medium">
           Actualización cada 2s · Resolución reducida
         </span>
       </div>

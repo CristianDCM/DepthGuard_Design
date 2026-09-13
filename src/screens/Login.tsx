@@ -3,18 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Shield, Lock, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { loginAdmin } from "../lib/supabase";
+import { getLockoutSeconds, LOCKOUT_THRESHOLDS } from "../lib/loginLockout";
 
 // ============================================
 // Rate limiting — anti fuerza bruta
 // ============================================
-
-/** Umbrales de bloqueo progresivo: [intentos, segundos de bloqueo] */
-const LOCKOUT_THRESHOLDS: [number, number][] = [
-  [3, 30],    // 3 intentos fallidos → 30s de bloqueo
-  [5, 120],   // 5 intentos → 2 minutos
-  [7, 300],   // 7 intentos → 5 minutos
-  [10, 600],  // 10 intentos → 10 minutos
-];
 
 const STORAGE_KEY = "dg_login_attempts";
 
@@ -33,14 +26,6 @@ function getAttemptState(): LoginAttemptState {
 
 function saveAttemptState(state: LoginAttemptState) {
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-function getLockoutSeconds(attempts: number): number {
-  let lockout = 0;
-  for (const [threshold, seconds] of LOCKOUT_THRESHOLDS) {
-    if (attempts >= threshold) lockout = seconds;
-  }
-  return lockout;
 }
 
 // ============================================
@@ -194,9 +179,11 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  aria-pressed={showPassword}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-dg-text-muted hover:text-white transition-colors"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff className="w-5 h-5" aria-hidden="true" /> : <Eye className="w-5 h-5" aria-hidden="true" />}
                 </button>
               </div>
             </div>
