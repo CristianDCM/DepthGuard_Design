@@ -60,6 +60,14 @@ jobs:
 
       - name: Determinar qué funciones desplegar
         id: objetivo
+        # Los valores del contexto ${{ }} entran como variables de entorno, no
+        # interpolados en el cuerpo del script. Interpolarlos permitiria
+        # inyeccion de codigo: basta una rama o un directorio cuyo nombre
+        # contenga metacaracteres de shell para que se ejecuten como comandos.
+        env:
+          EVENTO: ${{ github.event_name }}
+          ANTES: ${{ github.event.before }}
+          AHORA: ${{ github.sha }}
         run: |
           set -euo pipefail
 
@@ -67,9 +75,7 @@ jobs:
             find supabase/functions -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort
           }
 
-          ANTES="${{ github.event.before }}"
-
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          if [ "$EVENTO" = "workflow_dispatch" ]; then
             FUNCIONES=$(listar_todas)
             echo "Despliegue manual: todas las funciones."
           elif [ -z "$ANTES" ] || [ "$ANTES" = "0000000000000000000000000000000000000000" ] \
@@ -78,7 +84,7 @@ jobs:
             # recortado o force-push): no se puede saber qué cambió.
             FUNCIONES=$(listar_todas)
             echo "No hay commit anterior con el que comparar: se despliegan todas."
-          elif ! git diff --quiet "$ANTES" "${{ github.sha }}" -- supabase/config.toml supabase/functions/deno.json; then
+          elif ! git diff --quiet "$ANTES" "$AHORA" -- supabase/config.toml supabase/functions/deno.json; then
             # config.toml define verify_jwt y deno.json el mapa de importaciones:
             # ambos afectan a TODAS las funciones, así que hay que reaplicarlos
             # en bloque. Sin esto, un cambio en deno.json no desplegaría nada.
@@ -86,7 +92,7 @@ jobs:
             echo "Cambió config.toml o deno.json: se redespliegan todas."
           else
             # Solo las funciones tocadas en este push.
-            FUNCIONES=$(git diff --name-only "$ANTES" "${{ github.sha }}" -- 'supabase/functions/**' \
+            FUNCIONES=$(git diff --name-only "$ANTES" "$AHORA" -- 'supabase/functions/**' \
               | cut -d/ -f3 | sort -u)
             echo "Funciones modificadas en este push."
           fi
@@ -98,6 +104,11 @@ jobs:
           echo "FIN" >> "$GITHUB_OUTPUT"
 
       - name: Desplegar
+        # FUNCIONES llega por entorno, nunca interpolada en el script: su
+        # contenido procede de rutas de archivo del repositorio y no es
+        # confiable.
+        env:
+          FUNCIONES: ${{ steps.objetivo.outputs.funciones }}
         run: |
           set -euo pipefail
           DESPLEGADAS=0
@@ -113,7 +124,7 @@ jobs:
             supabase functions deploy "$fn"
             echo "::endgroup::"
             DESPLEGADAS=$((DESPLEGADAS + 1))
-          done <<< "${{ steps.objetivo.outputs.funciones }}"
+          done <<< "$FUNCIONES"
 
           if [ "$DESPLEGADAS" -eq 0 ]; then
             echo "::notice::No había ninguna función que desplegar."
