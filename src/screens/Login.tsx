@@ -138,12 +138,13 @@ export default function Login() {
             <img
               src="/logo.svg"
               alt="DepthGuard Logo"
-              className="w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(99,255,0,0.4)] z-10 relative"
+              className="w-24 h-24 object-contain z-10 relative"
             />
-            <div className="absolute inset-0 bg-[#63ff00]/20 blur-3xl rounded-full -z-10" />
+            {/* Halo del logotipo: la marca solo aparece aqui y en el wordmark. */}
+            <div className="absolute inset-0 bg-dg-brand/10 blur-3xl rounded-full -z-10" />
           </div>
-          <h1 className="text-4xl font-bold text-white tracking-tight font-headline">
-            Depth<span className="text-[#a3ff00]">Guard</span>
+          <h1 className="text-4xl font-bold text-dg-text tracking-tight font-headline">
+            Depth<span className="text-dg-brand">Guard</span>
           </h1>
           <p className="text-dg-text-muted text-sm mt-1">Sistema de Control de Acceso 3D</p>
         </motion.div>
@@ -168,7 +169,7 @@ export default function Login() {
                 required
                 disabled={isLocked}
                 aria-describedby={error ? "login-error" : undefined}
-                className="w-full bg-dg-input border border-dg-border text-white rounded-dg px-4 py-3 text-base placeholder:text-dg-text-muted focus:border-dg-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full bg-dg-input border border-dg-border text-dg-text rounded-dg px-4 py-3 text-base placeholder:text-dg-text-muted focus:border-dg-focus transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -186,14 +187,14 @@ export default function Login() {
                   required
                   disabled={isLocked}
                   aria-describedby={error ? "login-error" : undefined}
-                  className="w-full bg-dg-input border border-dg-border text-white rounded-dg px-4 py-3 text-base placeholder:text-dg-text-muted focus:border-dg-accent transition-colors pr-12 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full bg-dg-input border border-dg-border text-dg-text rounded-dg px-4 py-3 text-base placeholder:text-dg-text-muted focus:border-dg-focus transition-colors pr-12 disabled:opacity-40 disabled:cursor-not-allowed"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   aria-pressed={showPassword}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dg-text-muted hover:text-white transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dg-text-muted hover:text-dg-text transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" aria-hidden="true" /> : <Eye className="w-5 h-5" aria-hidden="true" />}
                 </button>

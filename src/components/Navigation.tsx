@@ -28,10 +28,10 @@ export default function Navigation() {
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 transition-colors",
-                isActive ? "text-dg-accent" : "text-dg-text-muted hover:text-dg-accent"
+                isActive ? "text-dg-action-text" : "text-dg-text-muted hover:text-dg-text"
               )}
             >
-              <item.icon aria-hidden="true" className={cn("w-5 h-5", isActive && "fill-dg-accent/20")} />
+              <item.icon aria-hidden="true" className={cn("w-5 h-5", isActive && "fill-dg-action-text/20")} />
               <span className="text-[10px] font-bold uppercase tracking-tighter">
                 {item.name}
               </span>

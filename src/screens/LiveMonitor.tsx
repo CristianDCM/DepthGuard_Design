@@ -162,7 +162,7 @@ export default function LiveMonitor() {
       <header className="sticky top-0 z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between w-full">
           <div className="flex items-center gap-3">
-            <Video className="w-6 h-6 text-dg-accent" />
+            <Video className="w-6 h-6 text-dg-text-secondary" aria-hidden="true" />
             <h1 className="text-xl font-bold tracking-tight font-headline">
               Monitor en Vivo
             </h1>
@@ -171,21 +171,21 @@ export default function LiveMonitor() {
           <div
             className={`flex items-center gap-1.5 px-2 py-1 rounded-full border ${
               edgeOnline
-                ? "bg-dg-accent/10 border-dg-accent/20"
+                ? "bg-dg-success/10 border-dg-success/20"
                 : "bg-dg-error/10 border-dg-error/20"
             }`}
           >
-            <Server className={`w-3 h-3 ${edgeOnline ? "text-dg-accent" : "text-dg-error"}`} />
+            <Server className={`w-3 h-3 ${edgeOnline ? "text-dg-success" : "text-dg-error"}`} aria-hidden="true" />
             <span
               className={`w-1.5 h-1.5 rounded-full ${
                 edgeOnline
-                  ? "bg-dg-accent shadow-[0_0_6px_#a3ff00] animate-pulse"
+                  ? "bg-dg-success shadow-[0_0_6px_var(--color-dg-success)] animate-pulse"
                   : "bg-dg-error"
               }`}
             />
             <span
               className={`text-[10px] font-bold tracking-widest uppercase ${
-                edgeOnline ? "text-dg-accent" : "text-dg-error"
+                edgeOnline ? "text-dg-success" : "text-dg-error"
               }`}
             >
               {edgeOnline ? "Online" : "Offline"}
@@ -197,7 +197,7 @@ export default function LiveMonitor() {
       <main className="flex-1 px-4 py-6 max-w-7xl mx-auto w-full">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <CameraPanel
@@ -262,16 +262,16 @@ function CameraPanel({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+            className={`w-10 h-10 rounded-dg flex items-center justify-center ${
               cameraType === "3D"
-                ? "bg-dg-accent/10 border border-dg-accent/20"
-                : "bg-blue-500/10 border border-blue-500/20"
+                ? "bg-dg-info/10 border border-dg-info/20"
+                : "bg-dg-info/10 border border-dg-info/20"
             }`}
           >
             {cameraType === "3D" ? (
-              <Shield className="w-5 h-5 text-dg-accent" />
+              <Shield className="w-5 h-5 text-dg-info" aria-hidden="true" />
             ) : (
-              <Eye className="w-5 h-5 text-blue-400" />
+              <Eye className="w-5 h-5 text-dg-info" />
             )}
           </div>
           <div>
@@ -280,10 +280,10 @@ function CameraPanel({
             </h2>
             <div className="flex items-center gap-2 mt-0.5">
               <span
-                className={`text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${
+                className={`text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-dg-sm ${
                   cameraType === "3D"
-                    ? "bg-dg-accent/10 text-dg-accent"
-                    : "bg-blue-500/10 text-blue-400"
+                    ? "bg-dg-info/10 text-dg-info"
+                    : "bg-dg-info/10 text-dg-info"
                 }`}
               >
                 {cameraType === "3D" ? "Anti-spoofing 3D" : "Verificación 2D"}
@@ -347,19 +347,19 @@ function CameraPanel({
                   Estatus de Seguridad
                 </span>
               </div>
-              <h3 className="font-headline text-xl font-bold text-white tracking-tight">
+              <h3 className="font-headline text-xl font-bold text-dg-text tracking-tight">
                 {statusConfig.title}
               </h3>
               {ultimoEvento?.nombre && (
-                <div className="flex items-center gap-2 mt-2 bg-dg-bg p-2.5 rounded-lg border border-dg-border">
-                  <div className="w-8 h-8 rounded-full bg-dg-accent/10 flex items-center justify-center shrink-0">
-                    <User className="w-4 h-4 text-dg-accent" />
+                <div className="flex items-center gap-2 mt-2 bg-dg-bg p-2.5 rounded-dg border border-dg-border">
+                  <div className="w-8 h-8 rounded-full bg-dg-input border border-dg-border flex items-center justify-center shrink-0">
+                    <User className="w-4 h-4 text-dg-text-secondary" aria-hidden="true" />
                   </div>
                   <div>
                     <div className="text-[10px] text-dg-text-muted uppercase font-bold tracking-wider">
                       Sujeto
                     </div>
-                    <div className="text-sm font-bold text-white">
+                    <div className="text-sm font-bold text-dg-text">
                       {ultimoEvento.nombre}
                     </div>
                   </div>
@@ -373,7 +373,7 @@ function CameraPanel({
             </div>
             {/* Confidence Badge */}
             {ultimoEvento?.confianza != null && (
-              <div className="bg-dg-bg px-3 py-2 rounded-lg border border-dg-border flex flex-col items-end shrink-0">
+              <div className="bg-dg-bg px-3 py-2 rounded-dg border border-dg-border flex flex-col items-end shrink-0">
                 <span className="text-[10px] text-dg-text-muted font-bold uppercase">
                   Confianza
                 </span>
@@ -440,14 +440,14 @@ function CameraPanel({
                 ((ultimoEvento.metricas_json.distancia ?? 0) / 150) * 100,
                 100
               )}
-              color="bg-blue-500"
+              color="bg-dg-info"
             />
             {cameraType === "3D" && (
               <MetricBar
                 label="Píxeles Válidos"
                 value={`${Math.round((ultimoEvento.metricas_json.pixeles_validos ?? 0) * 100)}%`}
                 progress={(ultimoEvento.metricas_json.pixeles_validos ?? 0) * 100}
-                color="bg-violet-500"
+                color="bg-dg-info"
               />
             )}
           </div>
@@ -486,21 +486,21 @@ function CameraPanel({
       {/* Connection footer */}
       <div className="flex items-center justify-between cyber-card p-3">
         <div className="flex items-center gap-2">
-          <div className="relative w-6 h-6 flex items-center justify-center bg-dg-accent/10 rounded-md">
-            <Cloud className="w-3.5 h-3.5 text-dg-accent" />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-dg-accent rounded-full border border-dg-card animate-pulse" />
+          <div className="relative w-6 h-6 flex items-center justify-center bg-dg-success/10 rounded-dg-sm">
+            <Cloud className="w-3.5 h-3.5 text-dg-success" aria-hidden="true" />
+            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-dg-success rounded-full border border-dg-card animate-pulse" />
           </div>
           <div>
             <div className="text-[10px] font-bold text-dg-text-muted uppercase tracking-wider">
               Supabase Realtime
             </div>
-            <div className="text-[10px] font-bold text-dg-accent flex items-center gap-1">
-              <span className="w-1 h-1 rounded-full bg-dg-accent" />
+            <div className="text-[10px] font-bold text-dg-success flex items-center gap-1">
+              <span className="w-1 h-1 rounded-full bg-dg-success" aria-hidden="true" />
               Suscrito
             </div>
           </div>
         </div>
-        <div className="text-[10px] px-2 py-1 rounded bg-white/5 font-mono text-dg-text-muted">
+        <div className="text-[10px] px-2 py-1 rounded-dg-sm bg-white/5 font-mono text-dg-text-muted">
           {cameraId === "entrada_principal" ? "CAM-01" : "CAM-02"} ·{" "}
           {cameraType}
         </div>
@@ -527,7 +527,7 @@ function MiniEventRow({ evento, onClick }: { key?: React.Key; evento: Evento; on
       className={`flex items-center gap-3 px-4 py-3 transition-colors ${onClick ? 'cursor-pointer hover:bg-white/5' : ''}`}
     >
       <div
-        className="w-7 h-7 rounded-md flex items-center justify-center shrink-0"
+        className="w-7 h-7 rounded-dg-sm flex items-center justify-center shrink-0"
         style={{ backgroundColor: `${config.color}15` }}
       >
         <config.icon
@@ -561,7 +561,7 @@ function MetricBar({
   label,
   value,
   progress,
-  color = "bg-dg-accent",
+  color = "bg-dg-info",
 }: {
   label: string;
   value: string | number;
@@ -571,17 +571,17 @@ function MetricBar({
   return (
     <div className="space-y-1.5">
       <div className="flex justify-between items-end">
-        <span className="text-xs font-medium text-slate-300">{label}</span>
+        <span className="text-xs font-medium text-dg-text-secondary">{label}</span>
         <span className="text-[10px] font-mono text-dg-text-muted">
           {value}
         </span>
       </div>
-      <div className="h-1.5 w-full bg-dg-bg rounded-full overflow-hidden">
+      <div className="h-1.5 w-full bg-dg-canvas rounded-full overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(progress, 100)}%` }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className={`h-full ${color} rounded-full shadow-[0_0_8px_rgba(163,255,0,0.3)]`}
+          className={`h-full ${color} rounded-full`}
         />
       </div>
     </div>
@@ -597,7 +597,7 @@ function getStatusConfig(evento: Evento | null) {
     return {
       title: "Esperando...",
       icon: Activity,
-      accentColor: "#888888",
+      accentColor: "var(--color-dg-text-muted)",
       borderClass: "",
     };
   }
@@ -607,22 +607,22 @@ function getStatusConfig(evento: Evento | null) {
       return {
         title: "Acceso Permitido",
         icon: CheckCircle,
-        accentColor: "#4ade80",
+        accentColor: "var(--color-dg-success)",
         borderClass: "",
       };
     case "FRAUDE":
       return {
         title: "¡Fraude Detectado!",
         icon: ShieldAlert,
-        accentColor: "#f87171",
-        borderClass: "border-dg-error/30 shadow-[0_0_20px_rgba(248,113,113,0.1)]",
+        accentColor: "var(--color-dg-error)",
+        borderClass: "border-dg-error/40",
       };
     case "DESCONOCIDO":
       return {
         title: "Desconocido",
         icon: ShieldQuestion,
-        accentColor: "#facc15",
-        borderClass: "border-yellow-500/20",
+        accentColor: "var(--color-dg-warning)",
+        borderClass: "border-dg-warning/30",
       };
     default:
       // El estado lo escribe el edge, no la app. Sin este caso, un valor
@@ -631,7 +631,7 @@ function getStatusConfig(evento: Evento | null) {
       return {
         title: "Estado no reconocido",
         icon: HelpCircle,
-        accentColor: "#888888",
+        accentColor: "var(--color-dg-text-muted)",
         borderClass: "",
       };
   }
@@ -640,13 +640,13 @@ function getStatusConfig(evento: Evento | null) {
 function getEventMiniConfig(evento: Evento) {
   switch (evento.estado) {
     case "ACCESO_PERMITIDO":
-      return { label: "Acceso Autorizado", icon: CheckCircle, color: "#4ade80" };
+      return { label: "Acceso Autorizado", icon: CheckCircle, color: "var(--color-dg-success)" };
     case "FRAUDE":
-      return { label: "Intento de Fraude", icon: AlertTriangle, color: "#f87171" };
+      return { label: "Intento de Fraude", icon: AlertTriangle, color: "var(--color-dg-error)" };
     case "DESCONOCIDO":
-      return { label: "Desconocido", icon: HelpCircle, color: "#facc15" };
+      return { label: "Desconocido", icon: HelpCircle, color: "var(--color-dg-warning)" };
     default:
-      return { label: "Estado no reconocido", icon: HelpCircle, color: "#888888" };
+      return { label: "Estado no reconocido", icon: HelpCircle, color: "var(--color-dg-text-muted)" };
   }
 }
 
@@ -753,7 +753,7 @@ function LiveSnapshotPreview({
       {/* Header del preview */}
       <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 py-2 bg-gradient-to-b from-black/70 to-transparent">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_6px_#ef4444]" />
+          <span className="w-2 h-2 rounded-full bg-dg-error animate-pulse shadow-[0_0_6px_var(--color-dg-error)]" />
           <span className="text-[10px] font-bold text-white/90 uppercase tracking-widest">
             En Vivo
           </span>
@@ -775,12 +775,12 @@ function LiveSnapshotPreview({
         <img
           src={snapshotUrl}
           alt="Preview en vivo de la cámara"
-          className="w-full aspect-video object-contain bg-black"
+          className="w-full aspect-video object-contain bg-dg-canvas"
           onError={() => setImgError(true)}
         />
       ) : (
         <div className="aspect-video bg-dg-bg flex flex-col items-center justify-center gap-2 text-dg-text-muted">
-          <div className="w-6 h-6 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
           <span className="text-xs font-medium">
             {imgError ? "Esperando snapshot del edge..." : "Conectando..."}
           </span>

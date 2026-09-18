@@ -38,7 +38,6 @@ export default function UserManagement() {
     (user.notas ?? "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const colors = ["text-dg-accent", "text-blue-400", "text-purple-400", "text-pink-400", "text-cyan-400", "text-orange-400"];
 
   function getInitials(nombre: string) {
     return nombre.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
@@ -54,12 +53,12 @@ export default function UserManagement() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between px-4 py-4">
             <div className="flex items-center gap-3">
-              <Users className="w-6 h-6 text-dg-accent" />
+              <Users className="w-6 h-6 text-dg-text-secondary" aria-hidden="true" />
               <h1 className="text-xl font-bold tracking-tight font-headline">Usuarios</h1>
             </div>
             <button 
               onClick={() => navigate("/register/start")}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-dg-accent text-dg-bg text-sm font-bold shadow-[0_0_15px_rgba(163,255,0,0.3)] active:scale-95 transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-dg bg-dg-action text-white text-sm font-semibold hover:bg-dg-action-hover active:scale-[0.98] transition-colors"
             >
               <Plus className="w-4 h-4" /> Registrar
             </button>
@@ -75,24 +74,24 @@ export default function UserManagement() {
                 placeholder="Buscar usuario..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-dg-card border border-dg-border rounded-xl py-2.5 pl-10 pr-4 text-sm focus:border-dg-accent transition-colors placeholder:text-dg-text-muted text-white"
+                className="w-full bg-dg-card border border-dg-border rounded-dg py-2.5 pl-10 pr-4 text-sm focus:border-dg-focus transition-colors placeholder:text-dg-text-muted text-dg-text"
               />
             </div>
             
-            <div className="bg-dg-card/50 border border-dg-border rounded-xl p-3 flex justify-around text-center max-w-2xl">
+            <div className="bg-dg-card/50 border border-dg-border rounded-dg p-3 flex justify-around text-center max-w-2xl">
               <div>
-                <p className="text-dg-accent font-bold text-sm">{users.length}</p>
+                <p className="text-dg-text font-bold text-sm">{users.length}</p>
                 <p className="text-[10px] text-dg-text-muted uppercase tracking-wider">Registrados</p>
               </div>
               <div className="w-[1px] bg-dg-border" />
               <div>
-                <p className="text-white font-bold text-sm">{totalAccesos}</p>
+                <p className="text-dg-text font-bold text-sm">{totalAccesos}</p>
                 <p className="text-[10px] text-dg-text-muted uppercase tracking-wider">Accesos</p>
               </div>
               <div className="w-[1px] bg-dg-border" />
               <div>
-                <p className="text-white font-bold text-sm flex items-center justify-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-dg-accent animate-pulse" /> {estadoCount.activos} / {estadoCount.inactivos}
+                <p className="text-dg-text font-bold text-sm flex items-center justify-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-dg-success animate-pulse" aria-hidden="true" /> {estadoCount.activos} / {estadoCount.inactivos}
                 </p>
                 <p className="text-[10px] text-dg-text-muted uppercase tracking-wider">Activos / Inactivos</p>
               </div>
@@ -106,7 +105,7 @@ export default function UserManagement() {
         
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
           </div>
         ) : filteredUsers.length > 0 ? (
           // En escritorio la lista pasa a rejilla: en una sola columna las
@@ -119,15 +118,15 @@ export default function UserManagement() {
               animate={{ opacity: 1, x: 0 }}
               className={`cyber-card p-4 flex items-center gap-4 shadow-sm ${!user.activo ? 'opacity-50' : ''}`}
             >
-              <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                <span className={`font-bold text-sm ${user.activo ? colors[index % colors.length] : 'text-dg-text-muted'}`}>
+              <div className="w-12 h-12 rounded-full bg-dg-input border border-dg-border flex items-center justify-center shrink-0">
+                <span className={`font-bold text-sm ${user.activo ? 'text-dg-text-secondary' : 'text-dg-text-off'}`}>
                   {getInitials(user.nombre)}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-start">
-                  <h3 className="font-bold text-white truncate flex items-center gap-1.5">
-                    <span className={`text-[10px] ${user.activo ? 'text-dg-accent' : 'text-dg-text-muted'}`}>●</span> {user.nombre}
+                  <h3 className="font-bold text-dg-text truncate flex items-center gap-1.5">
+                    <span className={`text-[10px] ${user.activo ? 'text-dg-success' : 'text-dg-text-muted'}`}>●</span> {user.nombre}
                   </h3>
                   <button 
                     onClick={(e) => { e.stopPropagation(); navigate(`/users/delete/${user.id}`); }}
@@ -141,7 +140,7 @@ export default function UserManagement() {
                 {user.notas && <p className="text-[10px] text-dg-text-muted/60 italic truncate">Nota: {user.notas}</p>}
                 <button 
                   onClick={() => navigate(`/profile/${user.id}`)}
-                  className="mt-2 text-xs font-bold text-dg-accent flex items-center gap-1"
+                  className="mt-2 text-xs font-bold text-dg-action-text flex items-center gap-1"
                 >
                   Ver perfil <ChevronRight className="w-3 h-3" />
                 </button>

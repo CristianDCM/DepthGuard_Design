@@ -186,7 +186,9 @@ export default function Dashboard() {
       });
     });
 
-    const DONUT_COLORS = ['#f87171', '#fb923c', '#facc15', '#f43f5e', '#ef4444'];
+    const DONUT_COLORS = [100, 78, 58, 42, 30].map(
+      (pct) => `color-mix(in srgb, var(--color-dg-error) ${pct}%, var(--color-dg-card))`
+    );
     const motivosArr = Object.keys(motivosCount).map((key, index) => ({
       name: key,
       value: motivosCount[key],
@@ -250,7 +252,7 @@ export default function Dashboard() {
   const statsConfig = [
     { label: "Accesos", value: activeStats.accesos, sub: activeSub, icon: CheckCircle, color: "text-dg-success" },
     { label: "Fraudes", value: activeStats.fraudes, sub: activeSub, icon: AlertTriangle, color: "text-dg-error" },
-    { label: "Desconocidos", value: activeStats.desconocidos, sub: activeSub, icon: HelpCircle, color: "text-yellow-500" },
+    { label: "Desconocidos", value: activeStats.desconocidos, sub: activeSub, icon: HelpCircle, color: "text-dg-warning" },
   ];
 
   function getEventConfig(evento: Evento) {
@@ -260,7 +262,7 @@ export default function Dashboard() {
       case "FRAUDE":
         return { title: "Intento de Fraude", sub: evento.motivo ?? "Superficie plana detectada", icon: AlertTriangle, color: "text-dg-error", border: false };
       case "DESCONOCIDO":
-        return { title: "Desconocido Detectado", sub: "Persona no registrada", icon: HelpCircle, color: "text-yellow-500", border: true };
+        return { title: "Desconocido Detectado", sub: "Persona no registrada", icon: HelpCircle, color: "text-dg-warning", border: true };
       default:
         // El estado lo escribe el edge: un valor inesperado no puede dejar
         // la funcion devolviendo undefined y romper el render del listado.
@@ -278,7 +280,7 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between px-4 py-4">
             <div className="flex items-center gap-2">
-              <Home className="w-6 h-6 text-dg-accent" />
+              <Home className="w-6 h-6 text-dg-text-secondary" aria-hidden="true" />
               <h1 className="text-xl font-bold tracking-tight font-headline">Inicio</h1>
             </div>
           </div>
@@ -288,7 +290,7 @@ export default function Dashboard() {
       <main className="flex-1 px-4 py-6 space-y-6 max-w-7xl mx-auto w-full">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <>
@@ -318,7 +320,7 @@ export default function Dashboard() {
                         {stat.sub && <span className="text-[10px] text-dg-text-muted font-medium">{stat.sub}</span>}
                       </div>
                     </div>
-                    <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-dg bg-white/5 flex items-center justify-center shrink-0">
                       <stat.icon className={`w-7 h-7 ${stat.color}`} />
                     </div>
                   </div>
@@ -339,9 +341,9 @@ export default function Dashboard() {
                       <button
                         key={p}
                         onClick={() => { setModoFiltro('preset'); setDiasPreset(p); }}
-                        className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md transition-all ${modoFiltro === 'preset' && diasPreset === p
-                            ? 'bg-dg-accent text-black'
-                            : 'bg-white/5 text-dg-text-muted hover:bg-white/10 hover:text-white'
+                        className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-dg-sm transition-all ${modoFiltro === 'preset' && diasPreset === p
+                            ? 'bg-dg-action text-white'
+                            : 'bg-white/5 text-dg-text-muted hover:bg-white/10 hover:text-dg-text'
                           }`}
                       >
                         {p}d
@@ -349,9 +351,9 @@ export default function Dashboard() {
                     ))}
                     <button
                       onClick={() => setModoFiltro('custom')}
-                      className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 ${modoFiltro === 'custom'
-                          ? 'bg-dg-accent text-black'
-                          : 'bg-white/5 text-dg-text-muted hover:bg-white/10 hover:text-white'
+                      className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-dg-sm transition-all flex items-center gap-1.5 ${modoFiltro === 'custom'
+                          ? 'bg-dg-action text-white'
+                          : 'bg-white/5 text-dg-text-muted hover:bg-white/10 hover:text-dg-text'
                         }`}
                     >
                       <Calendar className="w-3 h-3" /> Rango
@@ -364,7 +366,7 @@ export default function Dashboard() {
                         aria-label="Inicio del período personalizado"
                         value={customDesde}
                         onChange={(e) => setCustomDesde(e.target.value)}
-                        className="bg-white/5 border border-dg-border rounded-md px-2 py-1 text-[11px] text-dg-text-secondary focus:border-dg-accent transition-colors [color-scheme:dark]"
+                        className="bg-white/5 border border-dg-border rounded-dg-sm px-2 py-1 text-[11px] text-dg-text-secondary focus:border-dg-focus transition-colors [color-scheme:dark]"
                       />
                       <span className="text-dg-text-muted text-xs">—</span>
                       <input
@@ -372,7 +374,7 @@ export default function Dashboard() {
                         aria-label="Fin del período personalizado"
                         value={customHasta}
                         onChange={(e) => setCustomHasta(e.target.value)}
-                        className="bg-white/5 border border-dg-border rounded-md px-2 py-1 text-[11px] text-dg-text-secondary focus:border-dg-accent transition-colors [color-scheme:dark]"
+                        className="bg-white/5 border border-dg-border rounded-dg-sm px-2 py-1 text-[11px] text-dg-text-secondary focus:border-dg-focus transition-colors [color-scheme:dark]"
                       />
                     </div>
                   )}
@@ -386,7 +388,7 @@ export default function Dashboard() {
                     {filtroDia && (
                       <button
                         onClick={() => { setFiltroDia(null); setOrigenFiltro(null); }}
-                        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-dg-accent/15 text-dg-accent border border-dg-accent/30 hover:bg-dg-error/20 hover:text-dg-error hover:border-dg-error/30 transition-all"
+                        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-dg-sm bg-dg-action-text/15 text-dg-action-text border border-dg-action-text/30 hover:bg-dg-error/20 hover:text-dg-error hover:border-dg-error/30 transition-all"
                       >
                         Día: {filtroDia} <span className="text-[10px] opacity-70">✕</span>
                       </button>
@@ -394,7 +396,7 @@ export default function Dashboard() {
                     {filtroHora !== null && (
                       <button
                         onClick={() => { setFiltroHora(null); if (!filtroDia) setOrigenFiltro(null); }}
-                        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-dg-accent/15 text-dg-accent border border-dg-accent/30 hover:bg-dg-error/20 hover:text-dg-error hover:border-dg-error/30 transition-all"
+                        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-dg-sm bg-dg-action-text/15 text-dg-action-text border border-dg-action-text/30 hover:bg-dg-error/20 hover:text-dg-error hover:border-dg-error/30 transition-all"
                       >
                         Hora: {filtroHora}:00 <span className="text-[10px] opacity-70">✕</span>
                       </button>
@@ -402,14 +404,14 @@ export default function Dashboard() {
                     {filtroMotivo && (
                       <button
                         onClick={() => { setFiltroMotivo(null); setOrigenFiltro(null); }}
-                        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-dg-accent/15 text-dg-accent border border-dg-accent/30 hover:bg-dg-error/20 hover:text-dg-error hover:border-dg-error/30 transition-all"
+                        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-dg-sm bg-dg-action-text/15 text-dg-action-text border border-dg-action-text/30 hover:bg-dg-error/20 hover:text-dg-error hover:border-dg-error/30 transition-all"
                       >
                         {filtroMotivo} <span className="text-[10px] opacity-70">✕</span>
                       </button>
                     )}
                     <button
                       onClick={() => { setFiltroDia(null); setFiltroHora(null); setFiltroMotivo(null); setOrigenFiltro(null); }}
-                      className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-white/5 text-dg-text-muted hover:bg-dg-error/20 hover:text-dg-error transition-all"
+                      className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-dg-sm bg-white/5 text-dg-text-muted hover:bg-dg-error/20 hover:text-dg-error transition-all"
                     >
                       Limpiar todo
                     </button>
@@ -433,24 +435,24 @@ export default function Dashboard() {
                       }}>
                         <defs>
                           <linearGradient id="colorAccesos" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#4ade80" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#4ade80" stopOpacity={0} />
+                            <stop offset="5%" stopColor="var(--color-dg-success)" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="var(--color-dg-success)" stopOpacity={0} />
                           </linearGradient>
                           <linearGradient id="colorFraudes" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#f87171" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#f87171" stopOpacity={0} />
+                            <stop offset="5%" stopColor="var(--color-dg-error)" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="var(--color-dg-error)" stopOpacity={0} />
                           </linearGradient>
                           <linearGradient id="colorDesconocidos" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#eab308" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#eab308" stopOpacity={0} />
+                            <stop offset="5%" stopColor="var(--color-dg-warning)" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="var(--color-dg-warning)" stopOpacity={0} />
                           </linearGradient>
                         </defs>
-                        <XAxis dataKey="date" tick={{ fill: '#888', fontSize: 10 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fill: '#888', fontSize: 10 }} axisLine={false} tickLine={false} />
-                        <Tooltip cursor={false} contentStyle={{ backgroundColor: '#0f0f23', border: '1px solid #2a2a4a', borderRadius: '8px', fontSize: '12px' }} />
-                        <Area type="monotone" dataKey="accesos" name="Accesos" stroke="#4ade80" fillOpacity={1} fill="url(#colorAccesos)" className="cursor-pointer" activeDot={false} />
-                        <Area type="monotone" dataKey="fraudes" name="Fraudes" stroke="#f87171" fillOpacity={1} fill="url(#colorFraudes)" className="cursor-pointer" activeDot={false} />
-                        <Area type="monotone" dataKey="desconocidos" name="Desconocidos" stroke="#eab308" fillOpacity={1} fill="url(#colorDesconocidos)" className="cursor-pointer" activeDot={false} />
+                        <XAxis dataKey="date" tick={{ fill: 'var(--color-dg-text-muted)', fontSize: 10 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fill: 'var(--color-dg-text-muted)', fontSize: 10 }} axisLine={false} tickLine={false} />
+                        <Tooltip cursor={false} contentStyle={{ backgroundColor: 'var(--color-dg-card)', border: '1px solid var(--color-dg-border)', borderRadius: '10px', fontSize: '12px' }} />
+                        <Area type="monotone" dataKey="accesos" name="Accesos" stroke="var(--color-dg-success)" fillOpacity={1} fill="url(#colorAccesos)" className="cursor-pointer" activeDot={false} />
+                        <Area type="monotone" dataKey="fraudes" name="Fraudes" stroke="var(--color-dg-error)" fillOpacity={1} fill="url(#colorFraudes)" className="cursor-pointer" activeDot={false} />
+                        <Area type="monotone" dataKey="desconocidos" name="Desconocidos" stroke="var(--color-dg-warning)" fillOpacity={1} fill="url(#colorDesconocidos)" className="cursor-pointer" activeDot={false} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -473,7 +475,7 @@ export default function Dashboard() {
                             return (
                               <div
                                 key={i}
-                                className={`flex-1 text-center cursor-pointer transition-all ${filtroHora === i ? 'opacity-100 font-bold text-white bg-white/10 rounded' : 'opacity-60 hover:opacity-100'}`}
+                                className={`flex-1 text-center cursor-pointer transition-all ${filtroHora === i ? 'opacity-100 font-bold text-dg-text bg-white/10 rounded-dg-sm' : 'opacity-60 hover:opacity-100'}`}
                                 onClick={() => {
                                   setFiltroHora(prev => {
                                     const next = prev === i ? null : i;
@@ -491,7 +493,7 @@ export default function Dashboard() {
                         {heatmapMatrix.matrix.map((row) => (
                           <div key={row.dia} className="flex gap-1 items-center">
                             <span
-                              className={`w-8 text-[10px] text-dg-text-muted font-bold text-right pr-1.5 uppercase cursor-pointer hover:text-white transition-colors ${filtroDia === row.dia ? 'text-white' : ''}`}
+                              className={`w-8 text-[10px] text-dg-text-muted font-bold text-right pr-1.5 uppercase cursor-pointer hover:text-dg-text transition-colors ${filtroDia === row.dia ? 'text-dg-text' : ''}`}
                               onClick={() => {
                                 setFiltroDia(prev => {
                                   const next = prev === row.dia ? null : row.dia;
@@ -521,11 +523,11 @@ export default function Dashboard() {
                                         return nextHora;
                                       });
                                     }}
-                                    className={`flex-1 aspect-square rounded-[3px] bg-[#4ade80] transition-all duration-300 hover:ring-1 hover:ring-white cursor-crosshair relative group ${filtroDia === row.dia && filtroHora === j ? 'ring-2 ring-white z-10' : ''}`}
+                                    className={`flex-1 aspect-square rounded-dg-sm bg-dg-info transition-all duration-300 hover:ring-1 hover:ring-white cursor-crosshair relative group ${filtroDia === row.dia && filtroHora === j ? 'ring-2 ring-white z-10' : ''}`}
                                     style={{ opacity: baseOpacity }}
                                   >
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1.5 bg-[#0f0f23] border border-[#2a2a4a] text-white text-[10px] rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
-                                      <span className="font-bold text-[#4ade80]">{count} Eventos</span> <span className="opacity-50">el</span> {row.dia} <span className="opacity-50">a las</span> {hora}:00 {ampm}
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1.5 bg-dg-card border border-dg-border-hi text-dg-text text-[10px] rounded-dg-sm shadow-dg-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+                                      <span className="font-bold text-dg-info">{count} Eventos</span> <span className="opacity-50">el</span> {row.dia} <span className="opacity-50">a las</span> {hora}:00 {ampm}
                                     </div>
                                   </div>
                                 );
@@ -574,11 +576,11 @@ export default function Dashboard() {
                                   <Cell key={`cell-${index}`} fill={entry.color} opacity={filtroMotivo && filtroMotivo !== entry.name ? 0.3 : 1} />
                                 ))}
                               </Pie>
-                              <Tooltip contentStyle={{ backgroundColor: '#0f0f23', border: '1px solid #2a2a4a', borderRadius: '8px', fontSize: '12px' }} />
+                              <Tooltip contentStyle={{ backgroundColor: 'var(--color-dg-card)', border: '1px solid var(--color-dg-border)', borderRadius: '10px', fontSize: '12px' }} />
                             </PieChart>
                           </ResponsiveContainer>
                           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span className="text-2xl font-bold text-white leading-none">
+                            <span className="text-2xl font-bold text-dg-text leading-none">
                               {motivosFraude.reduce((acc, curr) => acc + curr.value, 0)}
                             </span>
                             <span className="text-[10px] text-dg-text-muted uppercase font-bold tracking-widest mt-1">Total</span>
@@ -591,7 +593,7 @@ export default function Dashboard() {
                             return (
                               <div
                                 key={i}
-                                className={`flex flex-col gap-1 cursor-pointer hover:bg-white/5 py-1 px-2 -mx-2 rounded-md transition-colors ${filtroMotivo && filtroMotivo !== m.name ? 'opacity-30' : ''}`}
+                                className={`flex flex-col gap-1 cursor-pointer hover:bg-white/5 py-1 px-2 -mx-2 rounded-dg-sm transition-colors ${filtroMotivo && filtroMotivo !== m.name ? 'opacity-30' : ''}`}
                                 onClick={() => {
                                   setFiltroMotivo(prev => {
                                     const next = prev === m.name ? null : m.name;
@@ -601,7 +603,7 @@ export default function Dashboard() {
                               >
                                 <div className="flex items-center justify-between">
                                   <span className="text-[10px] text-dg-text-muted font-bold uppercase tracking-wider">{m.name}</span>
-                                  <span className="text-xs font-bold text-white">{m.value} <span className="text-[10px] text-dg-text-muted font-normal ml-1">({porcentaje}%)</span></span>
+                                  <span className="text-xs font-bold text-dg-text">{m.value} <span className="text-[10px] text-dg-text-muted font-normal ml-1">({porcentaje}%)</span></span>
                                 </div>
                                 <div className="w-full bg-white/5 h-1 rounded-full overflow-hidden">
                                   <div className="h-full rounded-full transition-all duration-500" style={{ width: `${porcentaje}%`, backgroundColor: m.color }} />
@@ -627,11 +629,11 @@ export default function Dashboard() {
                   <div className="divide-y divide-dg-border">
                     <div className="flex items-center justify-between p-3 px-4">
                       <div className="flex items-center gap-3">
-                        <Server className="w-5 h-5 text-blue-400" />
+                        <Server className="w-5 h-5 text-dg-info" />
                         <span className="text-sm font-medium">Nodo Edge</span>
                       </div>
-                      <span className={`text-xs font-bold flex items-center gap-1 ${isEdgeOnline(estado?.ultimo_heartbeat ?? null) ? 'text-dg-accent' : 'text-dg-error'}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${isEdgeOnline(estado?.ultimo_heartbeat ?? null) ? 'bg-dg-accent animate-pulse' : 'bg-dg-error'}`} />
+                      <span className={`text-xs font-bold flex items-center gap-1 ${isEdgeOnline(estado?.ultimo_heartbeat ?? null) ? 'text-dg-success' : 'text-dg-error'}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${isEdgeOnline(estado?.ultimo_heartbeat ?? null) ? 'bg-dg-success animate-pulse' : 'bg-dg-error'}`} />
                         {isEdgeOnline(estado?.ultimo_heartbeat ?? null) ? "ONLINE" : "OFFLINE"}
                       </span>
                     </div>
@@ -642,14 +644,14 @@ export default function Dashboard() {
                       return (
                         <div className="flex items-center justify-between p-3 px-4">
                           <div className="flex items-center gap-3">
-                            <Video className="w-5 h-5 text-blue-400" />
+                            <Video className="w-5 h-5 text-dg-info" />
                             <div>
                               <span className="text-sm font-medium">Cámara</span>
-                              <span className="text-[10px] ml-2 px-1.5 py-0.5 rounded bg-white/5 text-dg-text-muted font-bold">{cam.camera_type}</span>
+                              <span className="text-[10px] ml-2 px-1.5 py-0.5 rounded-dg-sm bg-white/5 text-dg-text-muted font-bold">{cam.camera_type}</span>
                             </div>
                           </div>
-                          <span className={`text-xs font-bold flex items-center gap-1 ${activa ? 'text-dg-accent' : 'text-dg-error'}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${activa ? 'bg-dg-accent animate-pulse' : 'bg-dg-error'}`} />
+                          <span className={`text-xs font-bold flex items-center gap-1 ${activa ? 'text-dg-success' : 'text-dg-error'}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${activa ? 'bg-dg-success animate-pulse' : 'bg-dg-error'}`} />
                             {activa ? "ACTIVA" : "INACTIVA"}
                           </span>
                         </div>
@@ -657,17 +659,17 @@ export default function Dashboard() {
                     })()}
                     <div className="flex items-center justify-between p-3 px-4">
                       <div className="flex items-center gap-3">
-                        <History className="w-5 h-5 text-blue-400" />
+                        <History className="w-5 h-5 text-dg-info" />
                         <span className="text-sm font-medium">Último evento</span>
                       </div>
                       <span className="text-xs text-dg-text-muted">{ultimoEvento}</span>
                     </div>
                     <div className="flex items-center justify-between p-3 px-4">
                       <div className="flex items-center gap-3">
-                        <Users className="w-5 h-5 text-blue-400" />
+                        <Users className="w-5 h-5 text-dg-info" />
                         <span className="text-sm font-medium">Usuarios registrados</span>
                       </div>
-                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-dg-accent/20 text-dg-accent">{stats.totalUsuarios}</span>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-dg-sm bg-dg-input text-dg-text-secondary">{stats.totalUsuarios}</span>
                     </div>
                   </div>
                 </div>
@@ -678,7 +680,7 @@ export default function Dashboard() {
                     <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-muted">Últimos Eventos</h2>
                     <button
                       onClick={() => navigate("/history")}
-                      className="text-xs font-bold text-dg-accent uppercase tracking-widest"
+                      className="text-xs font-bold text-dg-action-text uppercase tracking-widest"
                     >
                       Ver todo
                     </button>
@@ -698,7 +700,7 @@ export default function Dashboard() {
                             onClick={() => navigate(`/event/${evento.id}`)}
                             className={`cyber-card p-4 flex items-center gap-4 cursor-pointer hover:bg-white/5 transition-colors ${idx >= 3 ? 'hidden lg:flex' : ''}`}
                           >
-                            <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                            <div className="w-12 h-12 rounded-dg bg-white/5 flex items-center justify-center shrink-0">
                               <config.icon className={`w-7 h-7 ${config.color}`} />
                             </div>
                             <div className="flex-1">
@@ -706,9 +708,9 @@ export default function Dashboard() {
                                 <p className={`text-base font-semibold ${config.color}`}>{config.title}</p>
                                 <div className="flex items-center gap-2 shrink-0">
                                   {evento.camera_id && (
-                                    <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${evento.camera_type === "3D"
-                                        ? "bg-dg-accent/10 text-dg-accent"
-                                        : "bg-blue-500/10 text-blue-400"
+                                    <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-dg-sm ${evento.camera_type === "3D"
+                                        ? "bg-dg-action-text/10 text-dg-action-text"
+                                        : "bg-dg-info/10 text-dg-info"
                                       }`}>
                                       {evento.camera_id === "entrada_principal" ? "CAM-01" : "CAM-02"} · {evento.camera_type}
                                     </span>

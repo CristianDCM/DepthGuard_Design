@@ -51,7 +51,7 @@ export default class ErrorBoundary extends Component<Props, State> {
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-xl font-bold font-headline text-white">
+            <h1 className="text-xl font-bold font-headline text-dg-text">
               Algo salió mal
             </h1>
             <p className="text-sm text-dg-text-muted leading-relaxed">

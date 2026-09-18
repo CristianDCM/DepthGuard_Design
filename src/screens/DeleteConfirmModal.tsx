@@ -41,7 +41,7 @@ export default function DeleteConfirmModal() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black/60">
-        <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -61,26 +61,26 @@ export default function DeleteConfirmModal() {
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-dg-card w-full max-w-[340px] rounded-2xl p-6 border border-dg-border shadow-2xl relative z-50"
+        className="bg-dg-card w-full max-w-[340px] rounded-dg-lg p-6 border border-dg-border shadow-2xl relative z-50"
       >
         <div className="flex flex-col items-center text-center">
           <div className="w-16 h-16 rounded-full bg-dg-error/10 flex items-center justify-center mb-5">
             <AlertTriangle className="w-10 h-10 text-dg-error fill-dg-error/10" />
           </div>
           
-          <h2 className="text-xl font-bold text-white mb-3 tracking-tight font-headline">¿Eliminar usuario?</h2>
+          <h2 className="text-xl font-bold text-dg-text mb-3 tracking-tight font-headline">¿Eliminar usuario?</h2>
           
           <p className="text-dg-text-muted text-xs leading-relaxed mb-6 px-2">
             Se eliminarán sus datos biométricos (embeddings faciales) y su registro del sistema. 
             <span className="text-dg-error font-semibold block mt-1">Esta acción no se puede deshacer.</span>
           </p>
 
-          <div className="w-full bg-dg-bg border border-dg-border rounded-xl p-3 flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-full bg-dg-accent/10 border border-dg-accent/20 flex items-center justify-center shrink-0">
-              <span className="text-dg-accent font-bold text-sm">{initials}</span>
+          <div className="w-full bg-dg-bg border border-dg-border rounded-dg p-3 flex items-center gap-3 mb-8">
+            <div className="w-10 h-10 rounded-full bg-dg-input border border-dg-border flex items-center justify-center shrink-0">
+              <span className="text-dg-text-secondary font-bold text-sm">{initials}</span>
             </div>
             <div className="text-left overflow-hidden">
-              <h3 className="font-bold text-white text-sm truncate">{user?.nombre ?? "—"}</h3>
+              <h3 className="font-bold text-dg-text text-sm truncate">{user?.nombre ?? "—"}</h3>
               <p className="text-[10px] text-dg-text-muted uppercase tracking-wider font-medium">ID #{id?.substring(0, 8)}</p>
             </div>
           </div>
@@ -89,13 +89,13 @@ export default function DeleteConfirmModal() {
             <button 
               onClick={handleDelete}
               disabled={deleting}
-              className="w-full py-3.5 bg-dg-error text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50"
+              className="w-full py-3.5 bg-dg-error text-dg-text font-bold rounded-dg flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50"
             >
               <Trash2 className="w-4 h-4" /> {deleting ? "Eliminando..." : "Eliminar"}
             </button>
             <button 
               onClick={() => navigate(-1)}
-              className="w-full py-3.5 bg-dg-bg text-dg-text-muted font-bold rounded-xl border border-dg-border hover:text-white hover:bg-dg-border transition-all active:scale-95"
+              className="w-full py-3.5 bg-dg-bg text-dg-text-muted font-bold rounded-dg border border-dg-border hover:text-dg-text hover:bg-dg-border transition-all active:scale-95"
             >
               Cancelar
             </button>

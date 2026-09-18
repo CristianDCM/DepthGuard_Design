@@ -272,7 +272,7 @@ export default function WebRTCPlayer({
         autoPlay
         playsInline
         muted
-        className={`w-full aspect-video object-contain bg-black transition-opacity duration-500 ${
+        className={`w-full aspect-video object-contain bg-dg-canvas transition-opacity duration-500 ${
           status === "conectado" ? "opacity-100" : "opacity-0 absolute"
         }`}
       />
@@ -282,7 +282,7 @@ export default function WebRTCPlayer({
         <div className="aspect-video flex flex-col items-center justify-center gap-3 bg-dg-bg text-dg-text-muted">
           {status === "iniciando" || status === "conectando" ? (
             <>
-              <Loader2 className="w-7 h-7 text-dg-accent animate-spin" />
+              <Loader2 className="w-7 h-7 text-dg-info animate-spin" />
               <span className="text-xs font-medium">
                 {status === "iniciando" ? "Iniciando WebRTC..." : "Estableciendo conexión P2P..."}
               </span>
@@ -305,14 +305,14 @@ export default function WebRTCPlayer({
       {status === "conectado" && !minimal && (
         <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 py-2 bg-gradient-to-b from-black/70 to-transparent">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_6px_#ef4444]" />
+            <span className="w-2 h-2 rounded-full bg-dg-error animate-pulse shadow-[0_0_6px_var(--color-dg-error)]" />
             <span className="text-[10px] font-bold text-white/90 uppercase tracking-widest">
               En Vivo
             </span>
           </div>
           <div className="flex items-center gap-1.5 bg-black/40 px-2 py-0.5 rounded-full">
-            <Wifi className="w-3 h-3 text-dg-accent" />
-            <span className="text-[10px] font-bold text-dg-accent uppercase tracking-wider">
+            <Wifi className="w-3 h-3 text-dg-success" aria-hidden="true" />
+            <span className="text-[10px] font-bold text-dg-success uppercase tracking-wider">
               WebRTC P2P
             </span>
           </div>
