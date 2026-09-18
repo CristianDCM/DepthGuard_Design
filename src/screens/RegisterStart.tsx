@@ -246,7 +246,7 @@ export default function RegisterStart() {
       <div className="absolute inset-0 blur-md opacity-40 pointer-events-none">
         <header className="bg-dg-bg border-b border-dg-border px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <Users className="w-6 h-6 text-dg-accent" />
+            <Users className="w-6 h-6 text-dg-text-secondary" aria-hidden="true" />
             <h1 className="text-xl font-bold tracking-tight font-headline">Usuarios</h1>
           </div>
         </header>
@@ -263,7 +263,7 @@ export default function RegisterStart() {
       <motion.div 
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
-        className="fixed bottom-0 left-0 right-0 z-50 bg-dg-bg rounded-t-2xl border-t border-x border-dg-border p-6 shadow-[0px_-24px_48px_rgba(0,0,0,0.6)] max-h-[92vh] overflow-y-auto md:max-w-2xl md:mx-auto md:bottom-8 md:rounded-2xl md:border"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-dg-bg rounded-t-dg-lg border-t border-x border-dg-border p-6 shadow-[0px_-24px_48px_rgba(0,0,0,0.6)] max-h-[92vh] overflow-y-auto md:max-w-2xl md:mx-auto md:bottom-8 md:rounded-dg-lg md:border"
       >
         <div className="w-12 h-1 bg-dg-border rounded-full mx-auto mb-8 shrink-0" />
         
@@ -271,10 +271,10 @@ export default function RegisterStart() {
         {step === "form" && (
           <>
             <div className="flex items-center gap-4 mb-6 shrink-0">
-              <div className="w-10 h-10 rounded-xl bg-dg-accent/10 flex items-center justify-center">
-                <UserPlus className="w-6 h-6 text-dg-accent" />
+              <div className="w-10 h-10 rounded-dg bg-dg-action/10 flex items-center justify-center">
+                <UserPlus className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
               </div>
-              <h2 className="text-xl font-bold text-white tracking-tight font-headline">Registrar Nuevo Usuario</h2>
+              <h2 className="text-xl font-bold text-dg-text tracking-tight font-headline">Registrar Nuevo Usuario</h2>
             </div>
 
             <div className="space-y-6 pb-10">
@@ -291,7 +291,7 @@ export default function RegisterStart() {
                     disabled={isSubmitting}
                     aria-invalid={error ? true : undefined}
                     aria-describedby={error ? "registro-nombre-error" : undefined}
-                    className={`w-full bg-dg-card border ${error ? 'border-dg-error' : 'border-dg-border'} rounded-xl px-4 py-3 text-white placeholder:text-dg-text-muted focus:border-dg-accent transition-colors text-sm disabled:opacity-50`}
+                    className={`w-full bg-dg-card border ${error ? 'border-dg-error' : 'border-dg-border'} rounded-dg px-4 py-3 text-dg-text placeholder:text-dg-text-muted focus:border-dg-focus transition-colors text-sm disabled:opacity-50`}
                   />
                   {error && <p id="registro-nombre-error" role="alert" className="text-xs text-dg-error px-1 mt-1">{error}</p>}
                 </div>
@@ -304,15 +304,15 @@ export default function RegisterStart() {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     disabled={isSubmitting}
-                    className="w-full bg-dg-card border border-dg-border rounded-xl px-4 py-3 text-white placeholder:text-dg-text-muted focus:border-dg-accent transition-colors text-sm disabled:opacity-50"
+                    className="w-full bg-dg-card border border-dg-border rounded-dg px-4 py-3 text-dg-text placeholder:text-dg-text-muted focus:border-dg-focus transition-colors text-sm disabled:opacity-50"
                   />
                 </div>
               </div>
 
-              <div className="bg-dg-card border border-dg-border rounded-2xl p-4 flex gap-4">
-                <Info className="w-6 h-6 text-dg-accent shrink-0" />
+              <div className="bg-dg-card border border-dg-border rounded-dg-lg p-4 flex gap-4">
+                <Info className="w-6 h-6 text-dg-info shrink-0" aria-hidden="true" />
                 <div className="space-y-2">
-                  <p className="text-sm text-white leading-snug">
+                  <p className="text-sm text-dg-text leading-snug">
                     La persona debe estar frente a la cámara durante el registro. Se capturarán 5 ángulos faciales en aproximadamente 30 segundos.
                   </p>
                   <p className="text-[11px] text-dg-text-muted">
@@ -340,7 +340,7 @@ export default function RegisterStart() {
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-dg-bg border-t-transparent rounded-full animate-spin" />
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Validando...
                     </>
                   ) : (
@@ -365,11 +365,11 @@ export default function RegisterStart() {
         {step === "consent" && (
           <>
             <div className="flex items-center gap-4 mb-6 shrink-0">
-              <div className="w-10 h-10 rounded-xl bg-dg-accent/10 flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6 text-dg-accent" />
+              <div className="w-10 h-10 rounded-dg bg-dg-action/10 flex items-center justify-center">
+                <ShieldCheck className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white tracking-tight font-headline">Autorización Biométrica</h2>
+                <h2 className="text-xl font-bold text-dg-text tracking-tight font-headline">Autorización Biométrica</h2>
                 <p className="text-[10px] text-dg-text-muted font-medium mt-0.5">
                   {name.trim()} · Paso obligatorio
                 </p>
@@ -378,49 +378,49 @@ export default function RegisterStart() {
 
             <div className="space-y-5 pb-10">
               {/* Texto legal */}
-              <div className="bg-dg-card border border-dg-border rounded-2xl p-5 space-y-4">
+              <div className="bg-dg-card border border-dg-border rounded-dg-lg p-5 space-y-4">
                 <div className="flex items-center gap-3 mb-1">
-                  <FileCheck2 className="w-5 h-5 text-dg-accent shrink-0" />
-                  <h3 className="text-sm font-bold text-white">Consentimiento para Tratamiento de Datos Biométricos</h3>
+                  <FileCheck2 className="w-5 h-5 text-dg-action-text shrink-0" aria-hidden="true" />
+                  <h3 className="text-sm font-bold text-dg-text">Consentimiento para Tratamiento de Datos Biométricos</h3>
                 </div>
 
                 <div className="text-xs text-dg-text-muted leading-relaxed space-y-3">
                   <p>
-                    Autorizo de manera <span className="text-white font-medium">libre, voluntaria, previa, expresa e informada</span> la 
+                    Autorizo de manera <span className="text-dg-text font-medium">libre, voluntaria, previa, expresa e informada</span> la 
                     captura, procesamiento y almacenamiento de mi geometría facial con el fin exclusivo de 
-                    habilitar el control de acceso biométrico mediante el sistema <span className="text-white font-medium">DepthGuard</span>.
+                    habilitar el control de acceso biométrico mediante el sistema <span className="text-dg-text font-medium">DepthGuard</span>.
                   </p>
 
                   <p className="font-semibold text-dg-text-muted/90">Se me ha informado que:</p>
 
                   <ul className="space-y-2 pl-1">
                     <li className="flex gap-2">
-                      <span className="text-dg-accent font-bold">1.</span>
-                      <span><span className="text-white font-medium">Dato sensible:</span> La biometría facial constituye un dato personal sensible conforme a la Ley 1581 de 2012. Su entrega es de carácter estrictamente voluntario.</span>
+                      <span className="text-dg-action-text font-bold">1.</span>
+                      <span><span className="text-dg-text font-medium">Dato sensible:</span> La biometría facial constituye un dato personal sensible conforme a la Ley 1581 de 2012. Su entrega es de carácter estrictamente voluntario.</span>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-dg-accent font-bold">2.</span>
-                      <span><span className="text-white font-medium">Finalidad exclusiva:</span> Mis datos biométricos serán utilizados únicamente para la verificación de identidad en puntos de acceso controlados por este sistema.</span>
+                      <span className="text-dg-action-text font-bold">2.</span>
+                      <span><span className="text-dg-text font-medium">Finalidad exclusiva:</span> Mis datos biométricos serán utilizados únicamente para la verificación de identidad en puntos de acceso controlados por este sistema.</span>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-dg-accent font-bold">3.</span>
-                      <span><span className="text-white font-medium">Seguridad:</span> Mi rostro no será almacenado como fotografía. Será transformado de manera irreversible en vectores matemáticos (embeddings), garantizando que no pueda reconstruirse mi imagen facial a partir de los datos almacenados.</span>
+                      <span className="text-dg-action-text font-bold">3.</span>
+                      <span><span className="text-dg-text font-medium">Seguridad:</span> Mi rostro no será almacenado como fotografía. Será transformado de manera irreversible en vectores matemáticos (embeddings), garantizando que no pueda reconstruirse mi imagen facial a partir de los datos almacenados.</span>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-dg-accent font-bold">4.</span>
-                      <span><span className="text-white font-medium">Derechos:</span> Como titular, tengo derecho a conocer, actualizar, rectificar y solicitar la supresión de mis datos biométricos en cualquier momento ante el responsable del tratamiento.</span>
+                      <span className="text-dg-action-text font-bold">4.</span>
+                      <span><span className="text-dg-text font-medium">Derechos:</span> Como titular, tengo derecho a conocer, actualizar, rectificar y solicitar la supresión de mis datos biométricos en cualquier momento ante el responsable del tratamiento.</span>
                     </li>
                   </ul>
 
                   <p className="pt-1 border-t border-dg-border/50">
                     Al aceptar y participar activamente en el escaneo facial (girando mi rostro en las direcciones solicitadas), 
-                    <span className="text-white font-medium"> reafirmo de manera inequívoca mi voluntad y consentimiento</span>.
+                    <span className="text-dg-text font-medium"> reafirmo de manera inequívoca mi voluntad y consentimiento</span>.
                   </p>
                 </div>
               </div>
 
               {/* Checkbox */}
-              <label className="flex items-start gap-3 cursor-pointer group p-3 rounded-xl border border-dg-border/50 hover:border-dg-accent/30 transition-colors">
+              <label className="flex items-start gap-3 cursor-pointer group p-3 rounded-dg border border-dg-border/50 hover:border-dg-action-text/40 transition-colors">
                 <div className="relative mt-0.5 shrink-0">
                   <input 
                     type="checkbox" 
@@ -428,17 +428,17 @@ export default function RegisterStart() {
                     onChange={(e) => setConsentChecked(e.target.checked)}
                     className="sr-only"
                   />
-                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                  <div className={`w-5 h-5 rounded-dg-sm border-2 flex items-center justify-center transition-all ${
                     consentChecked 
-                      ? 'bg-dg-accent border-dg-accent' 
+                      ? 'bg-dg-action border-dg-action' 
                       : 'border-dg-border group-hover:border-dg-text-muted'
                   }`}>
-                    {consentChecked && <Check className="w-3.5 h-3.5 text-dg-bg" strokeWidth={3} />}
+                    {consentChecked && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
                   </div>
                 </div>
                 <span className="text-xs text-dg-text-muted leading-relaxed">
                   He leído y comprendido la información anterior. 
-                  <span className="text-white font-medium"> Otorgo mi consentimiento expreso e informado</span> para 
+                  <span className="text-dg-text font-medium"> Otorgo mi consentimiento expreso e informado</span> para 
                   el tratamiento de mis datos biométricos faciales.
                 </span>
               </label>
@@ -452,7 +452,7 @@ export default function RegisterStart() {
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-dg-bg border-t-transparent rounded-full animate-spin" />
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Iniciando registro...
                     </>
                   ) : (
@@ -477,11 +477,11 @@ export default function RegisterStart() {
         {step === "waiting_edge" && (
           <>
             <div className="flex items-center gap-4 mb-6 shrink-0">
-              <div className="w-10 h-10 rounded-lg bg-dg-accent/10 flex items-center justify-center">
-                <UserPlus className="w-6 h-6 text-dg-accent" />
+              <div className="w-10 h-10 rounded-dg bg-dg-action/10 flex items-center justify-center">
+                <UserPlus className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white tracking-tight font-headline">Registrar Nuevo Usuario</h2>
+                <h2 className="text-xl font-bold text-dg-text tracking-tight font-headline">Registrar Nuevo Usuario</h2>
                 {usuarioCreado && (
                   <p className="text-[10px] text-dg-text-muted font-medium mt-0.5">
                     {usuarioCreado.nombre} · ID: {usuarioCreado.id.substring(0, 8)}
@@ -495,7 +495,7 @@ export default function RegisterStart() {
                 <div className="mb-4 flex justify-center">
                   <WifiOff className="w-12 h-12 text-dg-warning animate-pulse" />
                 </div>
-                <h3 className="text-white font-bold text-lg mb-2">
+                <h3 className="text-dg-text font-bold text-lg mb-2">
                   Esperando respuesta del edge...
                 </h3>
                 <p className="text-dg-text-muted text-xs mb-4">
@@ -523,11 +523,11 @@ export default function RegisterStart() {
         {step === "scanning" && (
           <>
             <div className="flex items-center gap-4 mb-6 shrink-0">
-              <div className="w-10 h-10 rounded-lg bg-dg-accent/10 flex items-center justify-center">
-                <UserPlus className="w-6 h-6 text-dg-accent" />
+              <div className="w-10 h-10 rounded-dg bg-dg-action/10 flex items-center justify-center">
+                <UserPlus className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white tracking-tight font-headline">Escaneando Rostro</h2>
+                <h2 className="text-xl font-bold text-dg-text tracking-tight font-headline">Escaneando Rostro</h2>
                 {usuarioCreado && (
                   <p className="text-[10px] text-dg-text-muted font-medium mt-0.5">
                     {usuarioCreado.nombre} · ID: {usuarioCreado.id.substring(0, 8)}
@@ -538,7 +538,7 @@ export default function RegisterStart() {
 
             <div className="space-y-5 pb-10">
               {/* Video feed — tamaño mediano, centrado */}
-              <div className="max-w-md mx-auto rounded-xl overflow-hidden border border-dg-border/60 bg-black shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+              <div className="max-w-md mx-auto rounded-dg overflow-hidden border border-dg-border bg-dg-canvas shadow-dg-lg">
                 {activeCameraId && !webrtcFailed ? (
                   <WebRTCPlayer 
                     cameraId={activeCameraId} 
@@ -548,7 +548,7 @@ export default function RegisterStart() {
                   />
                 ) : (
                   <div className="aspect-video flex items-center justify-center">
-                    <RotateCw className="w-10 h-10 text-dg-accent animate-spin-slow" />
+                    <RotateCw className="w-10 h-10 text-dg-info animate-spin-slow" aria-hidden="true" />
                   </div>
                 )}
               </div>
@@ -562,7 +562,7 @@ export default function RegisterStart() {
                   justo lo que necesita alguien que no puede mirar el movil
                   mientras gira la cara. */}
               <div className="text-center space-y-1.5" aria-live="assertive">
-                <p className="text-lg font-semibold text-white leading-snug">
+                <p className="text-lg font-semibold text-dg-text leading-snug">
                   {anguloEnCurso.instruccion}
                 </p>
                 <p className="text-xs text-dg-text-secondary">
@@ -581,9 +581,9 @@ export default function RegisterStart() {
                       aria-hidden="true"
                       className={`h-1.5 rounded-full transition-all duration-300 ${
                         completado
-                          ? "w-8 bg-dg-accent"
+                          ? "w-8 bg-dg-success"
                           : activo
-                            ? "w-8 bg-dg-accent/40 animate-pulse"
+                            ? "w-8 bg-dg-info/50 animate-pulse"
                             : "w-4 bg-dg-border"
                       }`}
                     />
@@ -611,7 +611,7 @@ export default function RegisterStart() {
                 <AlertTriangle className="w-16 h-16 text-dg-error relative z-10" />
               </div>
               <div>
-                <h2 className="text-[20px] font-bold text-white leading-tight font-headline">Error en el Registro</h2>
+                <h2 className="text-[20px] font-bold text-dg-text leading-tight font-headline">Error en el Registro</h2>
                 <p className="text-dg-text-muted text-sm mt-1">{error}</p>
               </div>
             </div>
@@ -642,20 +642,20 @@ export default function RegisterStart() {
                 <CheckCircle className="w-16 h-16 text-dg-success relative z-10 fill-dg-success/10" />
               </div>
               <div>
-                <h2 className="text-[20px] font-bold text-white leading-tight font-headline">¡Registro Exitoso!</h2>
+                <h2 className="text-[20px] font-bold text-dg-text leading-tight font-headline">¡Registro Exitoso!</h2>
                 <p className="text-dg-text-muted text-sm mt-1">Usuario registrado con embeddings reales del pipeline IA</p>
               </div>
             </div>
 
-            <div className="bg-dg-card p-4 rounded-2xl flex items-center justify-between border border-dg-border">
+            <div className="bg-dg-card p-4 rounded-dg-lg flex items-center justify-between border border-dg-border">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-dg-accent/10 flex items-center justify-center border border-dg-accent/20">
-                  <span className="text-dg-accent font-bold text-lg">
+                <div className="w-12 h-12 rounded-full bg-dg-input border border-dg-border flex items-center justify-center">
+                  <span className="text-dg-text-secondary font-bold text-lg">
                     {(usuarioCreado?.nombre ?? name).split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'U'}
                   </span>
                 </div>
                 <div>
-                  <p className="font-bold text-white">{usuarioCreado?.nombre ?? name}</p>
+                  <p className="font-bold text-dg-text">{usuarioCreado?.nombre ?? name}</p>
                   <p className="text-xs text-dg-text-muted">
                     ID: #{usuarioCreado?.id.substring(0, 8) ?? "------"}
                   </p>
@@ -669,11 +669,11 @@ export default function RegisterStart() {
 
             <div className="space-y-4">
               <div className="relative flex justify-between items-center px-2">
-                <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-dg-accent -translate-y-1/2 z-0" />
+                <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-dg-success -translate-y-1/2 z-0" />
                 {ANGULOS.map((a) => (
                   <div key={a.step} className="relative z-10 flex flex-col items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-dg-accent flex items-center justify-center shadow-[0_0_12px_rgba(163,255,0,0.4)]">
-                      <Check className="w-4 h-4 text-dg-bg font-bold" />
+                    <div className="w-6 h-6 rounded-full bg-dg-success flex items-center justify-center">
+                      <Check className="w-4 h-4 text-dg-bg" strokeWidth={3} aria-hidden="true" />
                     </div>
                   </div>
                 ))}
@@ -684,12 +684,12 @@ export default function RegisterStart() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-dg-card p-4 rounded-xl border border-dg-border flex flex-col items-center justify-center">
-                <span className="text-dg-accent text-2xl font-bold font-headline">{usuarioCreado?.num_angulos ?? 5}</span>
+              <div className="bg-dg-card p-4 rounded-dg border border-dg-border flex flex-col items-center justify-center">
+                <span className="text-dg-text text-2xl font-bold font-headline">{usuarioCreado?.num_angulos ?? 5}</span>
                 <span className="text-dg-text-muted text-[10px] uppercase tracking-widest font-semibold">Ángulos</span>
               </div>
-              <div className="bg-dg-card p-4 rounded-xl border border-dg-border flex flex-col items-center justify-center">
-                <span className="text-white text-2xl font-bold font-headline">Real</span>
+              <div className="bg-dg-card p-4 rounded-dg border border-dg-border flex flex-col items-center justify-center">
+                <span className="text-dg-text text-2xl font-bold font-headline">Real</span>
                 <span className="text-dg-text-muted text-[10px] uppercase tracking-widest font-semibold">Pipeline IA</span>
               </div>
             </div>

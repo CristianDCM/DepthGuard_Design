@@ -16,7 +16,7 @@ describe("cn", () => {
     // Es la razón de ser del helper: sin twMerge las dos clases acabarían en
     // el DOM y ganaría la que el CSS defina más tarde, no la que se pasa.
     expect(cn("px-2", "px-4")).toBe("px-4");
-    expect(cn("text-dg-text-muted", "text-dg-accent")).toBe("text-dg-accent");
+    expect(cn("text-dg-text-muted", "text-dg-action-text")).toBe("text-dg-action-text");
   });
 
   it("permite sobreescribir estilos desde una prop className", () => {

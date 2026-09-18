@@ -18,11 +18,11 @@ const PASSWORD_RULES = [
 
 function getStrength(password: string): { level: number; label: string; color: string } {
   const passed = PASSWORD_RULES.filter((r) => r.test(password)).length;
-  if (passed <= 1) return { level: 1, label: "Muy débil", color: "bg-red-500" };
-  if (passed <= 2) return { level: 2, label: "Débil", color: "bg-orange-500" };
-  if (passed <= 3) return { level: 3, label: "Media", color: "bg-yellow-500" };
-  if (passed <= 4) return { level: 4, label: "Fuerte", color: "bg-emerald-400" };
-  return { level: 5, label: "Muy fuerte", color: "bg-emerald-500" };
+  if (passed <= 1) return { level: 1, label: "Muy débil", color: "bg-dg-error" };
+  if (passed <= 2) return { level: 2, label: "Débil", color: "bg-dg-error" };
+  if (passed <= 3) return { level: 3, label: "Media", color: "bg-dg-warning" };
+  if (passed <= 4) return { level: 4, label: "Fuerte", color: "bg-dg-success" };
+  return { level: 5, label: "Muy fuerte", color: "bg-dg-success" };
 }
 
 export default function SetPassword() {
@@ -86,7 +86,7 @@ export default function SetPassword() {
   if (validatingToken) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-6">
-        <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
         <p className="text-dg-text-muted text-sm mt-4">Validando invitación...</p>
       </main>
     );
@@ -140,7 +140,7 @@ export default function SetPassword() {
           </p>
           <div className="w-full bg-dg-border rounded-full h-1 overflow-hidden">
             <motion.div
-              className="h-full bg-dg-accent"
+              className={`h-full ${strength.color}`}
               initial={{ width: "0%" }}
               animate={{ width: "100%" }}
               transition={{ duration: 3 }}
@@ -164,11 +164,11 @@ export default function SetPassword() {
             <img
               src="/logo.svg"
               alt="DepthGuard Logo"
-              className="w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(99,255,0,0.4)] z-10 relative"
+              className="w-24 h-24 object-contain z-10 relative"
             />
-            <div className="absolute inset-0 bg-[#63ff00]/20 blur-3xl rounded-full -z-10" />
+            <div className="absolute inset-0 bg-dg-brand/10 blur-3xl rounded-full -z-10" />
           </div>
-          <h1 className="text-3xl font-bold text-dg-accent tracking-tight font-headline">Bienvenido</h1>
+          <h1 className="text-3xl font-bold text-dg-text tracking-tight font-headline">Bienvenido</h1>
           <p className="text-dg-text-muted text-sm mt-1">Establece tu contraseña para activar tu cuenta</p>
         </motion.div>
 
@@ -194,14 +194,14 @@ export default function SetPassword() {
                   placeholder="••••••••"
                   required
                   autoComplete="new-password"
-                  className="w-full bg-dg-input border border-dg-border text-white rounded-dg pl-10 pr-12 py-3 text-base focus:border-dg-accent transition-colors"
+                  className="w-full bg-dg-input border border-dg-border text-dg-text rounded-dg pl-10 pr-12 py-3 text-base focus:border-dg-focus transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   aria-pressed={showPassword}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dg-text-muted hover:text-white transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dg-text-muted hover:text-dg-text transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
                 </button>
@@ -230,7 +230,7 @@ export default function SetPassword() {
                       ))}
                     </div>
                     <p className={`text-[10px] font-bold uppercase tracking-widest ${
-                      strength.level >= 4 ? "text-emerald-400" : strength.level >= 3 ? "text-yellow-500" : "text-red-400"
+                      strength.level >= 4 ? "text-dg-success" : strength.level >= 3 ? "text-dg-warning" : "text-dg-error"
                     }`}>
                       {strength.label}
                     </p>
@@ -273,12 +273,12 @@ export default function SetPassword() {
                   placeholder="••••••••"
                   required
                   autoComplete="new-password"
-                  className={`w-full bg-dg-input border text-white rounded-dg pl-10 pr-12 py-3 text-base transition-colors ${
+                  className={`w-full bg-dg-input border text-dg-text rounded-dg pl-10 pr-12 py-3 text-base transition-colors ${
                     confirm.length > 0
                       ? passwordsMatch
                         ? "border-dg-success focus:border-dg-success"
                         : "border-dg-error focus:border-dg-error"
-                      : "border-dg-border focus:border-dg-accent"
+                      : "border-dg-border focus:border-dg-focus"
                   }`}
                 />
                 <button
@@ -286,7 +286,7 @@ export default function SetPassword() {
                   onClick={() => setShowConfirm(!showConfirm)}
                   aria-label={showConfirm ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"}
                   aria-pressed={showConfirm}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dg-text-muted hover:text-white transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dg-text-muted hover:text-dg-text transition-colors"
                 >
                   {showConfirm ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
                 </button>

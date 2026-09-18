@@ -6,32 +6,75 @@
   --font-headline: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Public Sans", sans-serif;
 
-  --color-dg-bg: #0f0f23;
-  --color-dg-card: #1a1a2e;
-  --color-dg-border: #2a2a4a;
-  --color-dg-accent: #a3ff00;
-  --color-dg-input: #16162a;
-  --color-dg-success: #4ade80;
-  --color-dg-error: #f87171;
-  /* Ambar de aviso. Contraste verificado: 11.30:1 sobre el fondo y
-     10.22:1 sobre las tarjetas (WCAG AAA). */
-  --color-dg-warning: #fbbf24;
-  --color-dg-text-muted: #888888;
-  /* Texto secundario: mas claro que el muted, para controles de formulario.
-     Contraste 9.26:1 sobre el fondo (WCAG AAA). */
-  --color-dg-text-secondary: #b4b4c8;
+  /* ==========================================================
+     SUPERFICIES — azul grafito neutro
+     El #0f0f23 anterior tiraba a morado y empujaba la interfaz
+     hacia lo decorativo. Con una base neutra, el unico color
+     saturado de la pantalla es el que porta un dato.
+     ========================================================== */
+  --color-dg-canvas: #080b12;     /* pozos: fondo de video, pistas de barra */
+  --color-dg-bg: #0c1018;         /* fondo de pagina */
+  --color-dg-card: #11161f;       /* tarjetas */
+  --color-dg-input: #171d28;      /* campos, hover, superficie elevada */
+  --color-dg-border: #212936;     /* borde por defecto */
+  --color-dg-border-hi: #2c3644;  /* borde enfatizado */
 
-  /* Color unico del anillo de foco de todo el producto. Se declara como
-     token propio (y no como --color-dg-accent) para que el dia que el foco
-     deje de ser verde solo haya que cambiar esta linea. */
-  --color-dg-focus: #a3ff00;
+  /* ==========================================================
+     TEXTO — contrastes medidos sobre --color-dg-bg (#0c1018)
+     ========================================================== */
+  --color-dg-text: #e8edf4;            /* 16.0:1  AAA — texto primario */
+  --color-dg-text-secondary: #9aa6b8;  /*  7.8:1  AAA — secundario */
+  --color-dg-text-muted: #7a8699;      /*  5.2:1  AA  — metadatos */
+  --color-dg-text-off: #4a5567;        /* solo deshabilitado, nunca informativo */
 
-  --radius-dg: 12px;
+  /* ==========================================================
+     MARCA — exclusivamente logotipo y wordmark
+     Ni un boton, ni un estado, ni un icono de navegacion. El lime
+     hacia cuatro trabajos a la vez (marca, accion, "online" y
+     "acceso permitido") y un color que lo significa todo deja de
+     significar algo.
+     ========================================================== */
+  --color-dg-brand: #a3ff00;
 
-  /* Giro lento para los estados de espera del registro biometrico.
-     La clase `animate-spin-slow` se usaba en RegisterStart sin estar
-     definida: el icono se quedaba completamente quieto y parecia que la
-     aplicacion se habia colgado justo en mitad del escaneo facial. */
+  /* ==========================================================
+     ACCION — todo lo pulsable
+     ========================================================== */
+  --color-dg-action: #1d6fe8;        /* relleno; blanco encima 4.7:1 AA */
+  --color-dg-action-hover: #3b85f5;
+  --color-dg-action-text: #58a0ff;   /* enlaces sobre oscuro 7.2:1 AAA */
+
+  /* ==========================================================
+     ESTADO — un color, un significado, en toda la aplicacion
+     Ninguno actua solo: cada estado lleva siempre icono y
+     etiqueta de texto, porque en deuteranopia el verde y el rojo
+     de aqui no se distinguen entre si.
+     ========================================================== */
+  --color-dg-success: #34d399;  /*  9.9:1  autorizado, activo, en linea */
+  --color-dg-warning: #f5b544;  /* 10.5:1  desconocido, degradado */
+  --color-dg-error: #ff7b72;    /*  7.6:1  fraude, fuera de linea, error */
+  --color-dg-info: #58a0ff;     /*  7.2:1  en proceso, clasificacion */
+
+  /* Anillo de foco: un unico color en todo el producto. */
+  --color-dg-focus: #58a0ff;
+
+  /* ==========================================================
+     RADIOS — exactamente tres
+     Antes convivian siete valores distintos en una misma vista.
+     ========================================================== */
+  --radius-dg-sm: 6px;   /* chips, badges, celdas */
+  --radius-dg: 10px;     /* tarjetas, botones, campos */
+  --radius-dg-lg: 16px;  /* hojas, modales, marco de video */
+
+  /* ==========================================================
+     ELEVACION — profundidad por sombra, no por resplandor
+     El glow queda reservado para lo que esta vivo ahora mismo
+     (el punto de "en vivo"), no para la estructura.
+     ========================================================== */
+  --shadow-dg-sm: 0 1px 2px rgb(0 0 0 / 0.40);
+  --shadow-dg-md: 0 4px 12px rgb(0 0 0 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.04);
+  --shadow-dg-lg: 0 16px 48px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.06);
+
+  /* Giro lento para los estados de espera del registro biometrico. */
   --animate-spin-slow: spin-slow 2.4s linear infinite;
 
   @keyframes spin-slow {
@@ -43,7 +86,7 @@
 
 @layer base {
   body {
-    @apply bg-dg-bg text-white font-sans;
+    @apply bg-dg-bg text-dg-text font-sans;
     min-height: 100vh;
   }
 
@@ -101,11 +144,11 @@
 
 @layer components {
   .cyber-card {
-    @apply bg-dg-card border border-dg-border rounded-dg;
+    @apply bg-dg-card border border-dg-border rounded-dg shadow-dg-sm;
   }
 
   .btn-primary {
-    @apply bg-dg-accent text-dg-bg font-bold py-3 px-6 rounded-dg transition-all active:scale-95 hover:brightness-110 shadow-[0_0_15px_rgba(163,255,0,0.3)];
+    @apply bg-dg-action text-white font-semibold py-3 px-6 rounded-dg transition-colors hover:bg-dg-action-hover active:scale-[0.98];
   }
 
   /*
@@ -120,7 +163,7 @@
   }
 
   .btn-secondary {
-    @apply border border-dg-border text-white font-bold py-3 px-6 rounded-dg transition-all active:scale-95 hover:bg-white/5;
+    @apply border border-dg-border text-dg-text font-semibold py-3 px-6 rounded-dg transition-colors active:scale-[0.98] hover:bg-dg-input hover:border-dg-border-hi;
   }
 }
 

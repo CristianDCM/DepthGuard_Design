@@ -45,7 +45,7 @@ export default function EditUserModal() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black/60">
-        <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -55,21 +55,21 @@ export default function EditUserModal() {
       <motion.div 
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative z-50 w-full max-w-md bg-dg-card border border-dg-border rounded-2xl shadow-[0px_24px_48px_rgba(0,0,0,0.4)] overflow-hidden"
+        className="relative z-50 w-full max-w-md bg-dg-card border border-dg-border rounded-dg-lg shadow-[0px_24px_48px_rgba(0,0,0,0.4)] overflow-hidden"
       >
         <div className="p-6 flex flex-col items-center text-center">
-          <div className="w-12 h-12 bg-dg-accent/10 rounded-full flex items-center justify-center mb-4">
-            <Edit2 className="w-6 h-6 text-dg-accent" />
+          <div className="w-12 h-12 bg-dg-action/10 rounded-full flex items-center justify-center mb-4">
+            <Edit2 className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
           </div>
-          <h2 className="text-2xl font-bold font-headline text-white tracking-tight">Editar Usuario</h2>
+          <h2 className="text-2xl font-bold font-headline text-dg-text tracking-tight">Editar Usuario</h2>
           <p className="text-dg-text-muted text-sm mt-1">{user?.nombre ?? "—"} — ID #{id?.substring(0, 8)}</p>
         </div>
 
         <div className="px-6 pb-8 space-y-8">
           <div className="space-y-3">
             <span id="estado-usuario-label" className="block text-[10px] font-bold tracking-widest text-dg-text-muted uppercase font-display">ESTADO DEL USUARIO</span>
-            <div className="flex items-center justify-between bg-dg-bg p-4 rounded-xl border border-dg-border">
-              <span className="text-white font-medium">{isActive ? "Activo" : "Inactivo"}</span>
+            <div className="flex items-center justify-between bg-dg-bg p-4 rounded-dg border border-dg-border">
+              <span className="text-dg-text font-medium">{isActive ? "Activo" : "Inactivo"}</span>
               <button
                 type="button"
                 role="switch"
@@ -79,7 +79,7 @@ export default function EditUserModal() {
                 onClick={() => setIsActive(!isActive)}
                 className="relative inline-flex items-center cursor-pointer rounded-full"
               >
-                <span className={`block w-12 h-6 rounded-full transition-colors ${isActive ? 'bg-dg-accent' : 'bg-dg-border'}`} />
+                <span className={`block w-12 h-6 rounded-full transition-colors ${isActive ? 'bg-dg-success' : 'bg-dg-border'}`} />
                 <span className={`absolute w-5 h-5 bg-dg-bg rounded-full shadow-sm transition-transform ${isActive ? 'right-0.5' : 'left-0.5'}`} />
               </button>
             </div>
@@ -92,7 +92,7 @@ export default function EditUserModal() {
             <label htmlFor="editar-notas" className="block text-[10px] font-bold tracking-widest text-dg-text-muted uppercase font-display">NOTAS</label>
             <textarea 
               id="editar-notas"
-              className="w-full bg-dg-bg border border-dg-border text-white rounded-xl p-4 min-h-[100px] focus:border-dg-accent transition-colors resize-none text-sm"
+              className="w-full bg-dg-bg border border-dg-border text-dg-text rounded-dg p-4 min-h-[100px] focus:border-dg-focus transition-colors resize-none text-sm"
               placeholder="Ingrese notas del usuario..."
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
@@ -115,7 +115,7 @@ export default function EditUserModal() {
             </button>
           </div>
         </div>
-        <div className="h-1 w-full bg-gradient-to-r from-transparent via-dg-accent to-transparent opacity-30" />
+        <div className="h-1 w-full bg-gradient-to-r from-transparent via-dg-border-hi to-transparent" />
       </motion.div>
     </div>
   );

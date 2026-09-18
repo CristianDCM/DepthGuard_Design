@@ -74,7 +74,7 @@ export default function History() {
       case "FRAUDE":
         return { title: "Intento de Fraude", sub: evento.motivo ?? "Superficie plana detectada", icon: AlertTriangle, color: "text-dg-error", highlight: true };
       case "DESCONOCIDO":
-        return { title: "Desconocido", sub: evento.motivo ?? "Sin coincidencia en base de datos", icon: HelpCircle, color: "text-yellow-500", highlight: false };
+        return { title: "Desconocido", sub: evento.motivo ?? "Sin coincidencia en base de datos", icon: HelpCircle, color: "text-dg-warning", highlight: false };
     }
   }
 
@@ -107,13 +107,13 @@ export default function History() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between px-4 py-4">
             <div className="flex items-center gap-3">
-              <HistoryIcon className="w-6 h-6 text-dg-accent" />
+              <HistoryIcon className="w-6 h-6 text-dg-text-secondary" aria-hidden="true" />
               <h1 className="text-xl font-bold tracking-tight font-headline">Historial</h1>
             </div>
             <button 
               onClick={handleExportCSV}
               disabled={events.length === 0}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dg-card border border-dg-border text-dg-text-muted hover:text-white hover:border-dg-accent transition-all text-xs font-bold disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dg-card border border-dg-border text-dg-text-muted hover:text-dg-text hover:border-dg-action-text transition-all text-xs font-bold disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5" /> CSV
             </button>
@@ -129,7 +129,7 @@ export default function History() {
                   placeholder="Buscar accesos..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-dg-card border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-accent/50 placeholder:text-dg-text-muted text-white"
+                  className="w-full bg-dg-card border-none rounded-dg py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-focus/50 placeholder:text-dg-text-muted text-dg-text"
                 />
               </div>
               <div className="flex items-center gap-1.5">
@@ -140,7 +140,7 @@ export default function History() {
                     aria-label="Filtrar desde la fecha"
                     value={fechaDesde}
                     onChange={(e) => setFechaDesde(e.target.value)}
-                    className={`w-full md:w-[145px] bg-dg-card border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-accent/50 appearance-none [color-scheme:dark] relative [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${fechaDesde ? 'text-white' : 'text-dg-text-muted'}`}
+                    className={`w-full md:w-[145px] bg-dg-card border-none rounded-dg py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-focus/50 appearance-none [color-scheme:dark] relative [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${fechaDesde ? 'text-dg-text' : 'text-dg-text-muted'}`}
                     placeholder="Desde"
                   />
                 </div>
@@ -152,14 +152,14 @@ export default function History() {
                     aria-label="Filtrar hasta la fecha"
                     value={fechaHasta}
                     onChange={(e) => setFechaHasta(e.target.value)}
-                    className={`w-full md:w-[145px] bg-dg-card border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-accent/50 appearance-none [color-scheme:dark] relative [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${fechaHasta ? 'text-white' : 'text-dg-text-muted'}`}
+                    className={`w-full md:w-[145px] bg-dg-card border-none rounded-dg py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-focus/50 appearance-none [color-scheme:dark] relative [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${fechaHasta ? 'text-dg-text' : 'text-dg-text-muted'}`}
                     placeholder="Hasta"
                   />
                 </div>
                 {hasFechaFilter && (
                   <button
                     onClick={() => { setFechaDesde(""); setFechaHasta(""); }}
-                    className="p-2.5 rounded-xl bg-dg-error/10 text-dg-error hover:bg-dg-error/20 transition-colors shrink-0"
+                    className="p-2.5 rounded-dg bg-dg-error/10 text-dg-error hover:bg-dg-error/20 transition-colors shrink-0"
                     title="Limpiar fechas"
                   >
                     <X className="w-4 h-4" />
@@ -171,7 +171,7 @@ export default function History() {
               <FilterChip label="Todos" active={activeFilter === "Todos"} onClick={() => setActiveFilter("Todos")} />
               <FilterChip label="Autorizados" icon={CheckCircle} iconColor="text-dg-success" active={activeFilter === "Autorizados"} onClick={() => setActiveFilter("Autorizados")} />
               <FilterChip label="Fraude" icon={AlertTriangle} iconColor="text-dg-error" active={activeFilter === "Fraude"} onClick={() => setActiveFilter("Fraude")} />
-              <FilterChip label="Desconocido" icon={HelpCircle} iconColor="text-yellow-500" active={activeFilter === "Desconocido"} onClick={() => setActiveFilter("Desconocido")} />
+              <FilterChip label="Desconocido" icon={HelpCircle} iconColor="text-dg-warning" active={activeFilter === "Desconocido"} onClick={() => setActiveFilter("Desconocido")} />
             </div>
           </div>
         </div>
@@ -180,7 +180,7 @@ export default function History() {
       <main className="flex-1 px-4 py-4 space-y-3 max-w-7xl mx-auto w-full">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
           </div>
         ) : events.length === 0 ? (
           <div className="text-center py-12 text-dg-text-muted">
@@ -196,20 +196,20 @@ export default function History() {
                   <motion.div
                     key={evento.id}
                     whileTap={{ scale: 0.98 }}
-                    className={`cyber-card card-linked p-4 flex items-center gap-4 shadow-sm mb-3 relative hover:border-dg-accent/40 transition-colors ${config.highlight ? 'border-dg-accent/30 ring-1 ring-dg-accent/10' : ''}`}
+                    className={`cyber-card card-linked p-4 flex items-center gap-4 shadow-sm mb-3 relative hover:border-dg-action-text/40 transition-colors ${config.highlight ? 'border-dg-warning/40 ring-1 ring-dg-warning/10' : ''}`}
                   >
-                    <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-dg bg-white/5 flex items-center justify-center shrink-0">
                       <config.icon className={`w-8 h-8 ${config.color}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
-                        <h3 className="font-bold text-white truncate">{config.title}</h3>
+                        <h3 className="font-bold text-dg-text truncate">{config.title}</h3>
                         <span className="text-[10px] font-medium text-dg-text-muted">{formatTime(evento.timestamp)}</span>
                       </div>
                       <p className="text-xs text-dg-text-muted truncate">{config.sub}</p>
                       <Link
                         to={`/event/${evento.id}`}
-                        className="mt-2 text-xs font-bold text-dg-accent inline-flex items-center gap-1 focus-visible:outline-none after:absolute after:inset-0 after:rounded-dg"
+                        className="mt-2 text-xs font-bold text-dg-action-text inline-flex items-center gap-1 focus-visible:outline-none after:absolute after:inset-0 after:rounded-dg"
                       >
                         Ver detalles
                         <ChevronRight className="w-3 h-3" aria-hidden="true" />
@@ -227,7 +227,7 @@ export default function History() {
           <div className="pt-4 pb-8 flex justify-center">
             <button 
               onClick={cargarMas}
-              className="px-6 py-2 rounded-full border border-dg-accent/50 text-dg-accent font-bold text-sm hover:bg-dg-accent/10 transition-colors"
+              className="px-6 py-2 rounded-full border border-dg-action-text/50 text-dg-action-text font-semibold text-sm hover:bg-dg-action-text/10 transition-colors"
             >
               Cargar más eventos
             </button>
@@ -246,8 +246,8 @@ function FilterChip({ label, active, icon: Icon, iconColor, onClick }: { label: 
       onClick={onClick}
       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
       active 
-        ? "bg-dg-accent text-dg-bg font-bold" 
-        : "bg-dg-card border border-dg-border text-dg-text-muted hover:border-dg-accent/50"
+        ? "bg-dg-action text-white font-bold" 
+        : "bg-dg-card border border-dg-border text-dg-text-muted hover:border-dg-action-text/50"
     }`}>
       {Icon && <Icon className={`w-3.5 h-3.5 ${active ? "text-dg-bg" : iconColor}`} />}
       {label}

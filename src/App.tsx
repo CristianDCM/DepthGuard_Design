@@ -56,7 +56,7 @@ function PantallaCargando() {
       <div
         role="status"
         aria-label="Cargando"
-        className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin"
+        className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin"
       />
     </div>
   );

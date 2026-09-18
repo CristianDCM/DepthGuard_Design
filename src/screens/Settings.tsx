@@ -216,7 +216,7 @@ export default function Settings() {
       <header className="sticky top-0 z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
-            <SettingsIcon className="w-6 h-6 text-dg-accent" />
+            <SettingsIcon className="w-6 h-6 text-dg-text-secondary" aria-hidden="true" />
             <h1 className="text-xl font-bold tracking-tight font-headline">Ajustes</h1>
           </div>
         </div>
@@ -248,13 +248,13 @@ export default function Settings() {
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-6">
               <section className="cyber-card p-5 space-y-4">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-dg-accent">Estado del Sistema</h2>
+                <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-secondary">Estado del Sistema</h2>
                 <div className="space-y-4">
                   <StatusRow label="Nodo Edge" icon={Server} connected={servidorConectado} />
                   {(() => {
@@ -276,14 +276,14 @@ export default function Settings() {
               </section>
 
               <section className="cyber-card p-5 space-y-5">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-dg-accent">Notificaciones</h2>
+                <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-secondary">Notificaciones</h2>
                 <div className="space-y-6">
                   {/* Push Notifications Toggle */}
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-3">
                         {pushSubscribed ? (
-                          <BellRing className="w-5 h-5 text-dg-accent" />
+                          <BellRing className="w-5 h-5 text-dg-text-secondary" aria-hidden="true" />
                         ) : (
                           <BellOff className="w-5 h-5 text-dg-text-muted" />
                         )}
@@ -295,17 +295,17 @@ export default function Settings() {
                         </div>
                       </div>
                       {pushChecking ? (
-                        <div className="w-11 h-6 rounded-full bg-slate-800 flex items-center justify-center">
+                        <div className="w-11 h-6 rounded-full bg-dg-input flex items-center justify-center">
                           <Loader2 className="w-3 h-3 text-dg-text-muted animate-spin" />
                         </div>
                       ) : pushStatus === "unsupported" ? (
-                        <span className="text-[10px] text-dg-text-muted bg-slate-800 px-2 py-1 rounded-full">No soportado</span>
+                        <span className="text-[10px] text-dg-text-muted bg-dg-input px-2 py-1 rounded-full">No soportado</span>
                       ) : (
                         <div
                           onClick={pushLoading ? undefined : handlePushToggle}
                           className={`w-11 h-6 rounded-full transition-colors flex items-center px-0.5 ${
                             pushLoading ? 'opacity-50 cursor-wait' : 'cursor-pointer'
-                          } ${pushSubscribed ? 'bg-dg-accent' : 'bg-slate-800'}`}
+                          } ${pushSubscribed ? 'bg-dg-success' : 'bg-dg-input'}`}
                         >
                           {pushLoading ? (
                             <Loader2 className={`w-5 h-5 animate-spin ${pushSubscribed ? 'translate-x-5 text-dg-bg' : 'text-dg-text-muted'}`} />
@@ -316,7 +316,7 @@ export default function Settings() {
                       )}
                     </div>
                     {pushStatus === "denied" && (
-                      <p className="text-[10px] text-dg-error bg-dg-error/10 border border-dg-error/20 rounded-lg px-3 py-2">
+                      <p className="text-[10px] text-dg-error bg-dg-error/10 border border-dg-error/20 rounded-dg px-3 py-2">
                          Notificaciones bloqueadas por el navegador. Ve a la configuración del sitio para desbloquearlas.
                       </p>
                     )}
@@ -334,7 +334,7 @@ export default function Settings() {
                       </div>
                     </div>
                     {emailChecking ? (
-                      <div className="w-11 h-6 rounded-full bg-slate-800 flex items-center justify-center">
+                      <div className="w-11 h-6 rounded-full bg-dg-input flex items-center justify-center">
                         <Loader2 className="w-3 h-3 text-dg-text-muted animate-spin" />
                       </div>
                     ) : (
@@ -342,7 +342,7 @@ export default function Settings() {
                         onClick={emailLoading ? undefined : handleEmailToggle}
                         className={`w-11 h-6 rounded-full transition-colors flex items-center px-0.5 ${
                           emailLoading ? 'opacity-50 cursor-wait' : 'cursor-pointer'
-                        } ${emailSubscribed ? 'bg-dg-accent' : 'bg-slate-800'}`}
+                        } ${emailSubscribed ? 'bg-dg-success' : 'bg-dg-input'}`}
                       >
                         {emailLoading ? (
                           <Loader2 className={`w-5 h-5 animate-spin ${emailSubscribed ? 'translate-x-5 text-dg-bg' : 'text-dg-text-muted'}`} />
@@ -361,13 +361,13 @@ export default function Settings() {
               <section className="cyber-card p-5 space-y-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-dg-accent" />
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-dg-accent">Administradores</h2>
+                    <Users className="w-4 h-4 text-dg-text-secondary" aria-hidden="true" />
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-secondary">Administradores</h2>
                   </div>
                   {callerRole === "owner" && (
                     <button
                       onClick={() => { setShowInviteForm(!showInviteForm); setInviteResult(null); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dg-accent/10 border border-dg-accent/20 text-[10px] font-bold uppercase tracking-widest text-dg-accent hover:bg-dg-accent/20 transition-all active:scale-95"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dg-action/10 border border-dg-action/30 text-[10px] font-bold uppercase tracking-widest text-dg-action-text hover:bg-dg-action/20 transition-colors active:scale-[0.98]"
                     >
                       <UserPlus className="w-3.5 h-3.5" />
                       Invitar
@@ -399,13 +399,13 @@ export default function Settings() {
                               onChange={(e) => setInviteEmail(e.target.value)}
                               required
                               disabled={inviteLoading}
-                              className="w-full bg-dg-input border border-dg-border text-white rounded-lg py-2.5 pl-10 pr-4 text-sm focus:border-dg-accent placeholder:text-dg-text-muted transition-colors disabled:opacity-50"
+                              className="w-full bg-dg-input border border-dg-border text-dg-text rounded-dg py-2.5 pl-10 pr-4 text-sm focus:border-dg-focus placeholder:text-dg-text-muted transition-colors disabled:opacity-50"
                             />
                           </div>
                           <button
                             type="submit"
                             disabled={inviteLoading || !inviteEmail.trim()}
-                            className="px-4 py-2.5 bg-dg-accent text-dg-bg font-bold text-sm rounded-lg shadow-[0_0_10px_rgba(163,255,0,0.2)] hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="px-4 py-2.5 bg-dg-action text-white font-semibold text-sm rounded-dg hover:bg-dg-action-hover active:scale-[0.98] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
                             {inviteLoading ? (
                               <div className="w-4 h-4 border-2 border-dg-bg border-t-transparent rounded-full animate-spin" />
@@ -425,14 +425,14 @@ export default function Settings() {
                 {/* Lista de administradores */}
                 {adminsLoading ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="w-6 h-6 border-2 border-dg-accent border-t-transparent rounded-full animate-spin" />
+                    <div className="w-6 h-6 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : adminsError ? (
                   <div className="text-center py-6 space-y-2">
                     <p className="text-sm text-dg-error">{adminsError}</p>
                     <button
                       onClick={cargarAdmins}
-                      className="text-xs font-bold text-dg-accent hover:underline"
+                      className="text-xs font-bold text-dg-action-text hover:underline"
                     >
                       Reintentar
                     </button>
@@ -443,31 +443,31 @@ export default function Settings() {
                       <motion.div
                         key={admin.id}
                         layout
-                        className="flex items-center justify-between p-3 rounded-lg bg-dg-bg/50 border border-dg-border/50 group hover:border-dg-border transition-colors"
+                        className="flex items-center justify-between p-3 rounded-dg bg-dg-bg/50 border border-dg-border/50 group hover:border-dg-border transition-colors"
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
                             admin.id === callerId
-                              ? "bg-dg-accent/15 text-dg-accent border border-dg-accent/30"
+                              ? "bg-dg-action-text/15 text-dg-action-text border border-dg-action-text/30"
                               : "bg-white/5 text-dg-text-muted border border-white/10"
                           }`}>
                             {admin.email?.charAt(0).toUpperCase() ?? "?"}
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <p className="text-sm font-medium text-white truncate">{admin.email}</p>
+                              <p className="text-sm font-medium text-dg-text truncate">{admin.email}</p>
                               {admin.id === callerId && (
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-dg-accent bg-dg-accent/10 px-1.5 py-0.5 rounded">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-dg-info bg-dg-info/10 px-1.5 py-0.5 rounded-dg-sm">
                                   Tú
                                 </span>
                               )}
                               {admin.role === "owner" && (
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-dg-warning bg-dg-warning/10 px-1.5 py-0.5 rounded-dg-sm">
                                   Propietario
                                 </span>
                               )}
                               {!admin.confirmed && (
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-dg-warning bg-dg-warning/10 px-1.5 py-0.5 rounded">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-dg-warning bg-dg-warning/10 px-1.5 py-0.5 rounded-dg-sm">
                                   Pendiente
                                 </span>
                               )}
@@ -486,13 +486,13 @@ export default function Settings() {
                                 <button
                                   onClick={() => handleDelete(admin.id)}
                                   disabled={deletingId === admin.id}
-                                  className="px-2 py-1 text-[10px] font-bold uppercase bg-dg-error/10 border border-dg-error/30 text-dg-error rounded hover:bg-dg-error/20 transition-colors disabled:opacity-50"
+                                  className="px-2 py-1 text-[10px] font-bold uppercase bg-dg-error/10 border border-dg-error/30 text-dg-error rounded-dg-sm hover:bg-dg-error/20 transition-colors disabled:opacity-50"
                                 >
                                   {deletingId === admin.id ? "..." : "Confirmar"}
                                 </button>
                                 <button
                                   onClick={() => setConfirmDeleteId(null)}
-                                  className="px-2 py-1 text-[10px] font-bold uppercase text-dg-text-muted hover:text-white transition-colors"
+                                  className="px-2 py-1 text-[10px] font-bold uppercase text-dg-text-muted hover:text-dg-text transition-colors"
                                 >
                                   No
                                 </button>
@@ -531,7 +531,7 @@ export default function Settings() {
                           setTimeout(() => setInviteResult(null), 5000);
                         }}
                         disabled={settingOwner}
-                        className="w-full py-3 bg-amber-400/10 border border-amber-400/20 rounded-lg text-[10px] font-bold uppercase tracking-widest text-amber-400 hover:bg-amber-400/20 transition-all active:scale-95 disabled:opacity-50"
+                        className="w-full py-3 bg-dg-warning/10 border border-dg-warning/20 rounded-dg text-[10px] font-bold uppercase tracking-widest text-dg-warning hover:bg-dg-warning/20 transition-all active:scale-95 disabled:opacity-50"
                       >
                         {settingOwner ? "Configurando..." : "Reclamar Propiedad del Sistema"}
                       </button>
@@ -541,8 +541,8 @@ export default function Settings() {
               </section>
 
               <section className="cyber-card overflow-hidden p-5 space-y-4">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-dg-accent">Información Técnica</h2>
-                <div className="rounded-lg overflow-hidden border border-dg-border">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-secondary">Información Técnica</h2>
+                <div className="rounded-dg overflow-hidden border border-dg-border">
                   <table className="w-full text-left text-xs">
                     <tbody className="divide-y divide-dg-border">
                       <TechRow label="Anti-spoofing" value={estado?.antispoofing_activo ? "ACTIVO" : "INACTIVO"} highlight={estado?.antispoofing_activo} />
@@ -564,9 +564,9 @@ export default function Settings() {
           <div
             role="alertdialog"
             aria-labelledby="logout-titulo"
-            className="w-full max-w-md mx-auto rounded-xl border border-dg-error/30 bg-dg-error/5 p-4 space-y-3"
+            className="w-full max-w-md mx-auto rounded-dg border border-dg-error/30 bg-dg-error/5 p-4 space-y-3"
           >
-            <p id="logout-titulo" className="text-sm font-bold text-white text-center">
+            <p id="logout-titulo" className="text-sm font-bold text-dg-text text-center">
               ¿Cerrar la sesión?
             </p>
             <p className="text-xs text-dg-text-secondary text-center">
@@ -575,13 +575,13 @@ export default function Settings() {
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirmLogout(false)}
-                className="flex-1 py-3 rounded-lg border border-dg-border text-sm font-bold text-white hover:bg-white/5 transition-colors"
+                className="flex-1 py-3 rounded-dg border border-dg-border text-sm font-bold text-dg-text hover:bg-white/5 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleLogout}
-                className="flex-1 py-3 rounded-lg bg-dg-error text-dg-bg text-sm font-bold hover:brightness-110 transition-all"
+                className="flex-1 py-3 rounded-dg bg-dg-error text-dg-bg text-sm font-bold hover:brightness-110 transition-all"
               >
                 Sí, cerrar sesión
               </button>
@@ -590,7 +590,7 @@ export default function Settings() {
         ) : (
           <button 
             onClick={() => setConfirmLogout(true)}
-            className="w-full py-4 rounded-xl border border-dg-error/30 bg-dg-error/5 flex items-center justify-center gap-3 group hover:bg-dg-error/10 transition-colors active:scale-95 max-w-md mx-auto"
+            className="w-full py-4 rounded-dg border border-dg-error/30 bg-dg-error/5 flex items-center justify-center gap-3 group hover:bg-dg-error/10 transition-colors active:scale-95 max-w-md mx-auto"
           >
             <LogOut className="w-5 h-5 text-dg-error" aria-hidden="true" />
             <span className="text-sm font-bold uppercase tracking-widest text-dg-error">Cerrar Sesión</span>
@@ -628,7 +628,7 @@ function ToggleRow({ label, checked: initialChecked }: { label: string, checked?
       <span className="text-sm font-medium">{label}</span>
       <div 
         onClick={() => setIsChecked(!isChecked)}
-        className={`w-11 h-6 rounded-full transition-colors flex items-center px-0.5 cursor-pointer ${isChecked ? 'bg-dg-accent' : 'bg-slate-800'}`}
+        className={`w-11 h-6 rounded-full transition-colors flex items-center px-0.5 cursor-pointer ${isChecked ? 'bg-dg-success' : 'bg-dg-input'}`}
       >
         <div className={`w-5 h-5 rounded-full transition-transform shadow-sm ${isChecked ? 'translate-x-5 bg-dg-bg' : 'bg-dg-text-muted'}`} />
       </div>
