@@ -6,16 +6,17 @@ import {
   Video,
   Users,
   Check,
-  RotateCw,
   CheckCircle,
   ArrowLeft,
   AlertTriangle,
-  WifiOff,
+  ScanFace,
   ShieldCheck,
   FileCheck2,
 } from "lucide-react";
 import { motion } from "motion/react";
 import WebRTCPlayer from "../components/WebRTCPlayer";
+import BiometricFrame, { type EstadoMarco, type Pose } from "../components/BiometricFrame";
+import { leerCalidad, consejoPrioritario, type CalidadCaptura } from "../lib/calidadCaptura";
 import {
   crearUsuario,
   insertarComandoRegistro,
@@ -34,13 +35,29 @@ import {
 // Configuración de ángulos de captura
 // ============================================
 
-const ANGULOS = [
-  { step: 1, label: "Frontal", instruccion: "Mire directamente al frente" },
-  { step: 2, label: "Izquierda", instruccion: "Gire la cabeza a su IZQUIERDA" },
-  { step: 3, label: "Derecha", instruccion: "Gire la cabeza a su DERECHA" },
-  { step: 4, label: "Arriba", instruccion: "Mire hacia ARRIBA" },
-  { step: 5, label: "Abajo", instruccion: "Mire hacia ABAJO" },
+const ANGULOS: { step: number; label: string; pose: Pose; instruccion: string }[] = [
+  { step: 1, label: "Frontal", pose: "frontal", instruccion: "Mire directamente a la cámara" },
+  { step: 2, label: "Izquierda", pose: "izquierda", instruccion: "Gire la cabeza a su izquierda" },
+  { step: 3, label: "Derecha", pose: "derecha", instruccion: "Gire la cabeza a su derecha" },
+  { step: 4, label: "Arriba", pose: "arriba", instruccion: "Levante la barbilla" },
+  { step: 5, label: "Abajo", pose: "abajo", instruccion: "Baje la barbilla" },
 ];
+
+/**
+ * A partir de aqui damos por perdida la espera del terminal. Veinte segundos
+ * es de sobra para un latido de un edge sano; antes la pantalla se quedaba en
+ * "Polling..." indefinidamente, sin reintento ni diagnostico.
+ */
+const ESPERA_MAX_MS = 20_000;
+
+/** Vibracion breve, si el dispositivo la soporta. Nunca debe romper nada. */
+function vibrar(patron: number[]) {
+  try {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate(patron);
+    }
+  } catch { /* el navegador puede denegarlo sin motivo: es decorativo */ }
+}
 
 export default function RegisterStart() {
   const navigate = useNavigate();
@@ -62,11 +79,30 @@ export default function RegisterStart() {
   const [activeCameraId, setActiveCameraId] = useState<CameraId | null>(null);
   const [webrtcFailed, setWebrtcFailed] = useState(false);
 
+  // Calidad de captura publicada por el edge. Null mientras no la publique:
+  // ver el contrato en src/lib/calidadCaptura.ts.
+  const [calidad, setCalidad] = useState<CalidadCaptura | null>(null);
+  // El terminal no ha contestado dentro de ESPERA_MAX_MS.
+  const [esperaAgotada, setEsperaAgotada] = useState(false);
+
   // Angulo que el edge esta capturando ahora mismo. `anguloActual` es el
   // numero de angulos ya completados que publica el comando, asi que ese
   // mismo indice apunta al siguiente por capturar.
   const indiceAngulo = Math.min(anguloActual, ANGULOS.length - 1);
   const anguloEnCurso = ANGULOS[indiceAngulo];
+
+  // Un consejo de calidad urgente manda sobre la instruccion de pose: no
+  // sirve de nada pedir que gire la cara si el sistema no le ve por la luz.
+  const consejo = consejoPrioritario(calidad);
+  const instruccionVisible = consejo ?? anguloEnCurso.instruccion;
+
+  // Estado del marco. Sin datos de calidad nos quedamos en "capturando",
+  // que es lo unico que sabemos con certeza.
+  const estadoMarco: EstadoMarco = webrtcFailed
+    ? "esperando"
+    : consejo
+      ? "colocando"
+      : "capturando";
 
   // Cleanup ref for Realtime subscription
   const cleanupRef = useRef<(() => void) | null>(null);
@@ -99,7 +135,7 @@ export default function RegisterStart() {
       // Pre-validaciones antes de mostrar consentimiento
       const estado = await getEstadoSistema();
       if (!isEdgeOnline(estado.ultimo_heartbeat)) {
-        setError("El nodo edge no está activo. Encienda el sistema DepthGuard antes de registrar.");
+        setError("El terminal de acceso está apagado. Enciéndalo antes de registrar a una persona.");
         setIsSubmitting(false);
         return;
       }
@@ -149,6 +185,8 @@ export default function RegisterStart() {
       // 3. Pasar a "esperando edge"
       setStep("waiting_edge");
       setAnguloActual(0);
+      setCalidad(null);
+      setEsperaAgotada(false);
 
       // 4. El monitoreo (Realtime + polling) lo arranca el efecto de
       //    `comandoId`, en cuanto React aplica el estado de arriba.
@@ -173,19 +211,27 @@ export default function RegisterStart() {
    * nadie lo leyera nunca.
    */
   const _onComandoActualizado = (comando: ComandoEdge) => {
-    setAnguloActual(comando.progreso);
+    setAnguloActual((previo) => {
+      // Un angulo mas capturado: confirmacion hapatica, que en movil sustituye
+      // a mirar la pantalla justo cuando la persona tiene la cara girada.
+      if (comando.progreso > previo) vibrar([30]);
+      return comando.progreso;
+    });
+    setCalidad(leerCalidad(comando.resultado));
 
     if (comando.estado === "en_progreso") {
       setStep("scanning");
     }
     if (comando.estado === "completado") {
       _limpiarMonitoreo();
+      vibrar([30, 40, 30]);
       setUsuarioCreado((prev) => prev ? { ...prev, num_angulos: comando.progreso } : null);
       setStep("success");
     }
     if (comando.estado === "error") {
       _limpiarMonitoreo();
-      const msg = comando.resultado?.error ?? "Error desconocido en el edge";
+      vibrar([60, 40, 60]);
+      const msg = comando.resultado?.error ?? "El terminal no pudo completar la captura.";
       setError(msg);
       setStep("error");
     }
@@ -216,6 +262,16 @@ export default function RegisterStart() {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
   }, [comandoId]);
+
+  // Corta la espera del terminal a los ESPERA_MAX_MS. Antes, si el edge no
+  // contestaba nunca, la pantalla se quedaba en "Polling..." para siempre y
+  // la unica salida era cancelar.
+  useEffect(() => {
+    if (step !== "waiting_edge") return;
+    setEsperaAgotada(false);
+    const t = setTimeout(() => setEsperaAgotada(true), ESPERA_MAX_MS);
+    return () => clearTimeout(t);
+  }, [step]);
 
   const _limpiarMonitoreo = () => {
     cleanupRef.current?.();
@@ -316,7 +372,7 @@ export default function RegisterStart() {
                     La persona debe estar frente a la cámara durante el registro. Se capturarán 5 ángulos faciales en aproximadamente 30 segundos.
                   </p>
                   <p className="text-2xs text-dg-text-muted">
-                    Asegúrese de buena iluminación y que el rostro sea claramente visible. El nodo edge debe estar encendido.
+                    Asegúrese de que hay buena luz y de que el rostro se ve con claridad. El terminal de acceso debe estar encendido.
                   </p>
                 </div>
               </div>
@@ -340,8 +396,8 @@ export default function RegisterStart() {
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Validando...
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+                      Comprobando…
                     </>
                   ) : (
                     <>
@@ -452,12 +508,12 @@ export default function RegisterStart() {
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Iniciando registro...
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+                      Iniciando…
                     </>
                   ) : (
                     <>
-                      <ShieldCheck className="w-5 h-5" /> Aceptar y Comenzar Escaneo
+                      <ShieldCheck className="w-5 h-5" aria-hidden="true" /> Aceptar y comenzar
                     </>
                   )}
                 </button>
@@ -491,23 +547,61 @@ export default function RegisterStart() {
             </div>
 
             <div className="space-y-6 pb-10">
-              <div className="cyber-card p-8 text-center relative overflow-hidden">
-                <div className="mb-4 flex justify-center">
-                  <WifiOff className="w-12 h-12 text-dg-warning animate-pulse" />
+              {/*
+                Espera del terminal.
+
+                Antes esta pantalla decia "Esperando respuesta del edge...",
+                "El pipeline IA lo procesara en los proximos segundos" y
+                mostraba un distintivo con la palabra "Polling...", encabezado
+                por un icono de SIN CONEXION en ambar: el camino feliz se
+                anunciaba con la senal visual de una averia.
+              */}
+              {esperaAgotada ? (
+                <div className="cyber-card p-6 text-center" role="alert">
+                  <div className="mb-4 flex justify-center">
+                    <AlertTriangle className="h-10 w-10 text-dg-warning" aria-hidden="true" />
+                  </div>
+                  <h3 className="mb-2 text-lg font-bold text-dg-text">
+                    El terminal no responde
+                  </h3>
+                  <p className="mx-auto mb-5 max-w-sm text-sm text-dg-text-secondary">
+                    Se envió la orden de registro pero el terminal de acceso no ha
+                    contestado. Compruebe que está encendido y conectado a la red.
+                  </p>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <button
+                      onClick={() => setEsperaAgotada(false)}
+                      className="btn-primary flex-1"
+                    >
+                      Seguir esperando
+                    </button>
+                    <button
+                      onClick={() => navigate("/settings")}
+                      className="btn-secondary flex-1"
+                    >
+                      Ver estado del sistema
+                    </button>
+                  </div>
                 </div>
-                <h3 className="text-dg-text font-bold text-lg mb-2">
-                  Esperando respuesta del edge...
-                </h3>
-                <p className="text-dg-text-muted text-xs mb-4">
-                  El comando fue enviado. El pipeline IA lo procesará en los próximos segundos.
-                </p>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-dg-warning/10 border border-dg-warning/20">
-                  <div className="w-2 h-2 rounded-full bg-dg-warning animate-pulse" />
-                  <span className="text-2xs font-bold text-dg-warning uppercase">
-                    Polling...
-                  </span>
+              ) : (
+                <div className="cyber-card p-8 text-center" role="status">
+                  <div className="mb-4 flex justify-center">
+                    <ScanFace className="h-12 w-12 text-dg-info" aria-hidden="true" />
+                  </div>
+                  <h3 className="mb-2 text-lg font-bold text-dg-text">
+                    Preparando la cámara
+                  </h3>
+                  <p className="mx-auto max-w-sm text-sm text-dg-text-secondary">
+                    Conectando con el terminal de acceso. Suele tardar unos segundos.
+                  </p>
+                  <div
+                    aria-hidden="true"
+                    className="mx-auto mt-5 h-1 w-40 overflow-hidden rounded-full bg-dg-canvas"
+                  >
+                    <div className="h-full w-1/3 rounded-full bg-dg-info animate-pulse" />
+                  </div>
                 </div>
-              </div>
+              )}
 
               <button 
                 onClick={handleCancelScanning}
@@ -527,7 +621,7 @@ export default function RegisterStart() {
                 <UserPlus className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-dg-text tracking-tight headline">Escaneando Rostro</h2>
+                <h2 className="text-xl font-bold text-dg-text tracking-tight headline">Escaneando el rostro</h2>
                 {usuarioCreado && (
                   <p className="text-2xs text-dg-text-muted font-medium mt-0.5">
                     {usuarioCreado.nombre} · ID: {usuarioCreado.id.substring(0, 8)}
@@ -537,59 +631,37 @@ export default function RegisterStart() {
             </div>
 
             <div className="space-y-5 pb-10">
-              {/* Video feed — tamaño mediano, centrado */}
-              <div className="max-w-md mx-auto rounded-dg overflow-hidden border border-dg-border bg-dg-canvas shadow-dg-lg">
+              {/*
+                Todo el encuadre, el progreso y la guia viven ahora en
+                BiometricFrame. Antes esto era un <video> desnudo sobre negro,
+                sin ovalo, sin mascara y sin una sola indicacion de donde
+                debia colocarse la persona.
+              */}
+              <BiometricFrame
+                estado={estadoMarco}
+                instruccion={instruccionVisible}
+                pose={anguloEnCurso.pose}
+                progreso={anguloActual / ANGULOS.length}
+                angulosHechos={anguloActual}
+                angulosTotal={ANGULOS.length}
+                calidad={calidad}
+              >
                 {activeCameraId && !webrtcFailed ? (
-                  <WebRTCPlayer 
-                    cameraId={activeCameraId} 
-                    edgeOnline={true} 
+                  <WebRTCPlayer
+                    cameraId={activeCameraId}
+                    edgeOnline={true}
                     onFallback={() => setWebrtcFailed(true)}
                     minimal
+                    variante="bare"
                   />
                 ) : (
-                  <div className="aspect-video flex items-center justify-center">
-                    <RotateCw className="w-10 h-10 text-dg-info animate-spin-slow" aria-hidden="true" />
+                  <div className="flex h-full w-full items-center justify-center bg-dg-canvas" role="status">
+                    <span className="max-w-[14rem] text-center text-sm text-dg-text-secondary">
+                      Sin vídeo en directo. La captura continúa en el terminal.
+                    </span>
                   </div>
                 )}
-              </div>
-
-              {/* Instruccion de pose.
-                  El texto sale de ANGULOS[].instruccion, que estaba definido
-                  desde el primer commit y no se renderizaba en ningun sitio:
-                  la pantalla pedia "siga las instrucciones en pantalla" sin
-                  que hubiera ninguna instruccion en pantalla que seguir.
-                  aria-live la anuncia tambien por lector de pantalla, que es
-                  justo lo que necesita alguien que no puede mirar el movil
-                  mientras gira la cara. */}
-              <div className="text-center space-y-1.5" aria-live="assertive">
-                <p className="text-lg font-semibold text-dg-text leading-snug">
-                  {anguloEnCurso.instruccion}
-                </p>
-                <p className="text-xs text-dg-text-secondary">
-                  Ángulo {indiceAngulo + 1} de {ANGULOS.length} · {anguloEnCurso.label}
-                </p>
-              </div>
-
-              {/* Progreso real por angulo, alimentado por comando.progreso */}
-              <ol className="flex items-center justify-center gap-2" aria-label={`Progreso de la captura: ${anguloActual} de ${ANGULOS.length} ángulos completados`}>
-                {ANGULOS.map((a, i) => {
-                  const completado = i < anguloActual;
-                  const activo = i === indiceAngulo && !completado;
-                  return (
-                    <li
-                      key={a.step}
-                      aria-hidden="true"
-                      className={`h-1.5 rounded-full transition-all duration-300 ${
-                        completado
-                          ? "w-8 bg-dg-success"
-                          : activo
-                            ? "w-8 bg-dg-info/50 animate-pulse"
-                            : "w-4 bg-dg-border"
-                      }`}
-                    />
-                  );
-                })}
-              </ol>
+              </BiometricFrame>
 
               {/* Botón cancelar */}
               <button 
@@ -643,7 +715,9 @@ export default function RegisterStart() {
               </div>
               <div>
                 <h2 className="text-xl font-bold text-dg-text leading-tight headline">¡Registro Exitoso!</h2>
-                <p className="text-dg-text-muted text-sm mt-1">Usuario registrado con embeddings reales del pipeline IA</p>
+                <p className="text-dg-text-secondary text-sm mt-1">
+                  {(usuarioCreado?.nombre ?? name).split(" ")[0]} ya puede acceder.
+                </p>
               </div>
             </div>
 
@@ -688,9 +762,9 @@ export default function RegisterStart() {
                 <span className="text-dg-text text-2xl font-bold headline tabular">{usuarioCreado?.num_angulos ?? 5}</span>
                 <span className="text-dg-text-muted text-2xs uppercase font-semibold">Ángulos</span>
               </div>
-              <div className="bg-dg-card p-4 rounded-dg border border-dg-border flex flex-col items-center justify-center">
-                <span className="text-dg-text text-2xl font-bold headline">Real</span>
-                <span className="text-dg-text-muted text-2xs uppercase font-semibold">Pipeline IA</span>
+              <div className="bg-dg-card p-4 rounded-dg border border-dg-border flex flex-col items-center justify-center text-center">
+                <ShieldCheck className="h-6 w-6 text-dg-success" aria-hidden="true" />
+                <span className="mt-1 text-dg-text-muted text-2xs uppercase font-semibold">Plantilla cifrada</span>
               </div>
             </div>
 

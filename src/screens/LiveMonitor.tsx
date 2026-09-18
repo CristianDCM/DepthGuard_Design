@@ -12,6 +12,8 @@ import {
   AlertTriangle,
   HelpCircle,
   Eye,
+  VideoOff,
+  Image as ImageIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Navigation from "../components/Navigation";
@@ -312,20 +314,33 @@ function CameraPanel({
         {/* Columna Izquierda (o única si es compact) */}
         <div className={layout === "expanded" ? "lg:col-span-8 space-y-4" : "space-y-4"}>
 
-      {/* Preview en Vivo: WebRTC P2P (primero) con fallback automático a Snapshot */}
-      {camaraActiva && !webrtcFailed ? (
-        <WebRTCPlayer
-          cameraId={cameraId}
-          edgeOnline={edgeOnline}
-          onFallback={() => setWebrtcFailed(true)}
-        />
-      ) : (
-        <LiveSnapshotPreview
-          camaraActiva={camaraActiva}
-          cameraId={cameraId}
-          previewUrl={previewUrl}
-        />
-      )}
+      {/*
+        Preview en vivo con el veredicto SUPERPUESTO.
+
+        Hasta ahora el resultado aparecia en una tarjeta suelta debajo del
+        video, sin ninguna relacion visual con la imagen. Con dos personas en
+        el encuadre, el operador no podia saber a cual se referia un
+        "FRAUDE". La banda de abajo ata las dos cosas.
+      */}
+      <div className="relative">
+        {camaraActiva && !webrtcFailed ? (
+          <WebRTCPlayer
+            cameraId={cameraId}
+            edgeOnline={edgeOnline}
+            onFallback={() => setWebrtcFailed(true)}
+          />
+        ) : (
+          <LiveSnapshotPreview
+            camaraActiva={camaraActiva}
+            cameraId={cameraId}
+            previewUrl={previewUrl}
+          />
+        )}
+
+        {ultimoEvento && camaraActiva && (
+          <VeredictoSobreVideo evento={ultimoEvento} config={statusConfig} />
+        )}
+      </div>
 
       {/* Status Card — el evento actual */}
       <div
@@ -514,6 +529,51 @@ function CameraPanel({
 // ============================================
 // Sub-componentes
 // ============================================
+
+/**
+ * Banda de veredicto anclada al pie del video. Repite el estado que ya
+ * muestra la tarjeta de abajo, a proposito: lo que aporta no es el dato sino
+ * la union entre el rostro que se ve y el juicio que el sistema ha emitido.
+ */
+function VeredictoSobreVideo({
+  evento,
+  config,
+}: {
+  evento: Evento;
+  config: ReturnType<typeof getStatusConfig>;
+}) {
+  const esFraude = evento.estado === "FRAUDE";
+  return (
+    <motion.div
+      key={evento.id}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="pointer-events-none absolute inset-x-0 bottom-0 z-20 p-3"
+    >
+      <div
+        className="flex items-center gap-2.5 rounded-dg border bg-dg-bg/85 px-3 py-2 backdrop-blur-md"
+        style={{ borderColor: config.accentColor }}
+      >
+        <config.icon className="h-5 w-5 shrink-0" style={{ color: config.accentColor }} aria-hidden="true" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-bold" style={{ color: config.accentColor }}>
+            {config.title}
+          </p>
+          {(evento.nombre || evento.motivo) && (
+            <p className="truncate text-2xs text-dg-text-secondary">
+              {evento.nombre ?? evento.motivo}
+            </p>
+          )}
+        </div>
+        {evento.confianza != null && !esFraude && (
+          <span className="shrink-0 text-sm font-bold tabular" style={{ color: config.accentColor }}>
+            {Math.round(evento.confianza * 100)}%
+          </span>
+        )}
+      </div>
+    </motion.div>
+  );
+}
 
 function MiniEventRow({ evento, onClick }: { key?: React.Key; evento: Evento; onClick?: () => void }) {
   const config = getEventMiniConfig(evento);
@@ -740,9 +800,10 @@ function LiveSnapshotPreview({
   if (!camaraActiva) {
     return (
       <div className="cyber-card overflow-hidden">
-        <div className="aspect-video bg-dg-bg flex flex-col items-center justify-center gap-2 text-dg-text-muted">
-          <Video className="w-8 h-8 opacity-30" />
-          <span className="text-xs font-medium">Cámara desconectada</span>
+        <div className="aspect-video bg-dg-bg flex flex-col items-center justify-center gap-2 text-dg-text-muted" role="status">
+          <VideoOff className="w-8 h-8 opacity-40" aria-hidden="true" />
+          <span className="text-sm font-medium">Cámara desconectada</span>
+          <span className="text-xs text-dg-text-muted">Compruebe el terminal de acceso</span>
         </div>
       </div>
     );
@@ -750,12 +811,21 @@ function LiveSnapshotPreview({
 
   return (
     <div className="cyber-card overflow-hidden relative group">
-      {/* Header del preview */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 py-2 bg-gradient-to-b from-black/70 to-transparent">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-dg-error animate-pulse shadow-[0_0_6px_var(--color-dg-error)]" />
-          <span className="text-2xs font-bold text-white/90 uppercase">
-            En Vivo
+      {/*
+        Cabecera honesta.
+
+        Aqui NO hay video en directo: son imagenes sueltas, una cada dos
+        segundos, porque el enlace WebRTC no se pudo establecer. Antes esta
+        cabecera mostraba el mismo punto rojo parpadeante y el mismo rotulo
+        "EN VIVO" que el streaming de verdad, y el unico aviso estaba abajo,
+        en blanco al 40% sobre un degradado. Un operador podia tomar una
+        decision de seguridad creyendo que veia la escena en directo.
+      */}
+      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between gap-2 px-3 py-2 bg-gradient-to-b from-black/80 to-transparent">
+        <div className="flex items-center gap-1.5 rounded-full border border-dg-warning/40 bg-dg-warning/15 px-2 py-0.5 backdrop-blur-sm">
+          <ImageIcon className="h-3 w-3 text-dg-warning" aria-hidden="true" />
+          <span className="text-2xs font-bold uppercase text-dg-warning">
+            Vista reducida
           </span>
         </div>
         {lastUpdate > 0 && (
@@ -774,7 +844,7 @@ function LiveSnapshotPreview({
       {snapshotUrl && !imgError ? (
         <img
           src={snapshotUrl}
-          alt="Preview en vivo de la cámara"
+          alt="Última imagen capturada por la cámara de acceso"
           className="w-full aspect-video object-contain bg-dg-canvas"
           onError={() => setImgError(true)}
         />
@@ -782,15 +852,14 @@ function LiveSnapshotPreview({
         <div className="aspect-video bg-dg-bg flex flex-col items-center justify-center gap-2 text-dg-text-muted">
           <div className="w-6 h-6 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
           <span className="text-xs font-medium">
-            {imgError ? "Esperando snapshot del edge..." : "Conectando..."}
+            {imgError ? "Sin imagen de la cámara" : "Conectando…"}
           </span>
         </div>
       )}
 
-      {/* Footer sutil */}
-      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5 bg-gradient-to-t from-black/60 to-transparent">
-        <span className="text-2xs text-white/40 font-medium">
-          Actualización cada 2s · Resolución reducida
+      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5 bg-gradient-to-t from-black/75 to-transparent">
+        <span className="text-2xs font-medium text-white/80">
+          No es vídeo en directo · 1 imagen cada 2 s
         </span>
       </div>
     </div>
