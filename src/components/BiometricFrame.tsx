@@ -11,14 +11,18 @@ import { indicadores, type CalidadCaptura } from "../lib/calidadCaptura";
  * instrucciones de pose existían en el código desde el primer commit y no se
  * renderizaban en ningún sitio.
  *
- * Todo lo que dibuja este componente responde a una pregunta concreta que la
- * persona que está siendo escaneada se hace:
+ * Cada elemento responde a una pregunta concreta de quien está siendo
+ * escaneado, y no se dibuja nada que no responda a ninguna:
  *
  *   ¿dónde me pongo?          → máscara con óvalo recortado
- *   ¿me está viendo?          → color y grosor del anillo
+ *   ¿me está viendo?          → color del anillo
  *   ¿qué tengo que hacer?     → instrucción de pose y flecha direccional
  *   ¿cuánto queda?            → anillo de progreso y puntos de ángulo
  *   ¿por qué está fallando?   → tira de calidad (luz, distancia, encuadre)
+ *
+ * Se han retirado el barrido de escaneo, las esquinas de visor y el
+ * resplandor del anillo: eran decoración de película de espías encima de la
+ * cara de alguien que solo intenta seguir una instrucción.
  */
 
 export type EstadoMarco =
@@ -99,7 +103,6 @@ export default function BiometricFrame({
 }: Props) {
   const color = COLOR_ESTADO[estado];
   const Chevron = CHEVRON[pose];
-  const capturando = estado === "capturando";
   const progresoAcotado = Math.min(Math.max(progreso, 0), 1);
   const tira = calidad ? indicadores(calidad) : null;
 
@@ -127,27 +130,14 @@ export default function BiometricFrame({
         >
           <div className="absolute inset-0 rounded-[50%] shadow-[0_0_0_9999px_rgb(8_11_18_/_0.72)]" />
 
-          {/* Barrido de escaneo, recortado al óvalo */}
-          {capturando && (
-            <div className="absolute inset-0 overflow-hidden rounded-[50%]">
-              <div
-                className="absolute inset-x-0 h-8 animate-scan-sweep"
-                style={{
-                  background: `linear-gradient(180deg, transparent, ${color}22 60%, ${color}66 100%)`,
-                  borderBottom: `1px solid ${color}`,
-                }}
-              />
-            </div>
-          )}
-
           {/* Anillo de progreso: cada ángulo capturado avanza un tramo */}
           <svg viewBox="0 0 300 400" className="absolute inset-0 h-full w-full overflow-visible">
             <ellipse
               cx="150" cy="200" rx="147" ry="197"
               fill="none"
               stroke={color}
-              strokeOpacity={0.45}
-              strokeWidth="3"
+              strokeOpacity={0.35}
+              strokeWidth="2"
               style={{ transition: "stroke 200ms linear" }}
             />
             {/*
@@ -167,28 +157,23 @@ export default function BiometricFrame({
               cx="150" cy="200" rx="147" ry="197"
               fill="none"
               stroke={color}
-              strokeWidth="6"
+              strokeWidth="4"
               strokeLinecap="round"
               pathLength={1}
               strokeDasharray={`${progresoAcotado} ${Math.max(1 - progresoAcotado, 0.0001)}`}
               strokeDashoffset={-0.75}
-              style={{
-                transition: "stroke-dasharray 400ms ease-out, stroke 200ms linear",
-                filter: capturando ? `drop-shadow(0 0 8px ${color})` : undefined,
-              }}
+              style={{ transition: "stroke-dasharray 400ms ease-out, stroke 200ms linear" }}
             />
           </svg>
 
           {/* Flecha hacia donde debe girar la cara */}
           {Chevron && (
-            <div className={`absolute ${CHEVRON_POS[pose]} rounded-full bg-dg-bg/85 p-1.5 backdrop-blur-sm`}>
-              <Chevron className="h-5 w-5 animate-pulse" style={{ color }} />
+            <div className={`absolute ${CHEVRON_POS[pose]} rounded-full bg-dg-bg/80 p-1 backdrop-blur-sm`}>
+              <Chevron className="h-4 w-4" style={{ color }} aria-hidden="true" />
             </div>
           )}
         </div>
 
-        {/* Esquinas de visor: se cierran al empezar a capturar */}
-        <Esquinas color={color} cerradas={capturando} />
       </div>
 
       {/*
@@ -264,20 +249,6 @@ export default function BiometricFrame({
           ))}
         </ul>
       )}
-    </div>
-  );
-}
-
-/** Cuatro ángulos de visor en las esquinas del marco. */
-function Esquinas({ color, cerradas }: { color: string; cerradas: boolean }) {
-  const base = "absolute h-6 w-6 transition-all duration-200";
-  const off = cerradas ? "1rem" : "0.75rem";
-  return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-      <span className={`${base} border-l-2 border-t-2 rounded-tl-sm`} style={{ borderColor: color, top: off, left: off }} />
-      <span className={`${base} border-r-2 border-t-2 rounded-tr-sm`} style={{ borderColor: color, top: off, right: off }} />
-      <span className={`${base} border-l-2 border-b-2 rounded-bl-sm`} style={{ borderColor: color, bottom: off, left: off }} />
-      <span className={`${base} border-r-2 border-b-2 rounded-br-sm`} style={{ borderColor: color, bottom: off, right: off }} />
     </div>
   );
 }
