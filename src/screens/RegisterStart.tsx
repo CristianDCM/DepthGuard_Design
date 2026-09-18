@@ -332,7 +332,12 @@ export default function RegisterStart() {
       <motion.div 
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
-        className="fixed bottom-0 left-0 right-0 z-50 bg-dg-bg rounded-t-dg-lg border-t border-x border-dg-border p-6 shadow-[0px_-24px_48px_rgba(0,0,0,0.6)] max-h-[92vh] overflow-y-auto md:max-w-2xl md:mx-auto md:bottom-8 md:rounded-dg-lg md:border"
+        // overscroll-contain: sin esto, un scroll de mas dentro de la hoja
+              // propaga al documento y dispara el pull-to-refresh del
+              // navegador, que recarga la pagina EN MITAD del escaneo facial
+              // y pierde el registro.
+              style={{ overscrollBehavior: "contain", touchAction: "pan-y" }}
+              className="fixed bottom-0 left-0 right-0 z-50 bg-dg-bg rounded-t-dg-lg border-t border-x border-dg-border p-6 shadow-dg-lg max-h-[92vh] overflow-y-auto md:max-w-2xl md:mx-auto md:bottom-8 md:rounded-dg-lg md:border"
       >
         <div className="w-12 h-1 bg-dg-border rounded-full mx-auto mb-8 shrink-0" />
         

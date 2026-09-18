@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "r
 import { MotionConfig } from "motion/react";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
+import EstadoPwa from "./components/EstadoPwa";
 import Login from "./screens/Login";
 import SetPassword from "./screens/SetPassword";
 
@@ -66,6 +67,8 @@ export default function App() {
   return (
     <ErrorBoundary>
       <MotionConfig reducedMotion="user">
+        {/* Conexión, versión nueva e instalación. */}
+        <EstadoPwa />
         <Router>
           {/*
             Enlace de salto: el primer elemento enfocable de la pagina.

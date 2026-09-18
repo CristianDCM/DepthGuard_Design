@@ -10,8 +10,3 @@ createRoot(document.getElementById('root')!).render(
     <SpeedInsights />
   </StrictMode>,
 );
-
-// Registrar Service Worker para notificaciones push (FCM)
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {});
-}

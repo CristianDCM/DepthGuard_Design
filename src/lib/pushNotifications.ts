@@ -9,8 +9,16 @@ import { getFirebaseMessaging, VAPID_KEY } from "./firebase";
 
 export type PushStatus = "granted" | "denied" | "default" | "unsupported";
 
-/** Ruta del Service Worker de FCM (debe estar en la raíz del sitio). */
-const SW_URL = "/firebase-messaging-sw.js";
+/**
+ * Ruta del Service Worker de la aplicación.
+ *
+ * Es el Service Worker ÚNICO: atiende el precaché offline y, mediante
+ * `importScripts("/firebase-messaging-sw.js")`, también las notificaciones
+ * push. Antes se registraba aquí el de Firebase directamente, pero dos
+ * Service Workers no pueden convivir en el mismo ámbito — el segundo
+ * `register()` sustituye al primero — así que uno de los dos se perdía.
+ */
+const SW_URL = "/sw.js";
 
 /**
  * Obtiene el registro del Service Worker de FCM.

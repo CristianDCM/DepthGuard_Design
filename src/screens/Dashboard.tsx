@@ -329,9 +329,12 @@ export default function Dashboard() {
               {statsConfig.map((stat, i) => (
                 <motion.div
                   key={stat.label}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
+                  // El escalonado era de 0.1 s por tarjeta: 300 ms de espera
+                  // para ver cifras que ya estan en memoria, en una consola
+                  // en vivo. 0.03 s conserva el gesto sin costar latencia.
+                  transition={{ delay: i * 0.03, duration: 0.18 }}
                   className="cyber-card py-4 px-2 sm:p-4 flex flex-col items-center sm:items-stretch justify-center h-full"
                 >
                   {/* Vista Móvil (Centrado, más espacio vertical) */}
