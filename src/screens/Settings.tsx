@@ -214,7 +214,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen pb-24 flex flex-col bg-dg-bg">
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pl-60 flex flex-col bg-dg-bg">
       <header className="sticky top-0 z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
@@ -224,7 +224,7 @@ export default function Settings() {
         </div>
       </header>
 
-      <main className="flex-1 px-4 py-6 space-y-6 max-w-7xl mx-auto w-full">
+      <main id="contenido" className="flex-1 px-4 py-6 space-y-6 max-w-7xl mx-auto w-full">
         {/* Mensaje de resultado global */}
         <AnimatePresence>
           {inviteResult && (
@@ -303,18 +303,23 @@ export default function Settings() {
                       ) : pushStatus === "unsupported" ? (
                         <span className="text-2xs text-dg-text-muted bg-dg-input px-2 py-1 rounded-full">No soportado</span>
                       ) : (
-                        <div
-                          onClick={pushLoading ? undefined : handlePushToggle}
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={pushSubscribed}
+                          aria-label="Notificaciones push en este dispositivo"
+                          disabled={pushLoading}
+                          onClick={handlePushToggle}
                           className={`w-11 h-6 rounded-full transition-colors flex items-center px-0.5 ${
                             pushLoading ? 'opacity-50 cursor-wait' : 'cursor-pointer'
                           } ${pushSubscribed ? 'bg-dg-success' : 'bg-dg-input'}`}
                         >
                           {pushLoading ? (
-                            <Loader2 className={`w-5 h-5 animate-spin ${pushSubscribed ? 'translate-x-5 text-dg-bg' : 'text-dg-text-muted'}`} />
+                            <Loader2 className={`w-5 h-5 animate-spin ${pushSubscribed ? 'translate-x-5 text-dg-bg' : 'text-dg-text-muted'}`} aria-hidden="true" />
                           ) : (
-                            <div className={`w-5 h-5 rounded-full transition-transform shadow-sm ${pushSubscribed ? 'translate-x-5 bg-dg-bg' : 'bg-dg-text-muted'}`} />
+                            <span aria-hidden="true" className={`w-5 h-5 rounded-full transition-transform shadow-sm ${pushSubscribed ? 'translate-x-5 bg-dg-bg' : 'bg-dg-text-muted'}`} />
                           )}
-                        </div>
+                        </button>
                       )}
                     </div>
                     {pushStatus === "denied" && (
@@ -340,18 +345,23 @@ export default function Settings() {
                         <Loader2 className="w-3 h-3 text-dg-text-muted animate-spin" />
                       </div>
                     ) : (
-                      <div
-                        onClick={emailLoading ? undefined : handleEmailToggle}
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={emailSubscribed}
+                        aria-label="Email de respaldo ante eventos de seguridad"
+                        disabled={emailLoading}
+                        onClick={handleEmailToggle}
                         className={`w-11 h-6 rounded-full transition-colors flex items-center px-0.5 ${
                           emailLoading ? 'opacity-50 cursor-wait' : 'cursor-pointer'
                         } ${emailSubscribed ? 'bg-dg-success' : 'bg-dg-input'}`}
                       >
                         {emailLoading ? (
-                          <Loader2 className={`w-5 h-5 animate-spin ${emailSubscribed ? 'translate-x-5 text-dg-bg' : 'text-dg-text-muted'}`} />
+                          <Loader2 className={`w-5 h-5 animate-spin ${emailSubscribed ? 'translate-x-5 text-dg-bg' : 'text-dg-text-muted'}`} aria-hidden="true" />
                         ) : (
-                          <div className={`w-5 h-5 rounded-full transition-transform shadow-sm ${emailSubscribed ? 'translate-x-5 bg-dg-bg' : 'bg-dg-text-muted'}`} />
+                          <span aria-hidden="true" className={`w-5 h-5 rounded-full transition-transform shadow-sm ${emailSubscribed ? 'translate-x-5 bg-dg-bg' : 'bg-dg-text-muted'}`} />
                         )}
-                      </div>
+                      </button>
                     )}
                   </div>
 
@@ -677,12 +687,16 @@ function ToggleRow({ label, checked: initialChecked }: { label: string, checked?
   return (
     <div className="flex justify-between items-center">
       <span className="text-sm font-medium">{label}</span>
-      <div 
+      <button
+        type="button"
+        role="switch"
+        aria-checked={isChecked}
+        aria-label={label}
         onClick={() => setIsChecked(!isChecked)}
         className={`w-11 h-6 rounded-full transition-colors flex items-center px-0.5 cursor-pointer ${isChecked ? 'bg-dg-success' : 'bg-dg-input'}`}
       >
-        <div className={`w-5 h-5 rounded-full transition-transform shadow-sm ${isChecked ? 'translate-x-5 bg-dg-bg' : 'bg-dg-text-muted'}`} />
-      </div>
+        <span aria-hidden="true" className={`w-5 h-5 rounded-full transition-transform shadow-sm ${isChecked ? 'translate-x-5 bg-dg-bg' : 'bg-dg-text-muted'}`} />
+      </button>
     </div>
   );
 }

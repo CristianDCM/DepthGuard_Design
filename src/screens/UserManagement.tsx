@@ -48,7 +48,7 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="min-h-screen pb-24 flex flex-col">
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pl-60 flex flex-col">
       <header className="sticky top-0 z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between px-4 py-4">
@@ -100,7 +100,7 @@ export default function UserManagement() {
         </div>
       </header>
 
-      <main className="flex-1 px-4 py-4 space-y-3 max-w-7xl mx-auto w-full">
+      <main id="contenido" className="flex-1 px-4 py-4 space-y-3 max-w-7xl mx-auto w-full">
         <div className="text-xs font-bold text-dg-text-muted uppercase mb-2">Personal Autorizado</div>
         
         {loading ? (

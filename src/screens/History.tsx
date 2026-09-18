@@ -77,6 +77,8 @@ export default function History() {
         return { title: "Intento de Fraude", sub: evento.motivo ?? "Superficie plana detectada", icon: AlertTriangle, color: "text-dg-error", highlight: true };
       case "DESCONOCIDO":
         return { title: "Desconocido", sub: evento.motivo ?? "Sin coincidencia en base de datos", icon: HelpCircle, color: "text-dg-warning", highlight: false };
+      default:
+        return { title: "Estado no reconocido", sub: "Abra el detalle del evento", icon: HelpCircle, color: "text-dg-text-muted", highlight: false };
     }
   }
 
@@ -104,7 +106,7 @@ export default function History() {
   }, {});
 
   return (
-    <div className="min-h-screen pb-24 flex flex-col">
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pl-60 flex flex-col">
       <header className="sticky top-0 z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between px-4 py-4">
@@ -179,7 +181,7 @@ export default function History() {
         </div>
       </header>
 
-      <main className="flex-1 px-4 py-4 space-y-3 max-w-7xl mx-auto w-full">
+      <main id="contenido" className="flex-1 px-4 py-4 space-y-3 max-w-7xl mx-auto w-full">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
@@ -210,7 +212,77 @@ export default function History() {
             )}
           </div>
         ) : (
-          (Object.entries(groupedEvents) as [string, Evento[]][]).map(([dateLabel, dateEvents]) => (
+          <>
+          {/*
+            Tabla real a partir de 1024px.
+
+            Un registro de auditoria se lee comparando columnas: a que hora,
+            quien, con cuanta confianza y por que. La lista de tarjetas
+            obliga a leer cada fila entera para extraer un dato, y en un
+            monitor ancho desperdicia el espacio que hace util la comparacion.
+            Debajo de 1024px las tarjetas siguen siendo lo correcto.
+          */}
+          <div className="hidden lg:block overflow-auto max-h-[calc(100vh-15rem)] rounded-dg border border-dg-border custom-scrollbar">
+            <table className="w-full border-collapse text-sm">
+              <caption className="sr-only">
+                Historial de accesos. {events.length} eventos cargados.
+              </caption>
+              <thead className="sticky top-0 z-10 bg-dg-card">
+                <tr className="border-b border-dg-border text-left">
+                  {["Hora", "Estado", "Persona", "Confianza", "Motivo"].map((c) => (
+                    <th
+                      key={c}
+                      scope="col"
+                      className={`px-4 py-3 text-2xs font-bold uppercase text-dg-text-muted ${c === "Confianza" ? "text-right" : ""}`}
+                    >
+                      {c}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {events.map((evento) => {
+                  const config = getEventConfig(evento);
+                  return (
+                    <tr
+                      key={evento.id}
+                      className="border-b border-dg-border/60 transition-colors last:border-0 hover:bg-dg-input has-[a:focus-visible]:bg-dg-input"
+                    >
+                      <td className="whitespace-nowrap px-4 py-2.5 text-dg-text-secondary tabular">
+                        {formatDate(evento.timestamp)} · {formatTime(evento.timestamp)}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        {/* El enlace vive aqui: lleva el nombre accesible de
+                            la fila entera y es el unico elemento enfocable. */}
+                        <Link
+                          to={`/event/${evento.id}`}
+                          className={`inline-flex items-center gap-2 font-semibold ${config.color} hover:underline`}
+                        >
+                          <config.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                          {config.title}
+                          <span className="sr-only">
+                            , ver detalle del evento de las {formatTime(evento.timestamp)}
+                          </span>
+                        </Link>
+                      </td>
+                      <td className="max-w-[16rem] truncate px-4 py-2.5 text-dg-text">
+                        {evento.nombre ?? "—"}
+                      </td>
+                      <td className="px-4 py-2.5 text-right text-dg-text-secondary tabular">
+                        {evento.confianza != null ? `${Math.round(evento.confianza * 100)}%` : "—"}
+                      </td>
+                      <td className="max-w-[20rem] truncate px-4 py-2.5 text-dg-text-muted">
+                        {evento.motivo ?? "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="lg:hidden">
+          {(Object.entries(groupedEvents) as [string, Evento[]][]).map(([dateLabel, dateEvents]) => (
             <div key={dateLabel}>
               <div className="text-xs font-bold text-dg-text-muted uppercase mb-2 mt-4">{dateLabel}</div>
               {dateEvents.map((evento) => {
@@ -243,7 +315,9 @@ export default function History() {
                 );
               })}
             </div>
-          ))
+          ))}
+          </div>
+          </>
         )}
 
         {!loading && hasMore && events.length > 0 && (

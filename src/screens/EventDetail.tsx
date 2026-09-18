@@ -116,7 +116,7 @@ export default function EventDetail() {
   };
 
   return (
-    <div className="min-h-screen pb-24 flex flex-col">
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pl-60 flex flex-col">
       <header className="sticky top-0 z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between w-full">
           <div className="flex items-center gap-4">
@@ -128,7 +128,7 @@ export default function EventDetail() {
         </div>
       </header>
 
-      <main className="px-4 py-6 max-w-7xl mx-auto w-full">
+      <main id="contenido" className="px-4 py-6 max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column: Image and Status */}
           <div className="lg:col-span-7 space-y-6">

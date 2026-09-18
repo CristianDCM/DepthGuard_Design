@@ -197,7 +197,7 @@ export default function LiveMonitor() {
     : false;
 
   return (
-    <div className="min-h-screen pb-24 flex flex-col bg-dg-bg">
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pl-60 flex flex-col bg-dg-bg">
       <header className="sticky top-0 z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between w-full">
           <div className="flex items-center gap-3">
@@ -242,7 +242,7 @@ export default function LiveMonitor() {
         onReconocer={() => setFraudesPendientes([])}
       />
 
-      <main className="flex-1 px-4 py-6 max-w-7xl mx-auto w-full">
+      <main id="contenido" className="flex-1 px-4 py-6 max-w-7xl mx-auto w-full">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
