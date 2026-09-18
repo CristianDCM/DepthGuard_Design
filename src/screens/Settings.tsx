@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Settings as SettingsIcon, Server, Video, Bell, Database, Shield, LogOut, UserPlus, Trash2, Mail, CheckCircle, XCircle, Users, BellRing, BellOff, Send, Loader2 } from "lucide-react";
+import { Volume2, VolumeX, Settings as SettingsIcon, Server, Video, Bell, Database, Shield, LogOut, UserPlus, Trash2, Mail, CheckCircle, XCircle, Users, BellRing, BellOff, Send, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Navigation from "../components/Navigation";
 import { getEstadoSistema, isEdgeOnline, isCamaraActiva, logoutAdmin, listarAdmins, invitarAdmin, eliminarAdmin, establecerPropietario, type EstadoSistema, type AdminUser, getEmailNotificationPreference, toggleEmailNotifications } from "../lib/supabase";
 import { subscribeToPush, unsubscribeFromPush, getPushStatus, isSubscribed, type PushStatus } from "../lib/pushNotifications";
+import { sonidoActivado, activarSonido, sonarAlerta } from "../lib/alertaSonora";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ export default function Settings() {
   const [pushChecking, setPushChecking] = useState(true);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const [sonido, setSonido] = useState(sonidoActivado);
 
   // Estado de notificaciones email
   const [emailSubscribed, setEmailSubscribed] = useState(true);
@@ -351,6 +353,55 @@ export default function Settings() {
                         )}
                       </div>
                     )}
+                  </div>
+
+                  {/*
+                    Aviso sonoro de fraude.
+
+                    En una sala de control el sonido no es un adorno: una
+                    alerta solo visual se pierde en cuanto el operador mira a
+                    otro lado, que es la mayor parte de su turno. Va apagado
+                    por defecto, porque un panel que empieza a pitar sin
+                    avisar se silencia para siempre a los cinco minutos.
+                  */}
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      {sonido ? (
+                        <Volume2 className="w-5 h-5 text-dg-success" aria-hidden="true" />
+                      ) : (
+                        <VolumeX className="w-5 h-5 text-dg-text-muted" aria-hidden="true" />
+                      )}
+                      <div>
+                        <span className="text-sm font-medium">Aviso sonoro de fraude</span>
+                        <p className="text-2xs text-dg-text-muted mt-0.5">
+                          Suena en este dispositivo al detectarse una suplantación
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={sonido}
+                      aria-label="Aviso sonoro de fraude"
+                      onClick={() => {
+                        const nuevo = !sonido;
+                        setSonido(nuevo);
+                        activarSonido(nuevo);
+                        // Al encenderlo suena una vez: sin oirlo nadie sabe
+                        // que ha activado, ni si el dispositivo tiene volumen.
+                        if (nuevo) sonarAlerta();
+                      }}
+                      className={`w-11 h-6 rounded-full transition-colors flex items-center px-0.5 cursor-pointer ${
+                        sonido ? 'bg-dg-success' : 'bg-dg-input'
+                      }`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`w-5 h-5 rounded-full transition-transform shadow-sm ${
+                          sonido ? 'translate-x-5 bg-dg-bg' : 'bg-dg-text-muted'
+                        }`}
+                      />
+                    </button>
                   </div>
                 </div>
               </section>
