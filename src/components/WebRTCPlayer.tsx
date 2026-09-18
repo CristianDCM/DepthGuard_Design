@@ -13,7 +13,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Wifi, WifiOff, Loader2 } from "lucide-react";
+import { Wifi, VideoOff, Loader2 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import type { CameraId } from "../lib/supabase";
 
@@ -72,6 +72,12 @@ interface WebRTCPlayerProps {
   onFallback: () => void;
   /** Oculta overlays (EN VIVO, WEBRTC P2P, FPS). Ideal para registro. */
   minimal?: boolean;
+  /**
+   * "bare" elimina la tarjeta, la relacion de aspecto y los mensajes de
+   * estado propios: el video llena al contenedor y quien manda es el padre.
+   * Lo usa BiometricFrame, que dibuja su propio marco encima.
+   */
+  variante?: "card" | "bare";
 }
 
 // ──────────────────────────────────────────────
@@ -83,6 +89,7 @@ export default function WebRTCPlayer({
   edgeOnline,
   onFallback,
   minimal = false,
+  variante = "card",
 }: WebRTCPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [status, setStatus] = useState<ConnectionStatus>("iniciando");
@@ -264,48 +271,60 @@ export default function WebRTCPlayer({
   // Render
   // ──────────────────────────────────────────────
 
+  const bare = variante === "bare";
+
   return (
-    <div className="cyber-card overflow-hidden relative">
+    <div className={bare ? "relative h-full w-full" : "cyber-card overflow-hidden relative"}>
       {/* Video element — oculto hasta conectar */}
       <video
         ref={videoRef}
         autoPlay
         playsInline
         muted
-        className={`w-full aspect-video object-contain bg-dg-canvas transition-opacity duration-500 ${
+        aria-label="Vídeo en directo de la cámara de acceso"
+        className={`${
+          bare ? "h-full w-full object-cover" : "w-full aspect-video object-contain"
+        } bg-dg-canvas transition-opacity duration-500 ${
           status === "conectado" ? "opacity-100" : "opacity-0 absolute"
         }`}
       />
 
-      {/* Overlay de estado mientras conecta */}
+      {/*
+        Overlay mientras conecta.
+
+        El texto ya no cuenta la fontaneria: antes decia "Iniciando
+        WebRTC...", "Estableciendo conexion P2P..." y, en letra pequena,
+        "Timeout en 10s -> fallback a snapshot". Ningun producto explica su
+        plan B al usuario con una flecha ASCII.
+      */}
       {status !== "conectado" && (
-        <div className="aspect-video flex flex-col items-center justify-center gap-3 bg-dg-bg text-dg-text-muted">
+        <div
+          className={`${
+            bare ? "absolute inset-0" : "aspect-video"
+          } flex flex-col items-center justify-center gap-3 bg-dg-bg text-dg-text-muted`}
+          role="status"
+        >
           {status === "iniciando" || status === "conectando" ? (
             <>
-              <Loader2 className="w-7 h-7 text-dg-info animate-spin" />
-              <span className="text-xs font-medium">
-                {status === "iniciando" ? "Iniciando WebRTC..." : "Estableciendo conexión P2P..."}
-              </span>
-              <span className="text-2xs text-dg-text-muted/50 font-mono">
-                Timeout en {WEBRTC_TIMEOUT_MS / 1000}s → fallback a snapshot
-              </span>
+              <Loader2 className="h-7 w-7 text-dg-info animate-spin" aria-hidden="true" />
+              <span className="text-sm font-medium">Conectando con la cámara…</span>
             </>
           ) : (
             <>
-              <WifiOff className="w-7 h-7 text-dg-error opacity-60" />
-              <span className="text-xs font-medium text-dg-error/80">
-                WebRTC no disponible
+              <VideoOff className="h-7 w-7 text-dg-text-muted" aria-hidden="true" />
+              <span className="max-w-[16rem] text-center text-sm font-medium text-dg-text-secondary">
+                No se pudo abrir el vídeo en directo
               </span>
             </>
           )}
         </div>
       )}
 
-      {/* Header del preview — solo visible cuando hay video y NO es minimal */}
-      {status === "conectado" && !minimal && (
+      {/* Cabecera del preview — solo con video y fuera de los modos minimal/bare */}
+      {status === "conectado" && !minimal && !bare && (
         <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 py-2 bg-gradient-to-b from-black/70 to-transparent">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-dg-error animate-pulse shadow-[0_0_6px_var(--color-dg-error)]" />
+            <span className="w-2 h-2 rounded-full bg-dg-error animate-pulse shadow-[0_0_6px_var(--color-dg-error)]" aria-hidden="true" />
             <span className="text-2xs font-bold text-white/90 uppercase">
               En Vivo
             </span>
@@ -313,18 +332,9 @@ export default function WebRTCPlayer({
           <div className="flex items-center gap-1.5 bg-black/40 px-2 py-0.5 rounded-full">
             <Wifi className="w-3 h-3 text-dg-success" aria-hidden="true" />
             <span className="text-2xs font-bold text-dg-success uppercase">
-              WebRTC P2P
+              Directo
             </span>
           </div>
-        </div>
-      )}
-
-      {/* Footer sutil — solo cuando NO es minimal */}
-      {status === "conectado" && !minimal && (
-        <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5 bg-gradient-to-t from-black/60 to-transparent">
-          <span className="text-2xs text-white/40 font-medium">
-            Streaming en tiempo real · ~30 FPS
-          </span>
         </div>
       )}
     </div>

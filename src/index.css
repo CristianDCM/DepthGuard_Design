@@ -156,6 +156,17 @@
   --shadow-dg-md: 0 4px 12px rgb(0 0 0 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.04);
   --shadow-dg-lg: 0 16px 48px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.06);
 
+  /* Barrido del marco biometrico. Solo corre mientras se captura un angulo;
+     la regla global de prefers-reduced-motion lo detiene. */
+  --animate-scan-sweep: scan-sweep 1.8s ease-in-out infinite;
+
+  @keyframes scan-sweep {
+    0%   { top: 8%;  opacity: 0; }
+    12%  { opacity: 1; }
+    88%  { opacity: 1; }
+    100% { top: 92%; opacity: 0; }
+  }
+
   /* Giro lento para los estados de espera del registro biometrico. */
   --animate-spin-slow: spin-slow 2.4s linear infinite;
 

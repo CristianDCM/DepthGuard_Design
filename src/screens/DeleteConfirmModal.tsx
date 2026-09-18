@@ -70,8 +70,9 @@ export default function DeleteConfirmModal() {
           
           <h2 className="text-xl font-bold text-dg-text mb-3 tracking-tight headline">¿Eliminar usuario?</h2>
           
-          <p className="text-dg-text-muted text-xs leading-relaxed mb-6 px-2">
-            Se eliminarán sus datos biométricos (embeddings faciales) y su registro del sistema. 
+          <p className="text-dg-text-secondary text-sm leading-relaxed mb-6 px-2">
+            Se borrará su plantilla facial y su registro. Dejará de tener acceso
+            de inmediato.
             <span className="text-dg-error font-semibold block mt-1">Esta acción no se puede deshacer.</span>
           </p>
 
