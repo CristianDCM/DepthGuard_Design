@@ -624,6 +624,16 @@ function getStatusConfig(evento: Evento | null) {
         accentColor: "#facc15",
         borderClass: "border-yellow-500/20",
       };
+    default:
+      // El estado lo escribe el edge, no la app. Sin este caso, un valor
+      // nuevo o corrupto en la base devolvia undefined y la siguiente
+      // lectura (statusConfig.borderClass) tumbaba el monitor entero.
+      return {
+        title: "Estado no reconocido",
+        icon: HelpCircle,
+        accentColor: "#888888",
+        borderClass: "",
+      };
   }
 }
 
@@ -635,6 +645,8 @@ function getEventMiniConfig(evento: Evento) {
       return { label: "Intento de Fraude", icon: AlertTriangle, color: "#f87171" };
     case "DESCONOCIDO":
       return { label: "Desconocido", icon: HelpCircle, color: "#facc15" };
+    default:
+      return { label: "Estado no reconocido", icon: HelpCircle, color: "#888888" };
   }
 }
 

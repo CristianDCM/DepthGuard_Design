@@ -69,11 +69,13 @@ export default function UserManagement() {
             <div className="relative max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-dg-text-muted w-4 h-4" />
               <input 
-                type="text" 
+                id="buscar-usuario"
+                type="search"
+                aria-label="Buscar usuario por nombre"
                 placeholder="Buscar usuario..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-dg-card border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-accent/50 placeholder:text-dg-text-muted text-white"
+                className="w-full bg-dg-card border border-dg-border rounded-xl py-2.5 pl-10 pr-4 text-sm focus:border-dg-accent transition-colors placeholder:text-dg-text-muted text-white"
               />
             </div>
             

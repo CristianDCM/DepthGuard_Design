@@ -168,13 +168,10 @@ export default function WebRTCPlayer({
         // Solo procesar mensajes destinados a esta sesión
         if (payload.session_id !== sessionId) return;
 
-        console.log(`[WebRTCPlayer] Recibido: tipo=${payload.tipo}, session=${sessionId.slice(0, 12)}`);
 
         if (payload.tipo === "answer") {
           const sdp = payload.sdp as string;
-          console.log(`[WebRTCPlayer] Answer SDP recibida (${sdp.length} chars), contiene candidatos: ${sdp.includes("a=candidate:")}`);
           await pc.setRemoteDescription(new RTCSessionDescription({ type: "answer", sdp }));
-          console.log(`[WebRTCPlayer] remoteDescription asignada, connectionState=${pc.connectionState}`);
         } else if (payload.tipo === "ice_candidate") {
           const candidateData = payload.candidate as RTCIceCandidateInit | null;
           if (candidateData?.candidate) {
@@ -185,7 +182,6 @@ export default function WebRTCPlayer({
 
       await new Promise<void>((resolve, reject) => {
         canal!.subscribe((status, err) => {
-          console.log(`[WebRTCPlayer] Supabase canal status: ${status}`);
           if (status === "SUBSCRIBED") {
             resolve();
           } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
@@ -193,7 +189,6 @@ export default function WebRTCPlayer({
           }
         });
       });
-      console.log(`[WebRTCPlayer] Suscrito a canal '${canalNombre}'. Generando offer...`);
 
       // NO enviar candidates individuales (Trickle ICE).
       // aiortc en el backend NO soporta Trickle ICE —
@@ -228,9 +223,7 @@ export default function WebRTCPlayer({
       if (desmontado) return;
 
       // Ahora el SDP tiene todos los candidates embebidos
-      console.log(`[WebRTCPlayer] ICE gathering completado. Enviando offer con candidates embebidos.`);
-      console.log(`[WebRTCPlayer] SDP offer (${pc.localDescription!.sdp.length} chars), candidates: ${pc.localDescription!.sdp.includes('a=candidate:')}`);
-      const sendResult = canal.send({
+      canal.send({
         type: "broadcast",
         event: "signal",
         payload: {
@@ -239,14 +232,12 @@ export default function WebRTCPlayer({
           sdp: pc.localDescription!.sdp,
         },
       });
-      console.log(`[WebRTCPlayer] canal.send() retornó:`, sendResult);
 
       // Iniciar timer de fallback (5 segundos)
       fallbackTimer = setTimeout(() => {
         if (desmontado) return;
         const state = pc?.connectionState;
         if (state !== "connected") {
-          console.log(`[WebRTCPlayer] Timeout: connectionState=${state}, haciendo fallback`);
           setStatus("fallback");
           onFallbackRef.current();
         }

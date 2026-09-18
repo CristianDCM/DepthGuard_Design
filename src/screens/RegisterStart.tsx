@@ -7,7 +7,6 @@ import {
   Users,
   Check,
   RotateCw,
-  Hourglass,
   CheckCircle,
   ArrowLeft,
   AlertTriangle,
@@ -28,7 +27,6 @@ import {
   getUsuarios,
   type Usuario,
   type ComandoEdge,
-  type EstadoComando,
   type CameraId,
 } from "../lib/supabase";
 
@@ -55,7 +53,6 @@ export default function RegisterStart() {
 
   // Scanning state — driven by real edge progress
   const [anguloActual, setAnguloActual] = useState(0);
-  const [estadoComando, setEstadoComando] = useState<EstadoComando>("pendiente");
 
   // Resultado
   const [usuarioCreado, setUsuarioCreado] = useState<Usuario | null>(null);
@@ -64,6 +61,12 @@ export default function RegisterStart() {
   // WebRTC state
   const [activeCameraId, setActiveCameraId] = useState<CameraId | null>(null);
   const [webrtcFailed, setWebrtcFailed] = useState(false);
+
+  // Angulo que el edge esta capturando ahora mismo. `anguloActual` es el
+  // numero de angulos ya completados que publica el comando, asi que ese
+  // mismo indice apunta al siguiente por capturar.
+  const indiceAngulo = Math.min(anguloActual, ANGULOS.length - 1);
+  const anguloEnCurso = ANGULOS[indiceAngulo];
 
   // Cleanup ref for Realtime subscription
   const cleanupRef = useRef<(() => void) | null>(null);
@@ -145,10 +148,10 @@ export default function RegisterStart() {
 
       // 3. Pasar a "esperando edge"
       setStep("waiting_edge");
-      setEstadoComando("pendiente");
+      setAnguloActual(0);
 
-      // 4. Suscribirse a cambios del comando vía Realtime + polling fallback
-      _iniciarMonitoreo(comando.id);
+      // 4. El monitoreo (Realtime + polling) lo arranca el efecto de
+      //    `comandoId`, en cuanto React aplica el estado de arriba.
 
     } catch (err: any) {
       console.error("Error iniciando registro:", err);
@@ -163,53 +166,13 @@ export default function RegisterStart() {
   // Monitoreo del comando (Realtime + polling)
   // ============================================
 
-  const _iniciarMonitoreo = (cmdId: string) => {
-    // Realtime subscription
-    const unsub = suscribirComandoEstado(cmdId, _onComandoActualizado);
-    cleanupRef.current = unsub;
-
-    // Polling fallback cada 3s (por si Realtime falla)
-    pollingRef.current = setInterval(async () => {
-      try {
-        const cmd = await getComandoEstado(cmdId);
-        _onComandoActualizado(cmd);
-      } catch { /* silent */ }
-    }, 3000);
-  };
-
+  /**
+   * Unico punto donde se traduce el estado del comando del edge a la
+   * pantalla. Antes habia dos copias de esta funcion (una original y una
+   * "parcheada" que la sustituia) y un `stepRef` que se asignaba sin que
+   * nadie lo leyera nunca.
+   */
   const _onComandoActualizado = (comando: ComandoEdge) => {
-    setEstadoComando(comando.estado);
-    setAnguloActual(comando.progreso);
-
-    if (comando.estado === "en_progreso" && step !== "scanning") {
-      setStep("scanning");
-    }
-
-    if (comando.estado === "completado") {
-      _limpiarMonitoreo();
-      setUsuarioCreado((prev) => prev ? { ...prev, num_angulos: comando.progreso } : null);
-      setStep("success");
-    }
-
-    if (comando.estado === "error") {
-      _limpiarMonitoreo();
-      const msg = comando.resultado?.error ?? "Error desconocido en el edge";
-      setError(msg);
-      setStep("error");
-    }
-
-    if (comando.estado === "cancelado") {
-      _limpiarMonitoreo();
-      setStep("form");
-    }
-  };
-
-  // Fix: allow _onComandoActualizado to read latest `step`
-  const stepRef = useRef(step);
-  stepRef.current = step;
-  // Patch the condition to use ref
-  const _onComandoActualizadoPatched = (comando: ComandoEdge) => {
-    setEstadoComando(comando.estado);
     setAnguloActual(comando.progreso);
 
     if (comando.estado === "en_progreso") {
@@ -232,20 +195,19 @@ export default function RegisterStart() {
     }
   };
 
-  // Override to use patched version
   useEffect(() => {
     if (!comandoId) return;
     // Re-subscribe with patched handler
     cleanupRef.current?.();
     if (pollingRef.current) clearInterval(pollingRef.current);
 
-    const unsub = suscribirComandoEstado(comandoId, _onComandoActualizadoPatched);
+    const unsub = suscribirComandoEstado(comandoId, _onComandoActualizado);
     cleanupRef.current = unsub;
 
     pollingRef.current = setInterval(async () => {
       try {
         const cmd = await getComandoEstado(comandoId);
-        _onComandoActualizadoPatched(cmd);
+        _onComandoActualizado(cmd);
       } catch { /* silent */ }
     }, 3000);
 
@@ -318,26 +280,31 @@ export default function RegisterStart() {
             <div className="space-y-6 pb-10">
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-dg-text-muted px-1">NOMBRE COMPLETO</label>
+                  <label htmlFor="registro-nombre" className="text-[10px] uppercase font-bold tracking-widest text-dg-text-muted px-1">NOMBRE COMPLETO</label>
                   <input 
+                    id="registro-nombre"
                     type="text" 
+                    autoComplete="name"
                     placeholder="Ej: Juan Pérez"
                     value={name}
                     onChange={(e) => { setName(e.target.value); setError(""); }}
                     disabled={isSubmitting}
-                    className={`w-full bg-dg-card border ${error ? 'border-dg-error' : 'border-dg-border'} rounded-xl px-4 py-3 text-white placeholder:text-dg-text-muted/50 focus:ring-2 focus:ring-dg-accent/30 outline-none text-sm disabled:opacity-50`}
+                    aria-invalid={error ? true : undefined}
+                    aria-describedby={error ? "registro-nombre-error" : undefined}
+                    className={`w-full bg-dg-card border ${error ? 'border-dg-error' : 'border-dg-border'} rounded-xl px-4 py-3 text-white placeholder:text-dg-text-muted focus:border-dg-accent transition-colors text-sm disabled:opacity-50`}
                   />
-                  {error && <p className="text-xs text-dg-error px-1 mt-1">{error}</p>}
+                  {error && <p id="registro-nombre-error" role="alert" className="text-xs text-dg-error px-1 mt-1">{error}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-dg-text-muted px-1">NOTAS (OPCIONAL)</label>
+                  <label htmlFor="registro-notas" className="text-[10px] uppercase font-bold tracking-widest text-dg-text-muted px-1">NOTAS (OPCIONAL)</label>
                   <input 
+                    id="registro-notas"
                     type="text" 
                     placeholder="Ej: Empleado piso 3, Visitante temporal"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     disabled={isSubmitting}
-                    className="w-full bg-dg-card border border-dg-border rounded-xl px-4 py-3 text-white placeholder:text-dg-text-muted/50 focus:ring-2 focus:ring-dg-accent/30 outline-none text-sm disabled:opacity-50"
+                    className="w-full bg-dg-card border border-dg-border rounded-xl px-4 py-3 text-white placeholder:text-dg-text-muted focus:border-dg-accent transition-colors text-sm disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -586,13 +553,43 @@ export default function RegisterStart() {
                 )}
               </div>
 
-              {/* Indicador de estado sutil */}
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-dg-accent animate-pulse shadow-[0_0_8px_rgba(163,255,0,0.6)]" />
-                <span className="text-[11px] text-dg-text-muted font-medium tracking-wide">
-                  Paso {Math.min(anguloActual + 1, ANGULOS.length)} de {ANGULOS.length} — Siga las instrucciones en pantalla
-                </span>
+              {/* Instruccion de pose.
+                  El texto sale de ANGULOS[].instruccion, que estaba definido
+                  desde el primer commit y no se renderizaba en ningun sitio:
+                  la pantalla pedia "siga las instrucciones en pantalla" sin
+                  que hubiera ninguna instruccion en pantalla que seguir.
+                  aria-live la anuncia tambien por lector de pantalla, que es
+                  justo lo que necesita alguien que no puede mirar el movil
+                  mientras gira la cara. */}
+              <div className="text-center space-y-1.5" aria-live="assertive">
+                <p className="text-lg font-semibold text-white leading-snug">
+                  {anguloEnCurso.instruccion}
+                </p>
+                <p className="text-xs text-dg-text-secondary">
+                  Ángulo {indiceAngulo + 1} de {ANGULOS.length} · {anguloEnCurso.label}
+                </p>
               </div>
+
+              {/* Progreso real por angulo, alimentado por comando.progreso */}
+              <ol className="flex items-center justify-center gap-2" aria-label={`Progreso de la captura: ${anguloActual} de ${ANGULOS.length} ángulos completados`}>
+                {ANGULOS.map((a, i) => {
+                  const completado = i < anguloActual;
+                  const activo = i === indiceAngulo && !completado;
+                  return (
+                    <li
+                      key={a.step}
+                      aria-hidden="true"
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        completado
+                          ? "w-8 bg-dg-accent"
+                          : activo
+                            ? "w-8 bg-dg-accent/40 animate-pulse"
+                            : "w-4 bg-dg-border"
+                      }`}
+                    />
+                  );
+                })}
+              </ol>
 
               {/* Botón cancelar */}
               <button 

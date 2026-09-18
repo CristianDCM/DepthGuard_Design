@@ -67,26 +67,32 @@ export default function EditUserModal() {
 
         <div className="px-6 pb-8 space-y-8">
           <div className="space-y-3">
-            <label className="block text-[10px] font-bold tracking-widest text-dg-text-muted uppercase font-display">ESTADO DEL USUARIO</label>
+            <span id="estado-usuario-label" className="block text-[10px] font-bold tracking-widest text-dg-text-muted uppercase font-display">ESTADO DEL USUARIO</span>
             <div className="flex items-center justify-between bg-dg-bg p-4 rounded-xl border border-dg-border">
               <span className="text-white font-medium">{isActive ? "Activo" : "Inactivo"}</span>
-              <div 
-                className="relative inline-flex items-center cursor-pointer"
+              <button
+                type="button"
+                role="switch"
+                aria-checked={isActive}
+                aria-labelledby="estado-usuario-label"
+                aria-describedby="estado-usuario-ayuda"
                 onClick={() => setIsActive(!isActive)}
+                className="relative inline-flex items-center cursor-pointer rounded-full"
               >
-                <div className={`w-12 h-6 rounded-full transition-colors ${isActive ? 'bg-dg-accent' : 'bg-dg-border'}`} />
-                <div className={`absolute w-5 h-5 bg-dg-bg rounded-full shadow-sm transition-transform ${isActive ? 'right-0.5' : 'left-0.5'}`} />
-              </div>
+                <span className={`block w-12 h-6 rounded-full transition-colors ${isActive ? 'bg-dg-accent' : 'bg-dg-border'}`} />
+                <span className={`absolute w-5 h-5 bg-dg-bg rounded-full shadow-sm transition-transform ${isActive ? 'right-0.5' : 'left-0.5'}`} />
+              </button>
             </div>
-            <p className="text-[10px] text-dg-text-muted leading-relaxed px-1">
+            <p id="estado-usuario-ayuda" className="text-[10px] text-dg-text-muted leading-relaxed px-1">
               Si se desactiva, la cámara no reconocerá a esta persona
             </p>
           </div>
 
           <div className="space-y-3">
-            <label className="block text-[10px] font-bold tracking-widest text-dg-text-muted uppercase font-display">NOTAS</label>
+            <label htmlFor="editar-notas" className="block text-[10px] font-bold tracking-widest text-dg-text-muted uppercase font-display">NOTAS</label>
             <textarea 
-              className="w-full bg-dg-bg border border-dg-border text-white rounded-xl p-4 min-h-[100px] focus:ring-1 focus:ring-dg-accent focus:border-dg-accent transition-all resize-none text-sm outline-none"
+              id="editar-notas"
+              className="w-full bg-dg-bg border border-dg-border text-white rounded-xl p-4 min-h-[100px] focus:border-dg-accent transition-colors resize-none text-sm"
               placeholder="Ingrese notas del usuario..."
               value={notas}
               onChange={(e) => setNotas(e.target.value)}

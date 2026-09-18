@@ -34,6 +34,7 @@ export default function Settings() {
   const [pushLoading, setPushLoading] = useState(false);
   const [pushChecking, setPushChecking] = useState(true);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [confirmLogout, setConfirmLogout] = useState(false);
 
   // Estado de notificaciones email
   const [emailSubscribed, setEmailSubscribed] = useState(true);
@@ -389,13 +390,16 @@ export default function Settings() {
                           <div className="relative flex-1">
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-dg-text-muted w-4 h-4" />
                             <input
+                              id="invitar-email"
                               type="email"
+                              autoComplete="email"
+                              aria-label="Correo del nuevo administrador"
                               placeholder="correo@ejemplo.com"
                               value={inviteEmail}
                               onChange={(e) => setInviteEmail(e.target.value)}
                               required
                               disabled={inviteLoading}
-                              className="w-full bg-dg-input border border-dg-border text-white rounded-lg py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-accent/50 focus:border-dg-accent placeholder:text-dg-text-muted outline-none transition-all disabled:opacity-50"
+                              className="w-full bg-dg-input border border-dg-border text-white rounded-lg py-2.5 pl-10 pr-4 text-sm focus:border-dg-accent placeholder:text-dg-text-muted transition-colors disabled:opacity-50"
                             />
                           </div>
                           <button
@@ -556,13 +560,42 @@ export default function Settings() {
           </div>
         )}
 
-        <button 
-          onClick={handleLogout}
-          className="w-full py-4 rounded-xl border border-dg-error/30 bg-dg-error/5 flex items-center justify-center gap-3 group hover:bg-dg-error/10 transition-colors active:scale-95 max-w-md mx-auto"
-        >
-          <LogOut className="w-5 h-5 text-dg-error" />
-          <span className="text-sm font-bold uppercase tracking-widest text-dg-error">Cerrar Sesión</span>
-        </button>
+        {confirmLogout ? (
+          <div
+            role="alertdialog"
+            aria-labelledby="logout-titulo"
+            className="w-full max-w-md mx-auto rounded-xl border border-dg-error/30 bg-dg-error/5 p-4 space-y-3"
+          >
+            <p id="logout-titulo" className="text-sm font-bold text-white text-center">
+              ¿Cerrar la sesión?
+            </p>
+            <p className="text-xs text-dg-text-secondary text-center">
+              Tendrá que volver a introducir sus credenciales para entrar.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmLogout(false)}
+                className="flex-1 py-3 rounded-lg border border-dg-border text-sm font-bold text-white hover:bg-white/5 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex-1 py-3 rounded-lg bg-dg-error text-dg-bg text-sm font-bold hover:brightness-110 transition-all"
+              >
+                Sí, cerrar sesión
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button 
+            onClick={() => setConfirmLogout(true)}
+            className="w-full py-4 rounded-xl border border-dg-error/30 bg-dg-error/5 flex items-center justify-center gap-3 group hover:bg-dg-error/10 transition-colors active:scale-95 max-w-md mx-auto"
+          >
+            <LogOut className="w-5 h-5 text-dg-error" aria-hidden="true" />
+            <span className="text-sm font-bold uppercase tracking-widest text-dg-error">Cerrar Sesión</span>
+          </button>
+        )}
       </main>
 
       <Navigation />
