@@ -247,7 +247,7 @@ export default function RegisterStart() {
         <header className="bg-dg-bg border-b border-dg-border px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <Users className="w-6 h-6 text-dg-text-secondary" aria-hidden="true" />
-            <h1 className="text-xl font-bold tracking-tight font-headline">Usuarios</h1>
+            <h1 className="text-xl font-bold tracking-tight headline">Usuarios</h1>
           </div>
         </header>
         <main className="p-4 space-y-3 max-w-7xl mx-auto w-full">
@@ -274,13 +274,13 @@ export default function RegisterStart() {
               <div className="w-10 h-10 rounded-dg bg-dg-action/10 flex items-center justify-center">
                 <UserPlus className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
               </div>
-              <h2 className="text-xl font-bold text-dg-text tracking-tight font-headline">Registrar Nuevo Usuario</h2>
+              <h2 className="text-xl font-bold text-dg-text tracking-tight headline">Registrar Nuevo Usuario</h2>
             </div>
 
             <div className="space-y-6 pb-10">
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="registro-nombre" className="text-[10px] uppercase font-bold tracking-widest text-dg-text-muted px-1">NOMBRE COMPLETO</label>
+                  <label htmlFor="registro-nombre" className="block text-sm font-medium text-dg-text-secondary px-1">Nombre completo</label>
                   <input 
                     id="registro-nombre"
                     type="text" 
@@ -291,12 +291,12 @@ export default function RegisterStart() {
                     disabled={isSubmitting}
                     aria-invalid={error ? true : undefined}
                     aria-describedby={error ? "registro-nombre-error" : undefined}
-                    className={`w-full bg-dg-card border ${error ? 'border-dg-error' : 'border-dg-border'} rounded-dg px-4 py-3 text-dg-text placeholder:text-dg-text-muted focus:border-dg-focus transition-colors text-sm disabled:opacity-50`}
+                    className={`w-full bg-dg-card border ${error ? 'border-dg-error' : 'border-dg-border'} rounded-dg px-4 py-3 text-dg-text placeholder:text-dg-text-muted focus:border-dg-focus transition-colors text-base disabled:opacity-50`}
                   />
                   {error && <p id="registro-nombre-error" role="alert" className="text-xs text-dg-error px-1 mt-1">{error}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <label htmlFor="registro-notas" className="text-[10px] uppercase font-bold tracking-widest text-dg-text-muted px-1">NOTAS (OPCIONAL)</label>
+                  <label htmlFor="registro-notas" className="block text-sm font-medium text-dg-text-secondary px-1">Notas <span className="text-dg-text-muted font-normal">(opcional)</span></label>
                   <input 
                     id="registro-notas"
                     type="text" 
@@ -304,7 +304,7 @@ export default function RegisterStart() {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     disabled={isSubmitting}
-                    className="w-full bg-dg-card border border-dg-border rounded-dg px-4 py-3 text-dg-text placeholder:text-dg-text-muted focus:border-dg-focus transition-colors text-sm disabled:opacity-50"
+                    className="w-full bg-dg-card border border-dg-border rounded-dg px-4 py-3 text-dg-text placeholder:text-dg-text-muted focus:border-dg-focus transition-colors text-base disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -315,7 +315,7 @@ export default function RegisterStart() {
                   <p className="text-sm text-dg-text leading-snug">
                     La persona debe estar frente a la cámara durante el registro. Se capturarán 5 ángulos faciales en aproximadamente 30 segundos.
                   </p>
-                  <p className="text-[11px] text-dg-text-muted">
+                  <p className="text-2xs text-dg-text-muted">
                     Asegúrese de buena iluminación y que el rostro sea claramente visible. El nodo edge debe estar encendido.
                   </p>
                 </div>
@@ -328,7 +328,7 @@ export default function RegisterStart() {
                   ))}
                 </div>
                 <div className="text-center">
-                  <p className="text-[10px] text-dg-text-muted uppercase tracking-widest font-bold">5 Fases de Captura</p>
+                  <p className="text-2xs text-dg-text-muted uppercase font-bold">5 Fases de Captura</p>
                 </div>
               </div>
 
@@ -369,8 +369,8 @@ export default function RegisterStart() {
                 <ShieldCheck className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-dg-text tracking-tight font-headline">Autorización Biométrica</h2>
-                <p className="text-[10px] text-dg-text-muted font-medium mt-0.5">
+                <h2 className="text-xl font-bold text-dg-text tracking-tight headline">Autorización Biométrica</h2>
+                <p className="text-2xs text-dg-text-muted font-medium mt-0.5">
                   {name.trim()} · Paso obligatorio
                 </p>
               </div>
@@ -481,9 +481,9 @@ export default function RegisterStart() {
                 <UserPlus className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-dg-text tracking-tight font-headline">Registrar Nuevo Usuario</h2>
+                <h2 className="text-xl font-bold text-dg-text tracking-tight headline">Registrar Nuevo Usuario</h2>
                 {usuarioCreado && (
-                  <p className="text-[10px] text-dg-text-muted font-medium mt-0.5">
+                  <p className="text-2xs text-dg-text-muted font-medium mt-0.5">
                     {usuarioCreado.nombre} · ID: {usuarioCreado.id.substring(0, 8)}
                   </p>
                 )}
@@ -503,7 +503,7 @@ export default function RegisterStart() {
                 </p>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-dg-warning/10 border border-dg-warning/20">
                   <div className="w-2 h-2 rounded-full bg-dg-warning animate-pulse" />
-                  <span className="text-[10px] font-bold text-dg-warning uppercase tracking-wider">
+                  <span className="text-2xs font-bold text-dg-warning uppercase">
                     Polling...
                   </span>
                 </div>
@@ -527,9 +527,9 @@ export default function RegisterStart() {
                 <UserPlus className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-dg-text tracking-tight font-headline">Escaneando Rostro</h2>
+                <h2 className="text-xl font-bold text-dg-text tracking-tight headline">Escaneando Rostro</h2>
                 {usuarioCreado && (
-                  <p className="text-[10px] text-dg-text-muted font-medium mt-0.5">
+                  <p className="text-2xs text-dg-text-muted font-medium mt-0.5">
                     {usuarioCreado.nombre} · ID: {usuarioCreado.id.substring(0, 8)}
                   </p>
                 )}
@@ -611,7 +611,7 @@ export default function RegisterStart() {
                 <AlertTriangle className="w-16 h-16 text-dg-error relative z-10" />
               </div>
               <div>
-                <h2 className="text-[20px] font-bold text-dg-text leading-tight font-headline">Error en el Registro</h2>
+                <h2 className="text-xl font-bold text-dg-text leading-tight headline">Error en el Registro</h2>
                 <p className="text-dg-text-muted text-sm mt-1">{error}</p>
               </div>
             </div>
@@ -642,7 +642,7 @@ export default function RegisterStart() {
                 <CheckCircle className="w-16 h-16 text-dg-success relative z-10 fill-dg-success/10" />
               </div>
               <div>
-                <h2 className="text-[20px] font-bold text-dg-text leading-tight font-headline">¡Registro Exitoso!</h2>
+                <h2 className="text-xl font-bold text-dg-text leading-tight headline">¡Registro Exitoso!</h2>
                 <p className="text-dg-text-muted text-sm mt-1">Usuario registrado con embeddings reales del pipeline IA</p>
               </div>
             </div>
@@ -663,7 +663,7 @@ export default function RegisterStart() {
               </div>
               <div className="flex items-center gap-1.5 bg-dg-success/20 px-3 py-1 rounded-full border border-dg-success/30">
                 <span className="w-2 h-2 rounded-full bg-dg-success" />
-                <span className="text-[10px] font-bold text-dg-success uppercase tracking-wider">Activo</span>
+                <span className="text-2xs font-bold text-dg-success uppercase">Activo</span>
               </div>
             </div>
 
@@ -678,19 +678,19 @@ export default function RegisterStart() {
                   </div>
                 ))}
               </div>
-              <p className="text-center text-dg-text-muted text-[10px] font-medium tracking-wide">
+              <p className="text-center text-dg-text-muted text-2xs font-medium tracking-wide">
                 {usuarioCreado?.num_angulos ?? 5} de 5 ángulos capturados
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-dg-card p-4 rounded-dg border border-dg-border flex flex-col items-center justify-center">
-                <span className="text-dg-text text-2xl font-bold font-headline">{usuarioCreado?.num_angulos ?? 5}</span>
-                <span className="text-dg-text-muted text-[10px] uppercase tracking-widest font-semibold">Ángulos</span>
+                <span className="text-dg-text text-2xl font-bold headline tabular">{usuarioCreado?.num_angulos ?? 5}</span>
+                <span className="text-dg-text-muted text-2xs uppercase font-semibold">Ángulos</span>
               </div>
               <div className="bg-dg-card p-4 rounded-dg border border-dg-border flex flex-col items-center justify-center">
-                <span className="text-dg-text text-2xl font-bold font-headline">Real</span>
-                <span className="text-dg-text-muted text-[10px] uppercase tracking-widest font-semibold">Pipeline IA</span>
+                <span className="text-dg-text text-2xl font-bold headline">Real</span>
+                <span className="text-dg-text-muted text-2xs uppercase font-semibold">Pipeline IA</span>
               </div>
             </div>
 

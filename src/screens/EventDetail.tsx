@@ -113,7 +113,7 @@ export default function EventDetail() {
             <button onClick={() => navigate(-1)} aria-label="Volver a la pantalla anterior" className="active:scale-95 transition-transform">
               <ArrowLeft className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
             </button>
-            <h1 className="font-headline font-bold tracking-tight text-lg text-dg-text">{headerTitle}</h1>
+            <h1 className="headline font-bold tracking-tight text-lg text-dg-text">{headerTitle}</h1>
           </div>
         </div>
       </header>
@@ -126,7 +126,7 @@ export default function EventDetail() {
               {isAuthorized && (
                 <div className="px-6 py-3 rounded-full border-2 border-dg-success/30 bg-dg-success/10 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-dg-success" aria-hidden="true" />
-                  <span className="font-headline font-bold text-dg-success tracking-widest text-sm uppercase">ACCESO PERMITIDO</span>
+                  <span className="headline font-bold text-dg-success text-sm uppercase">ACCESO PERMITIDO</span>
                 </div>
               )}
               {isFraud && (
@@ -135,7 +135,7 @@ export default function EventDetail() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-dg-error opacity-75" />
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-dg-error" />
                   </span>
-                  <span className="font-headline font-bold text-xs tracking-widest text-dg-error uppercase">FRAUDE DETECTADO</span>
+                  <span className="headline font-bold text-xs text-dg-error uppercase">FRAUDE DETECTADO</span>
                 </div>
               )}
               {isUnknown && (
@@ -143,7 +143,7 @@ export default function EventDetail() {
                   <div className="relative flex items-center justify-center">
                     <span className="w-2.5 h-2.5 bg-dg-warning rounded-full animate-pulse" />
                   </div>
-                  <span className="font-headline font-bold text-dg-warning text-xs tracking-widest uppercase">PERSONA DESCONOCIDA</span>
+                  <span className="headline font-bold text-dg-warning text-xs uppercase">PERSONA DESCONOCIDA</span>
                 </div>
               )}
             </section>
@@ -164,7 +164,7 @@ export default function EventDetail() {
               
               <div className="absolute inset-0 bg-gradient-to-t from-dg-bg via-transparent to-transparent" />
               <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-dg">
-                <p className="font-mono text-xs text-white/90 tracking-tighter">{timestamp}</p>
+                <p className="font-mono tabular text-xs text-white/90">{timestamp}</p>
               </div>
             </div>
           </div>
@@ -173,17 +173,17 @@ export default function EventDetail() {
           <div className="lg:col-span-5 space-y-6">
             {isAuthorized && evento.nombre && (
               <div className="cyber-card p-5 flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-dg-input border border-dg-border-hi flex items-center justify-center text-dg-text-secondary font-headline font-bold text-xl">
+                <div className="w-16 h-16 rounded-full bg-dg-input border border-dg-border-hi flex items-center justify-center text-dg-text-secondary headline font-bold text-xl">
                   {evento.nombre.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-grow">
-                  <h3 className="text-dg-text font-headline font-bold text-lg">{evento.nombre}</h3>
-                  <p className="text-dg-text-muted text-xs font-mono">ID: #{evento.usuario_id?.substring(0, 8) ?? "—"}</p>
+                  <h3 className="text-dg-text headline font-bold text-lg">{evento.nombre}</h3>
+                  <p className="text-dg-text-muted text-xs font-mono tabular">ID: #{evento.usuario_id?.substring(0, 8) ?? "—"}</p>
                 </div>
                 {evento.usuario_id && (
                   <button 
                     onClick={() => navigate(`/profile/${evento.usuario_id}`)}
-                    className="text-dg-action-text text-xs font-bold font-headline flex items-center gap-1 hover:underline transition-colors"
+                    className="text-dg-action-text text-xs font-bold headline flex items-center gap-1 hover:underline transition-colors"
                   >
                     Ver Perfil <ExternalLink className="w-4 h-4" />
                   </button>
@@ -198,13 +198,13 @@ export default function EventDetail() {
                     <ShieldAlert className="w-8 h-8 text-dg-error" />
                   </div>
                   <div>
-                    <h3 className="font-headline font-bold text-xl text-dg-text">Intento de Suplantación</h3>
+                    <h3 className="headline font-bold text-xl text-dg-text">Intento de Suplantación</h3>
                     <p className="text-dg-text-muted text-sm">Ningún usuario identificado</p>
                   </div>
                 </div>
 
                 <div className="bg-dg-card p-6 rounded-dg-lg border border-dg-border">
-                  <h4 className="font-headline font-bold text-xs tracking-widest text-dg-error mb-3 uppercase">Motivo de Detección</h4>
+                  <h4 className="headline font-bold text-xs text-dg-error mb-3 uppercase">Motivo de Detección</h4>
                   <p className="text-dg-text text-base leading-relaxed">
                     {evento.motivo ?? "Superficie plana detectada — Varianza de profundidad insuficiente para rostro real"}
                   </p>
@@ -219,7 +219,7 @@ export default function EventDetail() {
                     <UserSearch className="w-10 h-10" />
                   </div>
                   <div>
-                    <h2 className="font-headline text-2xl font-bold text-dg-text tracking-tight">Persona No Registrada</h2>
+                    <h2 className="headline text-2xl font-bold text-dg-text tracking-tight">Persona No Registrada</h2>
                     <p className="text-dg-text-muted text-sm mt-1">No se encontró coincidencia en la base de datos</p>
                   </div>
                 </div>
@@ -235,7 +235,7 @@ export default function EventDetail() {
 
             <div className="cyber-card p-5 space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="font-headline font-bold text-dg-text text-base">Análisis Biométrico 3D</h2>
+                <h2 className="headline font-bold text-dg-text text-base">Análisis Biométrico 3D</h2>
                 <Fingerprint className={`w-6 h-6 ${isFraud ? 'text-dg-error' : isUnknown ? 'text-dg-warning' : 'text-dg-success'}`} />
               </div>
 
@@ -262,12 +262,12 @@ export default function EventDetail() {
                     </RadarChart>
                   </ResponsiveContainer>
                   {isFraud && (
-                    <div className="absolute top-2 left-2 px-2 py-1 bg-dg-error/20 border border-dg-error/30 text-[10px] font-bold text-dg-error uppercase rounded-dg-sm backdrop-blur-sm">
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-dg-error/20 border border-dg-error/30 text-2xs font-bold text-dg-error uppercase rounded-dg-sm backdrop-blur-sm">
                       Firma Plana Detectada
                     </div>
                   )}
                   {isAuthorized && (
-                    <div className="absolute top-2 left-2 px-2 py-1 bg-dg-success/20 border border-dg-success/30 text-[10px] font-bold text-dg-success uppercase rounded-dg-sm backdrop-blur-sm">
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-dg-success/20 border border-dg-success/30 text-2xs font-bold text-dg-success uppercase rounded-dg-sm backdrop-blur-sm">
                       Volumen Facial Confirmado
                     </div>
                   )}

@@ -157,9 +157,9 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
         <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="cyber-card p-6 max-w-sm w-full text-center space-y-4 animate-in fade-in zoom-in">
             <div className="w-16 h-16 mx-auto rounded-full bg-dg-warning/10 flex items-center justify-center">
-              <span className="text-3xl font-black text-dg-warning font-headline">{countdown}</span>
+              <span className="text-3xl font-black text-dg-warning headline">{countdown}</span>
             </div>
-            <h2 className="text-lg font-bold font-headline">Sesión por expirar</h2>
+            <h2 className="text-lg font-bold headline">Sesión por expirar</h2>
             <p className="text-sm text-dg-text-muted">
               Tu sesión se cerrará automáticamente por inactividad.
               Mueve el mouse o presiona una tecla para continuar.

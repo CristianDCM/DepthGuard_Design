@@ -1,10 +1,92 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Public+Sans:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
+
+/*
+ * Tipografia autoalojada.
+ *
+ * Antes se cargaba con `@import url(fonts.googleapis.com)` en la PRIMERA
+ * linea del CSS, que es el peor patron de carga posible: un @import dentro
+ * de CSS serializa dos ida y vuelta de red antes de poder pintar nada, sin
+ * preconnect ni preload. Ademas se descargaban siete pesos de Inter y cinco
+ * de Public Sans, cuando Public Sans se usaba dos veces en todo el proyecto.
+ *
+ * Ahora son dos fuentes variables servidas desde el propio dominio: se quita
+ * la dependencia externa, desaparecen dos entradas de la CSP y el subconjunto
+ * latino de Inter se precarga desde index.html.
+ *
+ * `opsz` es el eje de tamano optico de Inter. Da la diferencia entre texto y
+ * titular sin necesidad de una segunda familia, que es lo que --font-headline
+ * pretendia hacer apuntando a la misma fuente que --font-sans.
+ */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter-latin.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter-latin-ext.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono-latin.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-headline: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Public Sans", sans-serif;
+  /* Se retiran --font-headline (era un alias identico a --font-sans: sus
+     cuarenta y nueve usos no producian ninguna diferencia visual) y
+     --font-display (Public Sans, que se descargaba entera para usarse dos
+     veces). El contraste entre texto y titular lo da ahora el eje optico
+     de Inter mas el peso, no una segunda familia. */
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* ==========================================================
+     ESCALA TIPOGRAFICA
+     Antes convivian text-[10px], [11px], xs, sm, base, lg, xl,
+     [20px], 2xl, 3xl, 4xl y 5xl elegidos uno a uno. El suelo
+     eran 10px en mayusculas con tracking 0.1em, usado noventa y
+     una veces: ilegible a distancia de brazo y sin jerarquia,
+     porque cuando casi todo grita en pequenito nada destaca.
+     ========================================================== */
+  --text-2xs: 0.6875rem;   /* 11px — minimo absoluto, solo distintivos */
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.75rem;      /* 12px — metadatos y etiquetas */
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.875rem;     /* 14px — cuerpo y tablas (por defecto) */
+  --text-sm--line-height: 1.375rem;
+  --text-base: 1rem;       /* 16px — campos: por debajo, iOS hace zoom */
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;     /* 18px — instruccion de pose del escaneo */
+  --text-lg--line-height: 1.625rem;
+  --text-xl: 1.375rem;     /* 22px — titulo de seccion */
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.75rem;     /* 28px — titulo de pantalla */
+  --text-2xl--line-height: 2.125rem;
+  --text-3xl: 2.25rem;     /* 36px — cifras de KPI */
+  --text-3xl--line-height: 2.5rem;
+  --text-4xl: 2.75rem;     /* 44px — wordmark del acceso */
+  --text-4xl--line-height: 3rem;
+  --text-5xl: 3.5rem;      /* 56px — solo la cifra del 404 */
+  --text-5xl--line-height: 3.75rem;
 
   /* ==========================================================
      SUPERFICIES — azul grafito neutro
@@ -88,6 +170,18 @@
   body {
     @apply bg-dg-bg text-dg-text font-sans;
     min-height: 100vh;
+    /* cv05: la l con cola, para no confundirla con la I mayuscula en
+       nombres y matriculas. -0.011em compensa el ancho de Inter en
+       interfaz densa. */
+    font-feature-settings: "cv05";
+    letter-spacing: -0.011em;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Las mayusculas pequenas necesitan menos interletraje del que tenian:
+     0.1em y 0.15em a 10px separaban tanto que las palabras se deshacian. */
+  .uppercase {
+    letter-spacing: 0.04em;
   }
 
   /*
@@ -143,6 +237,26 @@
 }
 
 @layer components {
+  /*
+   * Titulares. Sustituye a `font-headline`, que era un alias apuntando a la
+   * misma familia que el cuerpo y por tanto no hacia absolutamente nada en
+   * sus cuarenta y nueve usos.
+   *
+   * La diferencia la dan ahora el eje de tamano optico de Inter (a 32 el
+   * ojo se abre y los remates se afinan, que es como una fuente display se
+   * comporta de verdad) y un interletraje mas cerrado.
+   */
+  .headline {
+    font-variation-settings: "opsz" 32;
+    letter-spacing: -0.021em;
+  }
+
+  /* Un titular en mayusculas necesita interletraje positivo: con el valor
+     negativo de arriba las capitales se tocaban entre si. */
+  .headline.uppercase {
+    letter-spacing: 0.04em;
+  }
+
   .cyber-card {
     @apply bg-dg-card border border-dg-border rounded-dg shadow-dg-sm;
   }
@@ -197,6 +311,16 @@
    * usaba en el log del monitor en vivo sin estar definida en ninguna
    * parte, asi que la lista salia con la barra gruesa del sistema.
    */
+  /*
+   * Cifras de ancho fijo. Obligatoria en todo numero que se compare o se
+   * apile: porcentajes de confianza, horas, identificadores y KPIs. Sin
+   * esto una tabla de auditoria baila en cada refresco en vivo.
+   */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
   .custom-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: var(--color-dg-border) transparent;

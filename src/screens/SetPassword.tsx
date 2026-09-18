@@ -102,7 +102,7 @@ export default function SetPassword() {
           className="cyber-card p-8 max-w-sm w-full text-center space-y-4"
         >
           <AlertTriangle className="w-16 h-16 text-dg-error mx-auto" />
-          <h1 className="text-xl font-bold font-headline">Enlace inválido</h1>
+          <h1 className="text-xl font-bold headline">Enlace inválido</h1>
           <p className="text-dg-text-muted text-sm">
             Este enlace de invitación ha expirado o ya fue utilizado.
             Contacta al administrador para recibir una nueva invitación.
@@ -134,7 +134,7 @@ export default function SetPassword() {
           >
             <CheckCircle className="w-20 h-20 text-dg-success mx-auto" />
           </motion.div>
-          <h1 className="text-xl font-bold font-headline">¡Contraseña establecida!</h1>
+          <h1 className="text-xl font-bold headline">¡Contraseña establecida!</h1>
           <p className="text-dg-text-muted text-sm">
             Tu cuenta ha sido activada exitosamente. Serás redirigido al inicio de sesión...
           </p>
@@ -168,7 +168,7 @@ export default function SetPassword() {
             />
             <div className="absolute inset-0 bg-dg-brand/10 blur-3xl rounded-full -z-10" />
           </div>
-          <h1 className="text-3xl font-bold text-dg-text tracking-tight font-headline">Bienvenido</h1>
+          <h1 className="text-3xl font-bold text-dg-text tracking-tight headline">Bienvenido</h1>
           <p className="text-dg-text-muted text-sm mt-1">Establece tu contraseña para activar tu cuenta</p>
         </motion.div>
 
@@ -181,7 +181,7 @@ export default function SetPassword() {
           <form className="space-y-5" onSubmit={handleSubmit}>
             {/* Campo: Nueva contraseña */}
             <div className="space-y-2">
-              <label htmlFor="input-password" className="text-xs font-bold uppercase tracking-widest text-dg-text-muted">
+              <label htmlFor="input-password" className="block text-sm font-medium text-dg-text-secondary">
                 Nueva contraseña
               </label>
               <div className="relative">
@@ -229,7 +229,7 @@ export default function SetPassword() {
                         />
                       ))}
                     </div>
-                    <p className={`text-[10px] font-bold uppercase tracking-widest ${
+                    <p className={`text-2xs font-bold uppercase ${
                       strength.level >= 4 ? "text-dg-success" : strength.level >= 3 ? "text-dg-warning" : "text-dg-error"
                     }`}>
                       {strength.label}
@@ -260,7 +260,7 @@ export default function SetPassword() {
 
             {/* Campo: Confirmar contraseña */}
             <div className="space-y-2">
-              <label htmlFor="input-confirm-password" className="text-xs font-bold uppercase tracking-widest text-dg-text-muted">
+              <label htmlFor="input-confirm-password" className="block text-sm font-medium text-dg-text-secondary">
                 Confirmar contraseña
               </label>
               <div className="relative">

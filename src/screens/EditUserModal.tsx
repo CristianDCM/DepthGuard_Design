@@ -61,13 +61,13 @@ export default function EditUserModal() {
           <div className="w-12 h-12 bg-dg-action/10 rounded-full flex items-center justify-center mb-4">
             <Edit2 className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
           </div>
-          <h2 className="text-2xl font-bold font-headline text-dg-text tracking-tight">Editar Usuario</h2>
+          <h2 className="text-2xl font-bold headline text-dg-text tracking-tight">Editar Usuario</h2>
           <p className="text-dg-text-muted text-sm mt-1">{user?.nombre ?? "—"} — ID #{id?.substring(0, 8)}</p>
         </div>
 
         <div className="px-6 pb-8 space-y-8">
           <div className="space-y-3">
-            <span id="estado-usuario-label" className="block text-[10px] font-bold tracking-widest text-dg-text-muted uppercase font-display">ESTADO DEL USUARIO</span>
+            <span id="estado-usuario-label" className="block text-sm font-medium text-dg-text-secondary">Estado del usuario</span>
             <div className="flex items-center justify-between bg-dg-bg p-4 rounded-dg border border-dg-border">
               <span className="text-dg-text font-medium">{isActive ? "Activo" : "Inactivo"}</span>
               <button
@@ -83,16 +83,16 @@ export default function EditUserModal() {
                 <span className={`absolute w-5 h-5 bg-dg-bg rounded-full shadow-sm transition-transform ${isActive ? 'right-0.5' : 'left-0.5'}`} />
               </button>
             </div>
-            <p id="estado-usuario-ayuda" className="text-[10px] text-dg-text-muted leading-relaxed px-1">
+            <p id="estado-usuario-ayuda" className="text-2xs text-dg-text-muted leading-relaxed px-1">
               Si se desactiva, la cámara no reconocerá a esta persona
             </p>
           </div>
 
           <div className="space-y-3">
-            <label htmlFor="editar-notas" className="block text-[10px] font-bold tracking-widest text-dg-text-muted uppercase font-display">NOTAS</label>
+            <label htmlFor="editar-notas" className="block text-sm font-medium text-dg-text-secondary">Notas</label>
             <textarea 
               id="editar-notas"
-              className="w-full bg-dg-bg border border-dg-border text-dg-text rounded-dg p-4 min-h-[100px] focus:border-dg-focus transition-colors resize-none text-sm"
+              className="w-full bg-dg-bg border border-dg-border text-dg-text rounded-dg p-4 min-h-[100px] focus:border-dg-focus transition-colors resize-none text-base"
               placeholder="Ingrese notas del usuario..."
               value={notas}
               onChange={(e) => setNotas(e.target.value)}

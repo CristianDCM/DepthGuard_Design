@@ -163,7 +163,7 @@ export default function LiveMonitor() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between w-full">
           <div className="flex items-center gap-3">
             <Video className="w-6 h-6 text-dg-text-secondary" aria-hidden="true" />
-            <h1 className="text-xl font-bold tracking-tight font-headline">
+            <h1 className="text-xl font-bold tracking-tight headline">
               Monitor en Vivo
             </h1>
           </div>
@@ -184,7 +184,7 @@ export default function LiveMonitor() {
               }`}
             />
             <span
-              className={`text-[10px] font-bold tracking-widest uppercase ${
+              className={`text-2xs font-bold uppercase ${
                 edgeOnline ? "text-dg-success" : "text-dg-error"
               }`}
             >
@@ -275,12 +275,12 @@ function CameraPanel({
             )}
           </div>
           <div>
-            <h2 className="font-headline text-base font-bold tracking-tight">
+            <h2 className="headline text-base font-bold tracking-tight">
               {label}
             </h2>
             <div className="flex items-center gap-2 mt-0.5">
               <span
-                className={`text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-dg-sm ${
+                className={`text-2xs font-bold uppercase px-1.5 py-0.5 rounded-dg-sm ${
                   cameraType === "3D"
                     ? "bg-dg-info/10 text-dg-info"
                     : "bg-dg-info/10 text-dg-info"
@@ -289,7 +289,7 @@ function CameraPanel({
                 {cameraType === "3D" ? "Anti-spoofing 3D" : "Verificación 2D"}
               </span>
               <span
-                className={`flex items-center gap-1 text-[10px] font-bold uppercase ${
+                className={`flex items-center gap-1 text-2xs font-bold uppercase ${
                   camaraActiva ? "text-dg-success" : "text-dg-error"
                 }`}
               >
@@ -338,25 +338,25 @@ function CameraPanel({
           <div className="absolute inset-0 bg-dg-error/5 animate-pulse pointer-events-none" />
         )}
 
-        <div className="p-3 relative z-10">
+        <div className="p-5 relative z-10">
           <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5" style={{ color: statusConfig.accentColor }}>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2" style={{ color: statusConfig.accentColor }}>
                 <statusConfig.icon className="w-4 h-4" />
-                <span className="text-[10px] font-bold tracking-widest uppercase">
+                <span className="text-2xs font-bold uppercase">
                   Estatus de Seguridad
                 </span>
               </div>
-              <h3 className="font-headline text-xl font-bold text-dg-text tracking-tight">
+              <h3 className="headline text-2xl font-bold text-dg-text">
                 {statusConfig.title}
               </h3>
               {ultimoEvento?.nombre && (
-                <div className="flex items-center gap-2 mt-2 bg-dg-bg p-2.5 rounded-dg border border-dg-border">
+                <div className="flex items-center gap-3 mt-3 bg-dg-bg p-3 rounded-dg border border-dg-border">
                   <div className="w-8 h-8 rounded-full bg-dg-input border border-dg-border flex items-center justify-center shrink-0">
                     <User className="w-4 h-4 text-dg-text-secondary" aria-hidden="true" />
                   </div>
                   <div>
-                    <div className="text-[10px] text-dg-text-muted uppercase font-bold tracking-wider">
+                    <div className="text-2xs text-dg-text-muted uppercase font-bold">
                       Sujeto
                     </div>
                     <div className="text-sm font-bold text-dg-text">
@@ -374,11 +374,11 @@ function CameraPanel({
             {/* Confidence Badge */}
             {ultimoEvento?.confianza != null && (
               <div className="bg-dg-bg px-3 py-2 rounded-dg border border-dg-border flex flex-col items-end shrink-0">
-                <span className="text-[10px] text-dg-text-muted font-bold uppercase">
+                <span className="text-2xs text-dg-text-muted font-bold uppercase">
                   Confianza
                 </span>
                 <span
-                  className="text-xl font-headline font-black"
+                  className="text-2xl headline font-bold tabular"
                   style={{ color: statusConfig.accentColor }}
                 >
                   {Math.round(ultimoEvento.confianza * 100)}%
@@ -388,7 +388,7 @@ function CameraPanel({
           </div>
           {/* Timestamp */}
           {ultimoEvento && (
-            <div className="mt-3 text-[10px] text-dg-text-muted font-medium border-t border-dg-border/50 pt-2 text-right">
+            <div className="mt-3 text-2xs text-dg-text-muted font-medium tabular border-t border-dg-border/50 pt-2 text-right">
               {new Date(ultimoEvento.timestamp).toLocaleString("es", {
                 day: "2-digit",
                 month: "short",
@@ -407,7 +407,7 @@ function CameraPanel({
       {/* Anti-spoofing Metrics (solo si hay evento con métricas) */}
       {ultimoEvento?.metricas_json && (
         <div className="cyber-card p-4">
-          <h4 className="text-[10px] font-bold text-dg-text-muted uppercase tracking-[0.15em] mb-4">
+          <h4 className="text-2xs font-bold text-dg-text-muted uppercase mb-4">
             {cameraType === "3D"
               ? "Métricas Anti-Spoofing"
               : "Métricas de Detección"}
@@ -457,10 +457,10 @@ function CameraPanel({
       {/* Mini Event Log */}
       <div className="cyber-card overflow-hidden">
         <div className="px-4 py-3 border-b border-dg-border bg-white/5 flex items-center justify-between">
-          <h4 className="text-[10px] font-bold text-dg-text-muted uppercase tracking-[0.15em]">
+          <h4 className="text-2xs font-bold text-dg-text-muted uppercase">
             Últimos Eventos
           </h4>
-          <span className="text-[10px] text-dg-text-muted font-medium">
+          <span className="text-2xs text-dg-text-muted font-medium tabular">
             {eventosRecientes.length} registros
           </span>
         </div>
@@ -484,23 +484,23 @@ function CameraPanel({
       </div>
 
       {/* Connection footer */}
-      <div className="flex items-center justify-between cyber-card p-3">
+      <div className="flex items-center justify-between cyber-card p-4">
         <div className="flex items-center gap-2">
           <div className="relative w-6 h-6 flex items-center justify-center bg-dg-success/10 rounded-dg-sm">
             <Cloud className="w-3.5 h-3.5 text-dg-success" aria-hidden="true" />
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-dg-success rounded-full border border-dg-card animate-pulse" />
           </div>
           <div>
-            <div className="text-[10px] font-bold text-dg-text-muted uppercase tracking-wider">
+            <div className="text-2xs font-bold text-dg-text-muted uppercase">
               Supabase Realtime
             </div>
-            <div className="text-[10px] font-bold text-dg-success flex items-center gap-1">
+            <div className="text-2xs font-bold text-dg-success flex items-center gap-1">
               <span className="w-1 h-1 rounded-full bg-dg-success" aria-hidden="true" />
               Suscrito
             </div>
           </div>
         </div>
-        <div className="text-[10px] px-2 py-1 rounded-dg-sm bg-white/5 font-mono text-dg-text-muted">
+        <div className="text-2xs px-2 py-1 rounded-dg-sm bg-white/5 font-mono text-dg-text-muted">
           {cameraId === "entrada_principal" ? "CAM-01" : "CAM-02"} ·{" "}
           {cameraType}
         </div>
@@ -524,7 +524,7 @@ function MiniEventRow({ evento, onClick }: { key?: React.Key; evento: Evento; on
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 10 }}
       onClick={onClick}
-      className={`flex items-center gap-3 px-4 py-3 transition-colors ${onClick ? 'cursor-pointer hover:bg-white/5' : ''}`}
+      className={`flex items-center gap-3 px-4 py-3.5 min-h-[56px] transition-colors ${onClick ? 'cursor-pointer hover:bg-white/5' : ''}`}
     >
       <div
         className="w-7 h-7 rounded-dg-sm flex items-center justify-center shrink-0"
@@ -539,16 +539,16 @@ function MiniEventRow({ evento, onClick }: { key?: React.Key; evento: Evento; on
         <p className="text-xs font-semibold truncate" style={{ color: config.color }}>
           {config.label}
         </p>
-        <p className="text-[10px] text-dg-text-muted truncate">
+        <p className="text-2xs text-dg-text-muted truncate">
           {evento.nombre ?? evento.motivo ?? "Persona no registrada"}
         </p>
       </div>
       <div className="text-right shrink-0">
-        <span className="text-[10px] text-dg-text-muted font-medium">
+        <span className="text-2xs text-dg-text-muted font-medium tabular">
           {formatTime(evento.timestamp)}
         </span>
         {evento.confianza != null && (
-          <p className="text-[10px] font-bold text-dg-text-muted/60">
+          <p className="text-2xs font-bold text-dg-text-muted/60 tabular">
             {Math.round(evento.confianza * 100)}%
           </p>
         )}
@@ -572,7 +572,7 @@ function MetricBar({
     <div className="space-y-1.5">
       <div className="flex justify-between items-end">
         <span className="text-xs font-medium text-dg-text-secondary">{label}</span>
-        <span className="text-[10px] font-mono text-dg-text-muted">
+        <span className="text-2xs font-mono tabular text-dg-text-muted">
           {value}
         </span>
       </div>
@@ -754,12 +754,12 @@ function LiveSnapshotPreview({
       <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 py-2 bg-gradient-to-b from-black/70 to-transparent">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-dg-error animate-pulse shadow-[0_0_6px_var(--color-dg-error)]" />
-          <span className="text-[10px] font-bold text-white/90 uppercase tracking-widest">
+          <span className="text-2xs font-bold text-white/90 uppercase">
             En Vivo
           </span>
         </div>
         {lastUpdate > 0 && (
-          <span className="text-[10px] text-white/50 font-mono">
+          <span className="text-2xs text-white/70 font-mono tabular">
             {new Date(lastUpdate).toLocaleTimeString("es", {
               hour: "2-digit",
               minute: "2-digit",
@@ -789,7 +789,7 @@ function LiveSnapshotPreview({
 
       {/* Footer sutil */}
       <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5 bg-gradient-to-t from-black/60 to-transparent">
-        <span className="text-[10px] text-white/40 font-medium">
+        <span className="text-2xs text-white/40 font-medium">
           Actualización cada 2s · Resolución reducida
         </span>
       </div>

@@ -16,8 +16,8 @@ export default function NotFound() {
         </div>
 
         <div className="space-y-2">
-          <p className="text-5xl font-black font-headline text-dg-text-muted">404</p>
-          <h1 className="text-xl font-bold font-headline text-dg-text">
+          <p className="text-5xl font-black headline text-dg-text-muted">404</p>
+          <h1 className="text-xl font-bold headline text-dg-text">
             Página no encontrada
           </h1>
           <p className="text-sm text-dg-text-muted leading-relaxed">

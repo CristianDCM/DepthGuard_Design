@@ -108,7 +108,7 @@ export default function History() {
           <div className="flex items-center justify-between px-4 py-4">
             <div className="flex items-center gap-3">
               <HistoryIcon className="w-6 h-6 text-dg-text-secondary" aria-hidden="true" />
-              <h1 className="text-xl font-bold tracking-tight font-headline">Historial</h1>
+              <h1 className="text-xl font-bold tracking-tight headline">Historial</h1>
             </div>
             <button 
               onClick={handleExportCSV}
@@ -129,7 +129,7 @@ export default function History() {
                   placeholder="Buscar accesos..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-dg-card border-none rounded-dg py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-focus/50 placeholder:text-dg-text-muted text-dg-text"
+                  className="w-full bg-dg-card border-none rounded-dg py-2.5 pl-10 pr-4 text-base focus:ring-2 focus:ring-dg-focus/50 placeholder:text-dg-text-muted text-dg-text"
                 />
               </div>
               <div className="flex items-center gap-1.5">
@@ -140,7 +140,7 @@ export default function History() {
                     aria-label="Filtrar desde la fecha"
                     value={fechaDesde}
                     onChange={(e) => setFechaDesde(e.target.value)}
-                    className={`w-full md:w-[145px] bg-dg-card border-none rounded-dg py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-focus/50 appearance-none [color-scheme:dark] relative [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${fechaDesde ? 'text-dg-text' : 'text-dg-text-muted'}`}
+                    className={`w-full md:w-[145px] bg-dg-card border-none rounded-dg py-2.5 pl-10 pr-4 text-base focus:ring-2 focus:ring-dg-focus/50 appearance-none [color-scheme:dark] relative [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${fechaDesde ? 'text-dg-text' : 'text-dg-text-muted'}`}
                     placeholder="Desde"
                   />
                 </div>
@@ -152,7 +152,7 @@ export default function History() {
                     aria-label="Filtrar hasta la fecha"
                     value={fechaHasta}
                     onChange={(e) => setFechaHasta(e.target.value)}
-                    className={`w-full md:w-[145px] bg-dg-card border-none rounded-dg py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-focus/50 appearance-none [color-scheme:dark] relative [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${fechaHasta ? 'text-dg-text' : 'text-dg-text-muted'}`}
+                    className={`w-full md:w-[145px] bg-dg-card border-none rounded-dg py-2.5 pl-10 pr-4 text-base focus:ring-2 focus:ring-dg-focus/50 appearance-none [color-scheme:dark] relative [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${fechaHasta ? 'text-dg-text' : 'text-dg-text-muted'}`}
                     placeholder="Hasta"
                   />
                 </div>
@@ -189,7 +189,7 @@ export default function History() {
         ) : (
           (Object.entries(groupedEvents) as [string, Evento[]][]).map(([dateLabel, dateEvents]) => (
             <div key={dateLabel}>
-              <div className="text-xs font-bold text-dg-text-muted uppercase tracking-wider mb-2 mt-4">{dateLabel}</div>
+              <div className="text-xs font-bold text-dg-text-muted uppercase mb-2 mt-4">{dateLabel}</div>
               {dateEvents.map((evento) => {
                 const config = getEventConfig(evento);
                 return (
@@ -204,7 +204,7 @@ export default function History() {
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
                         <h3 className="font-bold text-dg-text truncate">{config.title}</h3>
-                        <span className="text-[10px] font-medium text-dg-text-muted">{formatTime(evento.timestamp)}</span>
+                        <span className="text-2xs font-medium text-dg-text-muted tabular">{formatTime(evento.timestamp)}</span>
                       </div>
                       <p className="text-xs text-dg-text-muted truncate">{config.sub}</p>
                       <Link

@@ -51,7 +51,7 @@ export default class ErrorBoundary extends Component<Props, State> {
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-xl font-bold font-headline text-dg-text">
+            <h1 className="text-xl font-bold headline text-dg-text">
               Algo salió mal
             </h1>
             <p className="text-sm text-dg-text-muted leading-relaxed">
@@ -61,7 +61,7 @@ export default class ErrorBoundary extends Component<Props, State> {
           </div>
 
           {import.meta.env.DEV && this.state.error && (
-            <pre className="text-left text-[11px] text-dg-error bg-dg-bg border border-dg-border rounded-dg p-3 overflow-x-auto whitespace-pre-wrap">
+            <pre className="text-left text-2xs text-dg-error bg-dg-bg border border-dg-border rounded-dg p-3 overflow-x-auto whitespace-pre-wrap">
               {this.state.error.message}
             </pre>
           )}
