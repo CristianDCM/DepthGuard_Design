@@ -32,7 +32,7 @@ export default function Navigation() {
               )}
             >
               <item.icon aria-hidden="true" className={cn("w-5 h-5", isActive && "fill-dg-action-text/20")} />
-              <span className="text-[10px] font-bold uppercase tracking-tighter">
+              <span className="text-2xs font-bold uppercase tracking-tighter">
                 {item.name}
               </span>
             </Link>

@@ -143,7 +143,7 @@ export default function Login() {
             {/* Halo del logotipo: la marca solo aparece aqui y en el wordmark. */}
             <div className="absolute inset-0 bg-dg-brand/10 blur-3xl rounded-full -z-10" />
           </div>
-          <h1 className="text-4xl font-bold text-dg-text tracking-tight font-headline">
+          <h1 className="text-4xl font-bold text-dg-text tracking-tight headline">
             Depth<span className="text-dg-brand">Guard</span>
           </h1>
           <p className="text-dg-text-muted text-sm mt-1">Sistema de Control de Acceso 3D</p>
@@ -229,11 +229,11 @@ export default function Login() {
                 >
                   <div className="flex items-center justify-center gap-2">
                     <Lock className="w-4 h-4 text-dg-warning" />
-                    <span className="text-xs font-bold uppercase tracking-widest text-dg-warning">
+                    <span className="text-xs font-bold uppercase text-dg-warning">
                       Acceso bloqueado
                     </span>
                   </div>
-                  <div className="text-2xl font-black text-dg-warning font-headline">
+                  <div className="text-2xl font-bold text-dg-warning headline tabular">
                     {formatTime(remainingSeconds)}
                   </div>
                   <p className="text-xs text-dg-text-muted">

@@ -217,7 +217,7 @@ export default function Settings() {
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
             <SettingsIcon className="w-6 h-6 text-dg-text-secondary" aria-hidden="true" />
-            <h1 className="text-xl font-bold tracking-tight font-headline">Ajustes</h1>
+            <h1 className="text-xl font-bold tracking-tight headline">Ajustes</h1>
           </div>
         </div>
       </header>
@@ -254,7 +254,7 @@ export default function Settings() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-6">
               <section className="cyber-card p-5 space-y-4">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-secondary">Estado del Sistema</h2>
+                <h2 className="text-xs font-bold uppercase text-dg-text-secondary">Estado del Sistema</h2>
                 <div className="space-y-4">
                   <StatusRow label="Nodo Edge" icon={Server} connected={servidorConectado} />
                   {(() => {
@@ -276,7 +276,7 @@ export default function Settings() {
               </section>
 
               <section className="cyber-card p-5 space-y-5">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-secondary">Notificaciones</h2>
+                <h2 className="text-xs font-bold uppercase text-dg-text-secondary">Notificaciones</h2>
                 <div className="space-y-6">
                   {/* Push Notifications Toggle */}
                   <div className="space-y-3">
@@ -289,7 +289,7 @@ export default function Settings() {
                         )}
                         <div>
                           <span className="text-sm font-medium">Notificaciones Push</span>
-                          <p className="text-[10px] text-dg-text-muted mt-0.5">
+                          <p className="text-2xs text-dg-text-muted mt-0.5">
                             Alertas instantáneas de fraude y accesos desconocidos
                           </p>
                         </div>
@@ -299,7 +299,7 @@ export default function Settings() {
                           <Loader2 className="w-3 h-3 text-dg-text-muted animate-spin" />
                         </div>
                       ) : pushStatus === "unsupported" ? (
-                        <span className="text-[10px] text-dg-text-muted bg-dg-input px-2 py-1 rounded-full">No soportado</span>
+                        <span className="text-2xs text-dg-text-muted bg-dg-input px-2 py-1 rounded-full">No soportado</span>
                       ) : (
                         <div
                           onClick={pushLoading ? undefined : handlePushToggle}
@@ -316,7 +316,7 @@ export default function Settings() {
                       )}
                     </div>
                     {pushStatus === "denied" && (
-                      <p className="text-[10px] text-dg-error bg-dg-error/10 border border-dg-error/20 rounded-dg px-3 py-2">
+                      <p className="text-2xs text-dg-error bg-dg-error/10 border border-dg-error/20 rounded-dg px-3 py-2">
                          Notificaciones bloqueadas por el navegador. Ve a la configuración del sitio para desbloquearlas.
                       </p>
                     )}
@@ -328,7 +328,7 @@ export default function Settings() {
                       <Mail className="w-5 h-5 text-dg-text-muted" />
                       <div>
                         <span className="text-sm font-medium">Email de respaldo</span>
-                        <p className="text-[10px] text-dg-text-muted mt-0.5">
+                        <p className="text-2xs text-dg-text-muted mt-0.5">
                           Se envía email automáticamente ante eventos de seguridad
                         </p>
                       </div>
@@ -362,12 +362,12 @@ export default function Settings() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-dg-text-secondary" aria-hidden="true" />
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-secondary">Administradores</h2>
+                    <h2 className="text-xs font-bold uppercase text-dg-text-secondary">Administradores</h2>
                   </div>
                   {callerRole === "owner" && (
                     <button
                       onClick={() => { setShowInviteForm(!showInviteForm); setInviteResult(null); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dg-action/10 border border-dg-action/30 text-[10px] font-bold uppercase tracking-widest text-dg-action-text hover:bg-dg-action/20 transition-colors active:scale-[0.98]"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dg-action/10 border border-dg-action/30 text-2xs font-bold uppercase text-dg-action-text hover:bg-dg-action/20 transition-colors active:scale-[0.98]"
                     >
                       <UserPlus className="w-3.5 h-3.5" />
                       Invitar
@@ -399,7 +399,7 @@ export default function Settings() {
                               onChange={(e) => setInviteEmail(e.target.value)}
                               required
                               disabled={inviteLoading}
-                              className="w-full bg-dg-input border border-dg-border text-dg-text rounded-dg py-2.5 pl-10 pr-4 text-sm focus:border-dg-focus placeholder:text-dg-text-muted transition-colors disabled:opacity-50"
+                              className="w-full bg-dg-input border border-dg-border text-dg-text rounded-dg py-2.5 pl-10 pr-4 text-base focus:border-dg-focus placeholder:text-dg-text-muted transition-colors disabled:opacity-50"
                             />
                           </div>
                           <button
@@ -414,7 +414,7 @@ export default function Settings() {
                             )}
                           </button>
                         </div>
-                        <p className="text-[10px] text-dg-text-muted mt-2">
+                        <p className="text-2xs text-dg-text-muted mt-2">
                           Se enviará un correo de invitación. El nuevo admin establecerá su contraseña desde el enlace.
                         </p>
                       </motion.form>
@@ -457,22 +457,22 @@ export default function Settings() {
                             <div className="flex items-center gap-2">
                               <p className="text-sm font-medium text-dg-text truncate">{admin.email}</p>
                               {admin.id === callerId && (
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-dg-info bg-dg-info/10 px-1.5 py-0.5 rounded-dg-sm">
+                                <span className="text-2xs font-bold uppercase text-dg-info bg-dg-info/10 px-1.5 py-0.5 rounded-dg-sm">
                                   Tú
                                 </span>
                               )}
                               {admin.role === "owner" && (
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-dg-warning bg-dg-warning/10 px-1.5 py-0.5 rounded-dg-sm">
+                                <span className="text-2xs font-bold uppercase text-dg-warning bg-dg-warning/10 px-1.5 py-0.5 rounded-dg-sm">
                                   Propietario
                                 </span>
                               )}
                               {!admin.confirmed && (
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-dg-warning bg-dg-warning/10 px-1.5 py-0.5 rounded-dg-sm">
+                                <span className="text-2xs font-bold uppercase text-dg-warning bg-dg-warning/10 px-1.5 py-0.5 rounded-dg-sm">
                                   Pendiente
                                 </span>
                               )}
                             </div>
-                            <p className="text-[10px] text-dg-text-muted">
+                            <p className="text-2xs text-dg-text-muted">
                               Último acceso: {formatAdminDate(admin.last_sign_in_at)}
                             </p>
                           </div>
@@ -486,13 +486,13 @@ export default function Settings() {
                                 <button
                                   onClick={() => handleDelete(admin.id)}
                                   disabled={deletingId === admin.id}
-                                  className="px-2 py-1 text-[10px] font-bold uppercase bg-dg-error/10 border border-dg-error/30 text-dg-error rounded-dg-sm hover:bg-dg-error/20 transition-colors disabled:opacity-50"
+                                  className="px-2 py-1 text-2xs font-bold uppercase bg-dg-error/10 border border-dg-error/30 text-dg-error rounded-dg-sm hover:bg-dg-error/20 transition-colors disabled:opacity-50"
                                 >
                                   {deletingId === admin.id ? "..." : "Confirmar"}
                                 </button>
                                 <button
                                   onClick={() => setConfirmDeleteId(null)}
-                                  className="px-2 py-1 text-[10px] font-bold uppercase text-dg-text-muted hover:text-dg-text transition-colors"
+                                  className="px-2 py-1 text-2xs font-bold uppercase text-dg-text-muted hover:text-dg-text transition-colors"
                                 >
                                   No
                                 </button>
@@ -511,7 +511,7 @@ export default function Settings() {
                       </motion.div>
                     ))}
 
-                    <p className="text-center text-[10px] text-dg-text-muted pt-2">
+                    <p className="text-center text-2xs text-dg-text-muted pt-2">
                       {admins.length} administrador{admins.length !== 1 ? "es" : ""} registrado{admins.length !== 1 ? "s" : ""}
                     </p>
 
@@ -531,7 +531,7 @@ export default function Settings() {
                           setTimeout(() => setInviteResult(null), 5000);
                         }}
                         disabled={settingOwner}
-                        className="w-full py-3 bg-dg-warning/10 border border-dg-warning/20 rounded-dg text-[10px] font-bold uppercase tracking-widest text-dg-warning hover:bg-dg-warning/20 transition-all active:scale-95 disabled:opacity-50"
+                        className="w-full py-3 bg-dg-warning/10 border border-dg-warning/20 rounded-dg text-2xs font-bold uppercase text-dg-warning hover:bg-dg-warning/20 transition-all active:scale-95 disabled:opacity-50"
                       >
                         {settingOwner ? "Configurando..." : "Reclamar Propiedad del Sistema"}
                       </button>
@@ -541,7 +541,7 @@ export default function Settings() {
               </section>
 
               <section className="cyber-card overflow-hidden p-5 space-y-4">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-dg-text-secondary">Información Técnica</h2>
+                <h2 className="text-xs font-bold uppercase text-dg-text-secondary">Información Técnica</h2>
                 <div className="rounded-dg overflow-hidden border border-dg-border">
                   <table className="w-full text-left text-xs">
                     <tbody className="divide-y divide-dg-border">
@@ -593,7 +593,7 @@ export default function Settings() {
             className="w-full py-4 rounded-dg border border-dg-error/30 bg-dg-error/5 flex items-center justify-center gap-3 group hover:bg-dg-error/10 transition-colors active:scale-95 max-w-md mx-auto"
           >
             <LogOut className="w-5 h-5 text-dg-error" aria-hidden="true" />
-            <span className="text-sm font-bold uppercase tracking-widest text-dg-error">Cerrar Sesión</span>
+            <span className="text-sm font-bold uppercase text-dg-error">Cerrar Sesión</span>
           </button>
         )}
       </main>
@@ -612,7 +612,7 @@ function StatusRow({ label, icon: Icon, connected }: { label: string, icon: any,
       </div>
       <div className={`flex items-center gap-2 px-2 py-1 rounded-full ${connected ? 'bg-dg-success/10' : 'bg-dg-error/10'}`}>
         <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-dg-success animate-pulse' : 'bg-dg-error'}`} />
-        <span className={`text-[10px] font-bold uppercase ${connected ? 'text-dg-success' : 'text-dg-error'}`}>
+        <span className={`text-2xs font-bold uppercase ${connected ? 'text-dg-success' : 'text-dg-error'}`}>
           {connected ? "Conectado" : "Desconectado"}
         </span>
       </div>
@@ -640,7 +640,7 @@ function TechRow({ label, value, highlight }: { label: string, value: string, hi
   return (
     <tr className="bg-dg-bg/30">
       <td className="p-3 text-dg-text-muted">{label}</td>
-      <td className={`p-3 text-right ${highlight ? 'font-bold text-dg-success uppercase text-[10px]' : 'font-medium'}`}>{value}</td>
+      <td className={`p-3 text-right ${highlight ? 'font-bold text-dg-success uppercase text-2xs' : 'font-medium'}`}>{value}</td>
     </tr>
   );
 }

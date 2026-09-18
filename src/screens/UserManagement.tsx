@@ -54,7 +54,7 @@ export default function UserManagement() {
           <div className="flex items-center justify-between px-4 py-4">
             <div className="flex items-center gap-3">
               <Users className="w-6 h-6 text-dg-text-secondary" aria-hidden="true" />
-              <h1 className="text-xl font-bold tracking-tight font-headline">Usuarios</h1>
+              <h1 className="text-xl font-bold tracking-tight headline">Usuarios</h1>
             </div>
             <button 
               onClick={() => navigate("/register/start")}
@@ -74,26 +74,26 @@ export default function UserManagement() {
                 placeholder="Buscar usuario..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-dg-card border border-dg-border rounded-dg py-2.5 pl-10 pr-4 text-sm focus:border-dg-focus transition-colors placeholder:text-dg-text-muted text-dg-text"
+                className="w-full bg-dg-card border border-dg-border rounded-dg py-2.5 pl-10 pr-4 text-base focus:border-dg-focus transition-colors placeholder:text-dg-text-muted text-dg-text"
               />
             </div>
             
             <div className="bg-dg-card/50 border border-dg-border rounded-dg p-3 flex justify-around text-center max-w-2xl">
               <div>
                 <p className="text-dg-text font-bold text-sm">{users.length}</p>
-                <p className="text-[10px] text-dg-text-muted uppercase tracking-wider">Registrados</p>
+                <p className="text-2xs text-dg-text-muted uppercase">Registrados</p>
               </div>
               <div className="w-[1px] bg-dg-border" />
               <div>
                 <p className="text-dg-text font-bold text-sm">{totalAccesos}</p>
-                <p className="text-[10px] text-dg-text-muted uppercase tracking-wider">Accesos</p>
+                <p className="text-2xs text-dg-text-muted uppercase">Accesos</p>
               </div>
               <div className="w-[1px] bg-dg-border" />
               <div>
                 <p className="text-dg-text font-bold text-sm flex items-center justify-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-dg-success animate-pulse" aria-hidden="true" /> {estadoCount.activos} / {estadoCount.inactivos}
                 </p>
-                <p className="text-[10px] text-dg-text-muted uppercase tracking-wider">Activos / Inactivos</p>
+                <p className="text-2xs text-dg-text-muted uppercase">Activos / Inactivos</p>
               </div>
             </div>
           </div>
@@ -101,7 +101,7 @@ export default function UserManagement() {
       </header>
 
       <main className="flex-1 px-4 py-4 space-y-3 max-w-7xl mx-auto w-full">
-        <div className="text-xs font-bold text-dg-text-muted uppercase tracking-wider mb-2">Personal Autorizado</div>
+        <div className="text-xs font-bold text-dg-text-muted uppercase mb-2">Personal Autorizado</div>
         
         {loading ? (
           <div className="flex items-center justify-center py-20">
@@ -126,7 +126,7 @@ export default function UserManagement() {
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-start">
                   <h3 className="font-bold text-dg-text truncate flex items-center gap-1.5">
-                    <span className={`text-[10px] ${user.activo ? 'text-dg-success' : 'text-dg-text-muted'}`}>●</span> {user.nombre}
+                    <span className={`text-2xs ${user.activo ? 'text-dg-success' : 'text-dg-text-muted'}`}>●</span> {user.nombre}
                   </h3>
                   <button 
                     onClick={(e) => { e.stopPropagation(); navigate(`/users/delete/${user.id}`); }}
@@ -137,7 +137,7 @@ export default function UserManagement() {
                   </button>
                 </div>
                 <p className="text-xs text-dg-text-muted truncate">Registrado: {formatDate(user.fecha_registro)} • {user.num_angulos} ángulos</p>
-                {user.notas && <p className="text-[10px] text-dg-text-muted/60 italic truncate">Nota: {user.notas}</p>}
+                {user.notas && <p className="text-2xs text-dg-text-muted/60 italic truncate">Nota: {user.notas}</p>}
                 <button 
                   onClick={() => navigate(`/profile/${user.id}`)}
                   className="mt-2 text-xs font-bold text-dg-action-text flex items-center gap-1"

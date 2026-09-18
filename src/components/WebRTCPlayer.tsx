@@ -286,7 +286,7 @@ export default function WebRTCPlayer({
               <span className="text-xs font-medium">
                 {status === "iniciando" ? "Iniciando WebRTC..." : "Estableciendo conexión P2P..."}
               </span>
-              <span className="text-[10px] text-dg-text-muted/50 font-mono">
+              <span className="text-2xs text-dg-text-muted/50 font-mono">
                 Timeout en {WEBRTC_TIMEOUT_MS / 1000}s → fallback a snapshot
               </span>
             </>
@@ -306,13 +306,13 @@ export default function WebRTCPlayer({
         <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 py-2 bg-gradient-to-b from-black/70 to-transparent">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-dg-error animate-pulse shadow-[0_0_6px_var(--color-dg-error)]" />
-            <span className="text-[10px] font-bold text-white/90 uppercase tracking-widest">
+            <span className="text-2xs font-bold text-white/90 uppercase">
               En Vivo
             </span>
           </div>
           <div className="flex items-center gap-1.5 bg-black/40 px-2 py-0.5 rounded-full">
             <Wifi className="w-3 h-3 text-dg-success" aria-hidden="true" />
-            <span className="text-[10px] font-bold text-dg-success uppercase tracking-wider">
+            <span className="text-2xs font-bold text-dg-success uppercase">
               WebRTC P2P
             </span>
           </div>
@@ -322,7 +322,7 @@ export default function WebRTCPlayer({
       {/* Footer sutil — solo cuando NO es minimal */}
       {status === "conectado" && !minimal && (
         <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5 bg-gradient-to-t from-black/60 to-transparent">
-          <span className="text-[10px] text-white/40 font-medium">
+          <span className="text-2xs text-white/40 font-medium">
             Streaming en tiempo real · ~30 FPS
           </span>
         </div>
