@@ -156,25 +156,37 @@ export default function Login() {
         >
           <form className="space-y-6" onSubmit={handleLogin}>
             <div className="space-y-2">
+              <label htmlFor="login-email" className="block text-sm font-medium text-dg-text-secondary">
+                Correo corporativo
+              </label>
               <input
+                id="login-email"
                 name="email"
                 type="email"
-                placeholder="Correo"
+                autoComplete="email"
+                placeholder="nombre@empresa.com"
                 required
                 disabled={isLocked}
-                className="w-full bg-dg-input border-dg-border text-white rounded-dg px-4 py-3 focus:ring-dg-accent focus:border-dg-accent transition-all outline-none disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-describedby={error ? "login-error" : undefined}
+                className="w-full bg-dg-input border border-dg-border text-white rounded-dg px-4 py-3 text-base placeholder:text-dg-text-muted focus:border-dg-accent transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               />
             </div>
 
             <div className="space-y-2">
+              <label htmlFor="login-password" className="block text-sm font-medium text-dg-text-secondary">
+                Contraseña
+              </label>
               <div className="relative">
                 <input
+                  id="login-password"
                   name="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Contraseña"
+                  autoComplete="current-password"
+                  placeholder="••••••••"
                   required
                   disabled={isLocked}
-                  className="w-full bg-dg-input border-dg-border text-white rounded-dg px-4 py-3 focus:ring-dg-accent focus:border-dg-accent transition-all outline-none pr-12 disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-describedby={error ? "login-error" : undefined}
+                  className="w-full bg-dg-input border border-dg-border text-white rounded-dg px-4 py-3 text-base placeholder:text-dg-text-muted focus:border-dg-accent transition-colors pr-12 disabled:opacity-40 disabled:cursor-not-allowed"
                 />
                 <button
                   type="button"
@@ -192,6 +204,8 @@ export default function Login() {
             <AnimatePresence>
               {error && (
                 <motion.div
+                  id="login-error"
+                  role="alert"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
@@ -209,6 +223,7 @@ export default function Login() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
+                  role="status"
                   className="bg-dg-warning/5 border border-dg-warning/30 rounded-dg p-4 text-center space-y-2"
                 >
                   <div className="flex items-center justify-center gap-2">

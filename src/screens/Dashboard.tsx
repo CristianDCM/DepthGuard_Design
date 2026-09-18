@@ -261,6 +261,10 @@ export default function Dashboard() {
         return { title: "Intento de Fraude", sub: evento.motivo ?? "Superficie plana detectada", icon: AlertTriangle, color: "text-dg-error", border: false };
       case "DESCONOCIDO":
         return { title: "Desconocido Detectado", sub: "Persona no registrada", icon: HelpCircle, color: "text-yellow-500", border: true };
+      default:
+        // El estado lo escribe el edge: un valor inesperado no puede dejar
+        // la funcion devolviendo undefined y romper el render del listado.
+        return { title: "Estado no reconocido", sub: "Revise el registro del evento", icon: HelpCircle, color: "text-dg-text-muted", border: false };
     }
   }
 
@@ -357,16 +361,18 @@ export default function Dashboard() {
                     <div className="flex items-center gap-2 ml-auto sm:ml-0">
                       <input
                         type="date"
+                        aria-label="Inicio del período personalizado"
                         value={customDesde}
                         onChange={(e) => setCustomDesde(e.target.value)}
-                        className="bg-white/5 border border-dg-border rounded-md px-2 py-1 text-[11px] text-dg-text-secondary focus:border-dg-accent focus:outline-none transition-colors [color-scheme:dark]"
+                        className="bg-white/5 border border-dg-border rounded-md px-2 py-1 text-[11px] text-dg-text-secondary focus:border-dg-accent transition-colors [color-scheme:dark]"
                       />
                       <span className="text-dg-text-muted text-xs">—</span>
                       <input
                         type="date"
+                        aria-label="Fin del período personalizado"
                         value={customHasta}
                         onChange={(e) => setCustomHasta(e.target.value)}
-                        className="bg-white/5 border border-dg-border rounded-md px-2 py-1 text-[11px] text-dg-text-secondary focus:border-dg-accent focus:outline-none transition-colors [color-scheme:dark]"
+                        className="bg-white/5 border border-dg-border rounded-md px-2 py-1 text-[11px] text-dg-text-secondary focus:border-dg-accent transition-colors [color-scheme:dark]"
                       />
                     </div>
                   )}

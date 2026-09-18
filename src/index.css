@@ -21,7 +21,24 @@
      Contraste 9.26:1 sobre el fondo (WCAG AAA). */
   --color-dg-text-secondary: #b4b4c8;
 
+  /* Color unico del anillo de foco de todo el producto. Se declara como
+     token propio (y no como --color-dg-accent) para que el dia que el foco
+     deje de ser verde solo haya que cambiar esta linea. */
+  --color-dg-focus: #a3ff00;
+
   --radius-dg: 12px;
+
+  /* Giro lento para los estados de espera del registro biometrico.
+     La clase `animate-spin-slow` se usaba en RegisterStart sin estar
+     definida: el icono se quedaba completamente quieto y parecia que la
+     aplicacion se habia colgado justo en mitad del escaneo facial. */
+  --animate-spin-slow: spin-slow 2.4s linear infinite;
+
+  @keyframes spin-slow {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 }
 
 @layer base {
@@ -29,7 +46,46 @@
     @apply bg-dg-bg text-white font-sans;
     min-height: 100vh;
   }
-  
+
+  /*
+   * Anillo de foco unico para todo el producto.
+   *
+   * Antes: ningun <button> de la aplicacion tenia estilo de foco, y once
+   * `outline-none` repartidos por los formularios eliminaban ademas el
+   * indicador nativo del navegador. El panel era inoperable con teclado
+   * sin poder ver donde estabas (WCAG 2.4.7, nivel AA).
+   *
+   * Se usa :focus-visible, que el navegador solo activa en navegacion por
+   * teclado. El raton nunca ve el anillo, que es justo la razon por la que
+   * se habian puesto los `outline-none`; ya no hacen falta en ningun sitio.
+   */
+  :where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 2px solid var(--color-dg-focus);
+    outline-offset: 2px;
+  }
+
+  /*
+   * Respeto por prefers-reduced-motion (WCAG 2.3.3).
+   *
+   * La aplicacion mantiene animaciones en bucle en casi todas las pantallas
+   * (puntos de estado con animate-pulse, alertas con animate-ping, spinners)
+   * y un panel de seguridad se deja abierto durante todo un turno. Sin esto,
+   * un usuario con trastorno vestibular no puede usarlo.
+   *
+   * Las animaciones de Motion no pasan por CSS: se neutralizan aparte con
+   * <MotionConfig reducedMotion="user"> en App.tsx.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
   .recharts-responsive-container,
   .recharts-responsive-container *,
   .recharts-responsive-container:focus,
@@ -50,6 +106,17 @@
 
   .btn-primary {
     @apply bg-dg-accent text-dg-bg font-bold py-3 px-6 rounded-dg transition-all active:scale-95 hover:brightness-110 shadow-[0_0_15px_rgba(163,255,0,0.3)];
+  }
+
+  /*
+   * Tarjeta cuyo enlace se estira con ::after para cubrirla entera
+   * (patron "stretched link"). El anillo de foco tiene que dibujarse
+   * alrededor de la tarjeta, no del texto del enlace, que es lo unico
+   * que el navegador enfoca de verdad.
+   */
+  .card-linked:has(a:focus-visible) {
+    outline: 2px solid var(--color-dg-focus);
+    outline-offset: 2px;
   }
 
   .btn-secondary {
@@ -81,5 +148,32 @@
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
   }
-}
 
+  /*
+   * Barra de scroll fina para las listas largas de eventos. La clase se
+   * usaba en el log del monitor en vivo sin estar definida en ninguna
+   * parte, asi que la lista salia con la barra gruesa del sistema.
+   */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-dg-border) transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--color-dg-border);
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-dg-text-muted);
+  }
+}

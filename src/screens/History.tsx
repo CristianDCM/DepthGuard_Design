@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Search, CheckCircle, AlertTriangle, HelpCircle, ChevronRight, History as HistoryIcon, Download, Calendar, X } from "lucide-react";
 import { motion } from "motion/react";
 import Navigation from "../components/Navigation";
@@ -7,7 +7,6 @@ import { getHistorialPaginado, type Evento, type EstadoEvento } from "../lib/sup
 import { exportToCSV } from "../lib/exportUtils";
 
 export default function History() {
-  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"Todos" | "Autorizados" | "Fraude" | "Desconocido">("Todos");
   const [events, setEvents] = useState<Evento[]>([]);
@@ -125,7 +124,8 @@ export default function History() {
               <div className="relative flex-1 md:max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-dg-text-muted w-4 h-4" />
                 <input 
-                  type="text" 
+                  type="search"
+                  aria-label="Buscar accesos por nombre o motivo"
                   placeholder="Buscar accesos..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -137,6 +137,7 @@ export default function History() {
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-dg-text-muted w-4 h-4 pointer-events-none z-10" />
                   <input
                     type="date"
+                    aria-label="Filtrar desde la fecha"
                     value={fechaDesde}
                     onChange={(e) => setFechaDesde(e.target.value)}
                     className={`w-full md:w-[145px] bg-dg-card border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-accent/50 appearance-none [color-scheme:dark] relative [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${fechaDesde ? 'text-white' : 'text-dg-text-muted'}`}
@@ -148,6 +149,7 @@ export default function History() {
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-dg-text-muted w-4 h-4 pointer-events-none z-10" />
                   <input
                     type="date"
+                    aria-label="Filtrar hasta la fecha"
                     value={fechaHasta}
                     onChange={(e) => setFechaHasta(e.target.value)}
                     className={`w-full md:w-[145px] bg-dg-card border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-dg-accent/50 appearance-none [color-scheme:dark] relative [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${fechaHasta ? 'text-white' : 'text-dg-text-muted'}`}
@@ -194,8 +196,7 @@ export default function History() {
                   <motion.div
                     key={evento.id}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => navigate(`/event/${evento.id}`)}
-                    className={`cyber-card p-4 flex items-center gap-4 shadow-sm cursor-pointer mb-3 ${config.highlight ? 'border-dg-accent/30 ring-1 ring-dg-accent/10' : ''}`}
+                    className={`cyber-card card-linked p-4 flex items-center gap-4 shadow-sm mb-3 relative hover:border-dg-accent/40 transition-colors ${config.highlight ? 'border-dg-accent/30 ring-1 ring-dg-accent/10' : ''}`}
                   >
                     <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
                       <config.icon className={`w-8 h-8 ${config.color}`} />
@@ -206,9 +207,14 @@ export default function History() {
                         <span className="text-[10px] font-medium text-dg-text-muted">{formatTime(evento.timestamp)}</span>
                       </div>
                       <p className="text-xs text-dg-text-muted truncate">{config.sub}</p>
-                      <button className="mt-2 text-xs font-bold text-dg-accent flex items-center gap-1">
-                        Ver detalles <ChevronRight className="w-3 h-3" />
-                      </button>
+                      <Link
+                        to={`/event/${evento.id}`}
+                        className="mt-2 text-xs font-bold text-dg-accent inline-flex items-center gap-1 focus-visible:outline-none after:absolute after:inset-0 after:rounded-dg"
+                      >
+                        Ver detalles
+                        <ChevronRight className="w-3 h-3" aria-hidden="true" />
+                        <span className="sr-only">de {config.title} a las {formatTime(evento.timestamp)}</span>
+                      </Link>
                     </div>
                   </motion.div>
                 );

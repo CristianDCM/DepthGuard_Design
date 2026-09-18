@@ -1,5 +1,6 @@
 import { Suspense, lazy, type ReactNode } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { MotionConfig } from "motion/react";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Login from "./screens/Login";
@@ -64,32 +65,34 @@ function PantallaCargando() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <Router>
-        <InviteRedirect>
-          <Suspense fallback={<PantallaCargando />}>
-            <Routes>
-              {/* Rutas públicas */}
-              <Route path="/" element={<Login />} />
-              <Route path="/auth/callback" element={<SetPassword />} />
+      <MotionConfig reducedMotion="user">
+        <Router>
+          <InviteRedirect>
+            <Suspense fallback={<PantallaCargando />}>
+              <Routes>
+                {/* Rutas públicas */}
+                <Route path="/" element={<Login />} />
+                <Route path="/auth/callback" element={<SetPassword />} />
 
-              {/* Rutas protegidas — requieren login */}
-              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/live" element={<ProtectedRoute><LiveMonitor /></ProtectedRoute>} />
-              <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
-              <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
-              <Route path="/event/:id" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
-              <Route path="/profile/:id" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
-              <Route path="/users/edit/:id" element={<ProtectedRoute><EditUserModal /></ProtectedRoute>} />
-              <Route path="/users/delete/:id" element={<ProtectedRoute><DeleteConfirmModal /></ProtectedRoute>} />
-              <Route path="/register/start" element={<ProtectedRoute><RegisterStart /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                {/* Rutas protegidas — requieren login */}
+                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/live" element={<ProtectedRoute><LiveMonitor /></ProtectedRoute>} />
+                <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+                <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+                <Route path="/event/:id" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
+                <Route path="/profile/:id" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+                <Route path="/users/edit/:id" element={<ProtectedRoute><EditUserModal /></ProtectedRoute>} />
+                <Route path="/users/delete/:id" element={<ProtectedRoute><DeleteConfirmModal /></ProtectedRoute>} />
+                <Route path="/register/start" element={<ProtectedRoute><RegisterStart /></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
-              {/* 404 — cualquier ruta no reconocida */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </InviteRedirect>
-      </Router>
+                {/* 404 — cualquier ruta no reconocida */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </InviteRedirect>
+        </Router>
+      </MotionConfig>
     </ErrorBoundary>
   );
 }

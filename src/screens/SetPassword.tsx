@@ -181,7 +181,7 @@ export default function SetPassword() {
           <form className="space-y-5" onSubmit={handleSubmit}>
             {/* Campo: Nueva contraseña */}
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-dg-text-muted">
+              <label htmlFor="input-password" className="text-xs font-bold uppercase tracking-widest text-dg-text-muted">
                 Nueva contraseña
               </label>
               <div className="relative">
@@ -194,7 +194,7 @@ export default function SetPassword() {
                   placeholder="••••••••"
                   required
                   autoComplete="new-password"
-                  className="w-full bg-dg-input border-dg-border text-white rounded-dg pl-10 pr-12 py-3 focus:ring-dg-accent focus:border-dg-accent transition-all outline-none"
+                  className="w-full bg-dg-input border border-dg-border text-white rounded-dg pl-10 pr-12 py-3 text-base focus:border-dg-accent transition-colors"
                 />
                 <button
                   type="button"
@@ -260,7 +260,7 @@ export default function SetPassword() {
 
             {/* Campo: Confirmar contraseña */}
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-dg-text-muted">
+              <label htmlFor="input-confirm-password" className="text-xs font-bold uppercase tracking-widest text-dg-text-muted">
                 Confirmar contraseña
               </label>
               <div className="relative">
@@ -273,7 +273,7 @@ export default function SetPassword() {
                   placeholder="••••••••"
                   required
                   autoComplete="new-password"
-                  className={`w-full bg-dg-input border text-white rounded-dg pl-10 pr-12 py-3 focus:ring-dg-accent transition-all outline-none ${
+                  className={`w-full bg-dg-input border text-white rounded-dg pl-10 pr-12 py-3 text-base transition-colors ${
                     confirm.length > 0
                       ? passwordsMatch
                         ? "border-dg-success focus:border-dg-success"
