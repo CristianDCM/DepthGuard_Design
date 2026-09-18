@@ -67,6 +67,18 @@ export default function App() {
     <ErrorBoundary>
       <MotionConfig reducedMotion="user">
         <Router>
+          {/*
+            Enlace de salto: el primer elemento enfocable de la pagina.
+            Sin el, llegar al contenido con teclado obliga a recorrer los
+            cinco destinos de la navegacion en CADA pantalla.
+            Solo se ve cuando recibe el foco.
+          */}
+          <a
+            href="#contenido"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-dg focus:bg-dg-action focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+          >
+            Saltar al contenido
+          </a>
           <InviteRedirect>
             <Suspense fallback={<PantallaCargando />}>
               <Routes>

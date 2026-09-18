@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Edit2, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
@@ -55,7 +55,7 @@ export default function UserProfile() {
   const alertas = eventos.filter(e => e.estado !== "ACCESO_PERMITIDO").length;
 
   return (
-    <div className="min-h-screen pb-24 flex flex-col bg-dg-bg">
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pl-60 flex flex-col bg-dg-bg">
       <header className="fixed top-0 w-full z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between w-full">
           <div className="flex items-center gap-4">
@@ -67,7 +67,7 @@ export default function UserProfile() {
         </div>
       </header>
 
-      <main className="pt-24 px-6 max-w-7xl mx-auto pb-32 w-full">
+      <main id="contenido" className="pt-24 px-6 max-w-7xl mx-auto pb-32 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column: Profile Info & Actions */}
           <div className="lg:col-span-4 space-y-6">
@@ -130,16 +130,20 @@ export default function UserProfile() {
                 <h3 className="headline font-bold text-sm text-dg-text-muted uppercase mb-4">Últimas Capturas</h3>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                   {eventos.filter(e => e.foto_url).map((evento) => (
-                    <div key={evento.id} className="aspect-square bg-dg-bg rounded-dg overflow-hidden border border-dg-border relative group cursor-pointer" onClick={() => navigate(`/event/${evento.id}`)}>
+                    <Link
+                      key={evento.id}
+                      to={`/event/${evento.id}`}
+                      className="aspect-square bg-dg-bg rounded-dg overflow-hidden border border-dg-border relative group block"
+                    >
                       <img 
                         className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" 
                         src={evento.foto_url!} 
-                        alt="Capture"
+                        alt={`Captura del ${new Date(evento.timestamp).toLocaleString("es", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`}
                       />
                       <div className="absolute bottom-1 right-1 bg-dg-bg/80 text-2xs px-1 rounded-dg-sm font-mono text-dg-text">
                         {new Date(evento.timestamp).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit", hour12: true })}
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>

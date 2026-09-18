@@ -204,6 +204,36 @@ export default function Dashboard() {
     };
   }, [rawTendencias, filtroDia, filtroMotivo, filtroHora, modoFiltro, diasPreset, customDesde, customHasta, origenFiltro]);
 
+  /**
+   * Flechas dentro del mapa de calor (patron de tabIndex itinerante).
+   *
+   * Sin esto habria que pulsar Tab 168 veces para cruzar la rejilla, que
+   * tecnicamente es accesible y en la practica es inutilizable.
+   */
+  const moverFocoRejilla = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const DELTAS: Record<string, [number, number]> = {
+      ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1],
+    };
+    const delta = DELTAS[e.key];
+    if (!delta) return;
+
+    const activo = document.activeElement as HTMLElement | null;
+    const fila = Number(activo?.dataset?.fila);
+    const col = Number(activo?.dataset?.col);
+    if (Number.isNaN(fila) || Number.isNaN(col)) return;
+
+    e.preventDefault();
+    const destino = e.currentTarget.querySelector<HTMLElement>(
+      `[data-fila="${fila + delta[0]}"][data-col="${col + delta[1]}"]`
+    );
+    if (!destino) return;
+
+    // El foco se mueve y con el la unica parada de tabulacion.
+    activo!.tabIndex = -1;
+    destino.tabIndex = 0;
+    destino.focus();
+  };
+
   const limpiarFiltros = () => {
     setFiltroDia(null);
     setFiltroMotivo(null);
@@ -275,7 +305,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen pb-24 flex flex-col bg-dg-bg">
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pl-60 flex flex-col bg-dg-bg">
       <header className="sticky top-0 z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between px-4 py-4">
@@ -287,7 +317,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="flex-1 px-4 py-6 space-y-6 max-w-7xl mx-auto w-full">
+      <main id="contenido" className="flex-1 px-4 py-6 space-y-6 max-w-7xl mx-auto w-full">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
@@ -466,70 +496,89 @@ export default function Dashboard() {
                     {heatmapMatrix.matrix.length === 0 ? (
                       <div className="h-32 flex items-center justify-center text-dg-text-muted text-xs">Sin datos recientes</div>
                     ) : (
-                      <div className="min-w-[600px] flex flex-col gap-1">
+                      <div
+                        role="grid"
+                        aria-label="Eventos por día de la semana y hora"
+                        className="min-w-[600px] flex flex-col gap-1"
+                        /*
+                          Antes las celdas, las horas y los dias eran <div> y
+                          <span> con onClick: sin rol, sin tabIndex y sin
+                          teclado. La analitica cruzada, que es la funcion mas
+                          elaborada del panel, era inalcanzable sin raton
+                          (WCAG 2.1.1).
+
+                          Ahora es una rejilla con tabIndex itinerante: solo
+                          una celda entra en el orden de tabulacion y las
+                          flechas mueven el foco dentro. Tabular por 168
+                          celdas para cruzar la rejilla no seria accesible,
+                          seria una condena.
+                        */
+                        onKeyDown={moverFocoRejilla}
+                      >
                         {/* Eje X: Horas */}
-                        <div className="flex pl-8 text-2xs text-dg-text-muted mb-1 font-mono tabular tracking-tighter">
+                        <div role="row" className="flex pl-8 text-2xs text-dg-text-muted mb-1 font-mono tabular tracking-tighter">
                           {[...Array(24)].map((_, i) => {
                             const ampm = i >= 12 ? 'PM' : 'AM';
                             const hora = i % 12 || 12;
+                            const activa = filtroHora === i;
                             return (
-                              <div
+                              <button
                                 key={i}
-                                className={`flex-1 text-center cursor-pointer transition-all ${filtroHora === i ? 'opacity-100 font-bold text-dg-text bg-white/10 rounded-dg-sm' : 'opacity-60 hover:opacity-100'}`}
-                                onClick={() => {
-                                  setFiltroHora(prev => {
-                                    const next = prev === i ? null : i;
-                                    return next;
-                                  });
-                                }}
+                                type="button"
+                                role="columnheader"
+                                aria-pressed={activa}
+                                aria-label={`Filtrar por las ${hora}:00 ${ampm}`}
+                                onClick={() => setFiltroHora(prev => (prev === i ? null : i))}
+                                className={`flex-1 text-center transition-all ${activa ? 'opacity-100 font-bold text-dg-text bg-white/10 rounded-dg-sm' : 'opacity-60 hover:opacity-100'}`}
                               >
-                                {i % 4 === 0 ? `${hora}${ampm}` : ''}
-                              </div>
+                                {i % 4 === 0 ? `${hora}${ampm}` : <span aria-hidden="true">·</span>}
+                              </button>
                             );
                           })}
                         </div>
 
                         {/* Filas: Días */}
-                        {heatmapMatrix.matrix.map((row) => (
-                          <div key={row.dia} className="flex gap-1 items-center">
-                            <span
-                              className={`w-8 text-2xs text-dg-text-muted font-bold text-right pr-1.5 uppercase cursor-pointer hover:text-dg-text transition-colors ${filtroDia === row.dia ? 'text-dg-text' : ''}`}
-                              onClick={() => {
-                                setFiltroDia(prev => {
-                                  const next = prev === row.dia ? null : row.dia;
-                                  return next;
-                                });
-                              }}
+                        {heatmapMatrix.matrix.map((row, filaIdx) => (
+                          <div role="row" key={row.dia} className="flex gap-1 items-center">
+                            <button
+                              type="button"
+                              role="rowheader"
+                              aria-pressed={filtroDia === row.dia}
+                              aria-label={`Filtrar por ${row.dia}`}
+                              onClick={() => setFiltroDia(prev => (prev === row.dia ? null : row.dia))}
+                              className={`w-8 text-2xs text-dg-text-muted font-bold text-right pr-1.5 uppercase hover:text-dg-text transition-colors ${filtroDia === row.dia ? 'text-dg-text' : ''}`}
                             >
                               {row.dia}
-                            </span>
+                            </button>
                             <div className="flex-1 flex gap-1">
                               {row.horas.map((count, j) => {
                                 const baseOpacity = count === 0 ? 0.05 : Math.max(0.25, count / heatmapMatrix.max);
                                 const ampm = j >= 12 ? 'PM' : 'AM';
                                 const hora = j % 12 || 12;
+                                const seleccionada = filtroDia === row.dia && filtroHora === j;
                                 return (
-                                  <div
+                                  <button
                                     key={j}
+                                    type="button"
+                                    role="gridcell"
+                                    data-fila={filaIdx}
+                                    data-col={j}
+                                    // Solo la primera celda entra en el orden de
+                                    // tabulacion; el resto se alcanza con flechas.
+                                    tabIndex={filaIdx === 0 && j === 0 ? 0 : -1}
+                                    aria-pressed={seleccionada}
+                                    aria-label={`${count} ${count === 1 ? "evento" : "eventos"} el ${row.dia} a las ${hora}:00 ${ampm}`}
                                     onClick={() => {
-                                      let nextDia = row.dia;
-                                      let nextHora = j;
-                                      setFiltroDia(prev => {
-                                        nextDia = prev === row.dia ? null : row.dia;
-                                        return nextDia;
-                                      });
-                                      setFiltroHora(prev => {
-                                        nextHora = prev === j ? null : j;
-                                        return nextHora;
-                                      });
+                                      setFiltroDia(prev => (prev === row.dia ? null : row.dia));
+                                      setFiltroHora(prev => (prev === j ? null : j));
                                     }}
-                                    className={`flex-1 aspect-square rounded-dg-sm bg-dg-info transition-all duration-300 hover:ring-1 hover:ring-white cursor-crosshair relative group ${filtroDia === row.dia && filtroHora === j ? 'ring-2 ring-white z-10' : ''}`}
+                                    className={`flex-1 aspect-square rounded-dg-sm bg-dg-info transition-all duration-300 hover:ring-1 hover:ring-white cursor-crosshair relative group ${seleccionada ? 'ring-2 ring-white z-10' : ''}`}
                                     style={{ opacity: baseOpacity }}
                                   >
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1.5 bg-dg-card border border-dg-border-hi text-dg-text text-2xs rounded-dg-sm shadow-dg-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+                                    <span aria-hidden="true" className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1.5 bg-dg-card border border-dg-border-hi text-dg-text text-2xs rounded-dg-sm shadow-dg-lg opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
                                       <span className="font-bold text-dg-info">{count} Eventos</span> <span className="opacity-50">el</span> {row.dia} <span className="opacity-50">a las</span> {hora}:00 {ampm}
-                                    </div>
-                                  </div>
+                                    </span>
+                                  </button>
                                 );
                               })}
                             </div>
@@ -591,15 +640,13 @@ export default function Dashboard() {
                             const total = motivosFraude.reduce((acc, curr) => acc + curr.value, 0);
                             const porcentaje = total > 0 ? Math.round((m.value / total) * 100) : 0;
                             return (
-                              <div
+                              <button
                                 key={i}
-                                className={`flex flex-col gap-1 cursor-pointer hover:bg-white/5 py-1 px-2 -mx-2 rounded-dg-sm transition-colors ${filtroMotivo && filtroMotivo !== m.name ? 'opacity-30' : ''}`}
-                                onClick={() => {
-                                  setFiltroMotivo(prev => {
-                                    const next = prev === m.name ? null : m.name;
-                                    return next;
-                                  });
-                                }}
+                                type="button"
+                                aria-pressed={filtroMotivo === m.name}
+                                aria-label={`Filtrar por ${m.name}: ${m.value} eventos, ${porcentaje} por ciento`}
+                                onClick={() => setFiltroMotivo(prev => (prev === m.name ? null : m.name))}
+                                className={`w-full text-left flex flex-col gap-1 cursor-pointer hover:bg-white/5 py-1 px-2 -mx-2 rounded-dg-sm transition-colors ${filtroMotivo && filtroMotivo !== m.name ? 'opacity-30' : ''}`}
                               >
                                 <div className="flex items-center justify-between">
                                   <span className="text-2xs text-dg-text-muted font-bold uppercase">{m.name}</span>
@@ -608,7 +655,7 @@ export default function Dashboard() {
                                 <div className="w-full bg-white/5 h-1 rounded-full overflow-hidden">
                                   <div className="h-full rounded-full transition-all duration-500" style={{ width: `${porcentaje}%`, backgroundColor: m.color }} />
                                 </div>
-                              </div>
+                              </button>
                             );
                           })}
                         </div>
