@@ -92,7 +92,11 @@ export default function RegisterStart() {
   // Angulo que el edge esta capturando ahora mismo. `anguloActual` es el
   // numero de angulos ya completados que publica el comando, asi que ese
   // mismo indice apunta al siguiente por capturar.
-  const indiceAngulo = Math.min(anguloActual, ANGULOS.length - 1);
+  // `progreso` es `integer DEFAULT 0` pero admite nulo, y si el edge manda el
+  // campo ausente llega `undefined`: Math.min(undefined, 4) da NaN,
+  // ANGULOS[NaN] es undefined y leer .instruccion tumbaba la pantalla entera.
+  const anguloSeguro = Number.isFinite(anguloActual) ? Math.trunc(anguloActual) : 0;
+  const indiceAngulo = Math.min(Math.max(anguloSeguro, 0), ANGULOS.length - 1);
   const anguloEnCurso = ANGULOS[indiceAngulo];
 
   // Un consejo de calidad urgente manda sobre la instruccion de pose: no
@@ -219,10 +223,11 @@ export default function RegisterStart() {
    */
   const _onComandoActualizado = (comando: ComandoEdge) => {
     setAnguloActual((previo) => {
+      const progreso = Number.isFinite(comando.progreso) ? comando.progreso : previo;
       // Un angulo mas capturado: confirmacion hapatica, que en movil sustituye
       // a mirar la pantalla justo cuando la persona tiene la cara girada.
-      if (comando.progreso > previo) vibrar([30]);
-      return comando.progreso;
+      if (progreso > previo) vibrar([30]);
+      return progreso;
     });
     setCalidad(leerCalidad(comando.resultado));
 
@@ -232,7 +237,7 @@ export default function RegisterStart() {
     if (comando.estado === "completado") {
       _limpiarMonitoreo();
       vibrar([30, 40, 30]);
-      setUsuarioCreado((prev) => prev ? { ...prev, num_angulos: comando.progreso } : null);
+      setUsuarioCreado((prev) => prev ? { ...prev, num_angulos: comando.progreso ?? prev.num_angulos } : null);
       setStep("success");
     }
     if (comando.estado === "error") {
@@ -659,8 +664,8 @@ export default function RegisterStart() {
                 estado={estadoMarco}
                 instruccion={instruccionVisible}
                 pose={anguloEnCurso.pose}
-                progreso={anguloActual / ANGULOS.length}
-                angulosHechos={anguloActual}
+                progreso={anguloSeguro / ANGULOS.length}
+                angulosHechos={anguloSeguro}
                 angulosTotal={ANGULOS.length}
                 calidad={calidad}
               >
