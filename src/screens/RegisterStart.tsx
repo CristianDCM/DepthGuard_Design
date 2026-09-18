@@ -17,6 +17,7 @@ import { motion } from "motion/react";
 import WebRTCPlayer from "../components/WebRTCPlayer";
 import BiometricFrame, { type EstadoMarco, type Pose } from "../components/BiometricFrame";
 import { leerCalidad, consejoPrioritario, type CalidadCaptura } from "../lib/calidadCaptura";
+import { traducirError, type ErrorUi } from "../lib/errores";
 import {
   crearUsuario,
   insertarComandoRegistro,
@@ -64,7 +65,10 @@ export default function RegisterStart() {
   const [step, setStep] = useState<"form" | "consent" | "waiting_edge" | "scanning" | "success" | "error">("form");
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
+  /** Error de validacion del formulario: cabe en una linea bajo el campo. */
   const [error, setError] = useState("");
+  /** Error que ocupa la pantalla: lleva causa, accion y codigo de soporte. */
+  const [errorUi, setErrorUi] = useState<ErrorUi | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
 
@@ -158,9 +162,12 @@ export default function RegisterStart() {
       // Todo validado — pasar al consentimiento
       setConsentChecked(false);
       setStep("consent");
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error validando:", err);
-      setError(err.message ?? "Error de validación. Intente de nuevo.");
+      // Antes aqui salia el texto crudo del error, que podia ser
+      // "Failed to fetch" o "JWT expired": ninguno dice que hacer.
+      setErrorUi(traducirError(err, { contexto: "registro" }));
+      setStep("error");
     } finally {
       setIsSubmitting(false);
     }
@@ -191,10 +198,10 @@ export default function RegisterStart() {
       // 4. El monitoreo (Realtime + polling) lo arranca el efecto de
       //    `comandoId`, en cuanto React aplica el estado de arriba.
 
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error iniciando registro:", err);
-      setError(err.message ?? "Error al crear el usuario. Intente de nuevo.");
-      setStep("form");
+      setErrorUi(traducirError(err, { contexto: "registro" }));
+      setStep("error");
     } finally {
       setIsSubmitting(false);
     }
@@ -231,8 +238,14 @@ export default function RegisterStart() {
     if (comando.estado === "error") {
       _limpiarMonitoreo();
       vibrar([60, 40, 60]);
-      const msg = comando.resultado?.error ?? "El terminal no pudo completar la captura.";
-      setError(msg);
+      // El edge manda su propio texto. Se conserva como detalle tecnico,
+      // pero el titular y la accion los pone la aplicacion.
+      const detalle = typeof comando.resultado?.error === "string" ? comando.resultado.error : "";
+      setErrorUi({
+        ...traducirError(detalle, { contexto: "registro" }),
+        titulo: "No se pudo completar la captura",
+        cuerpo: detalle || "El terminal interrumpió el escaneo. Vuelva a intentarlo con la persona frente a la cámara.",
+      });
       setStep("error");
     }
     if (comando.estado === "cancelado") {
@@ -675,26 +688,34 @@ export default function RegisterStart() {
         )}
 
         {/* ============ ERROR ============ */}
-        {step === "error" && (
+        {step === "error" && errorUi && (
           <div className="px-2 pb-10 space-y-8">
             <div className="flex flex-col items-center text-center space-y-4">
-              <div className="relative">
-                <div className="absolute inset-0 bg-dg-error/20 blur-xl rounded-full" />
-                <AlertTriangle className="w-16 h-16 text-dg-error relative z-10" />
-              </div>
+              <AlertTriangle className="h-14 w-14 text-dg-error" aria-hidden="true" />
               <div>
-                <h2 className="text-xl font-bold text-dg-text leading-tight headline">Error en el Registro</h2>
-                <p className="text-dg-text-muted text-sm mt-1">{error}</p>
+                <h2 className="text-xl font-bold text-dg-text leading-tight headline">
+                  {errorUi.titulo}
+                </h2>
+                <p className="mx-auto mt-2 max-w-sm text-sm text-dg-text-secondary">
+                  {errorUi.cuerpo}
+                </p>
               </div>
             </div>
 
             <div className="flex flex-col gap-3">
-              <button 
-                onClick={() => { setStep("form"); setError(""); }}
-                className="btn-primary w-full h-14 flex items-center justify-center gap-2"
-              >
-                Intentar de Nuevo
-              </button>
+              {errorUi.acciones.map((accion) => (
+                <button
+                  key={accion.etiqueta}
+                  onClick={() =>
+                    accion.tipo === "navegar" && accion.destino
+                      ? navigate(accion.destino)
+                      : (setStep("form"), setErrorUi(null), setError(""))
+                  }
+                  className={`w-full h-14 ${accion.tipo === "navegar" ? "btn-secondary" : "btn-primary"}`}
+                >
+                  {accion.etiqueta}
+                </button>
+              ))}
               <button 
                 onClick={() => navigate("/users")}
                 className="btn-secondary w-full h-14"
@@ -702,6 +723,12 @@ export default function RegisterStart() {
                 Volver a Usuarios
               </button>
             </div>
+
+            {/* Codigo corto y copiable: lo unico tecnico que ve el usuario,
+                y solo porque soporte lo necesita para reproducir el caso. */}
+            <p className="text-center text-2xs text-dg-text-muted">
+              Código de error: <span className="font-mono tabular">{errorUi.codigo}</span>
+            </p>
           </div>
         )}
 

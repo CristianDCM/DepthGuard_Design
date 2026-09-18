@@ -52,6 +52,16 @@ export default function EventDetail() {
   const metricas = evento.metricas_json;
   const confianzaPct = evento.confianza != null ? Math.round(evento.confianza * 100) : null;
   const headerTitle = isFraud ? "Detalle de Fraude" : "Detalle del Evento";
+  /*
+   * Descripcion de la evidencia para lectores de pantalla. El alt anterior
+   * era la palabra "Captura", que en la unica imagen forense del sistema no
+   * dice absolutamente nada de lo que hay en ella.
+   */
+  const estadoTexto = isFraud
+    ? "intento de suplantación"
+    : isUnknown
+      ? "persona no registrada"
+      : "acceso permitido";
   const timestamp = new Date(evento.timestamp).toLocaleString("es", { dateStyle: "short", timeStyle: "medium", hour12: true });
 
   // ============================================
@@ -154,7 +164,7 @@ export default function EventDetail() {
                 <img 
                   className={`w-full h-full object-cover opacity-80 ${!isAuthorized ? 'grayscale' : ''}`} 
                   src={evento.foto_url} 
-                  alt="Captura"
+                  alt={`Captura del momento del evento: ${estadoTexto}${evento.nombre ? `, ${evento.nombre}` : ""}, ${timestamp}`}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-dg-bg text-dg-text-muted">

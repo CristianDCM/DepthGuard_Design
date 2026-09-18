@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, CheckCircle, AlertTriangle, HelpCircle, ChevronRight, History as HistoryIcon, Download, Calendar, X } from "lucide-react";
+import { Search, SearchX, CheckCircle, AlertTriangle, HelpCircle, ChevronRight, History as HistoryIcon, Download, Calendar, X } from "lucide-react";
 import { motion } from "motion/react";
 import Navigation from "../components/Navigation";
 import { getHistorialPaginado, type Evento, type EstadoEvento } from "../lib/supabase";
@@ -18,6 +18,8 @@ export default function History() {
   const limit = 50;
 
   const hasFechaFilter = fechaDesde !== "" || fechaHasta !== "";
+  /** Hay algo estrechando la lista: el vacio puede ser culpa del filtro. */
+  const hayFiltros = hasFechaFilter || searchQuery !== "" || activeFilter !== "Todos";
 
   useEffect(() => {
     async function cargarInicial() {
@@ -183,8 +185,29 @@ export default function History() {
             <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
           </div>
         ) : events.length === 0 ? (
-          <div className="text-center py-12 text-dg-text-muted">
-            <p className="text-sm">No se encontraron eventos que coincidan</p>
+          /*
+            Antes esto era una linea de texto suelta. Con filtros puestos, la
+            pantalla vacia y ninguna salida, parece que el sistema no ha
+            registrado nada, cuando lo que pasa es que el filtro no deja ver.
+          */
+          <div className="flex flex-col items-center gap-3 py-16 text-center">
+            <SearchX className="h-10 w-10 text-dg-text-off" aria-hidden="true" />
+            <div>
+              <p className="text-sm font-semibold text-dg-text">Ningún evento coincide</p>
+              <p className="mt-1 text-xs text-dg-text-muted">
+                {hayFiltros
+                  ? "Pruebe a ampliar el rango de fechas o a quitar algún filtro."
+                  : "Todavía no se ha registrado ningún acceso."}
+              </p>
+            </div>
+            {hayFiltros && (
+              <button
+                onClick={() => { setSearchQuery(""); setFechaDesde(""); setFechaHasta(""); setActiveFilter("Todos"); }}
+                className="btn-secondary mt-1 px-5 py-2 text-sm"
+              >
+                Quitar filtros
+              </button>
+            )}
           </div>
         ) : (
           (Object.entries(groupedEvents) as [string, Evento[]][]).map(([dateLabel, dateEvents]) => (

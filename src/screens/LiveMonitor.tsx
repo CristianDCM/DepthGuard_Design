@@ -18,6 +18,9 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import Navigation from "../components/Navigation";
 import WebRTCPlayer from "../components/WebRTCPlayer";
+import IndicadorFrescura, { useFrescura, ContenidoFrescura } from "../components/IndicadorFrescura";
+import AlertaFraude from "../components/AlertaFraude";
+import { sonarAlerta } from "../lib/alertaSonora";
 import {
   supabase,
   getEventosPorCamara,
@@ -30,6 +33,9 @@ import {
   type CameraType,
   type CamaraEstado,
 } from "../lib/supabase";
+
+/** Cada cuanto se pregunta por el estado del terminal. */
+const SONDEO_HEARTBEAT_MS = 30_000;
 
 // ============================================
 // Tipos locales
@@ -59,6 +65,14 @@ export default function LiveMonitor() {
     eventosRecientes: [],
   });
   const [loading, setLoading] = useState(true);
+  /**
+   * Marca del ultimo sondeo CORRECTO del heartbeat. No la del ultimo
+   * intento: lo que importa no es cuando preguntamos, sino cuando supimos
+   * algo cierto por ultima vez.
+   */
+  const [ultimoExito, setUltimoExito] = useState<number | null>(null);
+  /** Fraudes que nadie ha reconocido todavia, del mas reciente al mas viejo. */
+  const [fraudesPendientes, setFraudesPendientes] = useState<Evento[]>([]);
 
   // Cargar datos iniciales — detecta la primera cámara del heartbeat
   useEffect(() => {
@@ -68,6 +82,7 @@ export default function LiveMonitor() {
 
         if (estadoData) {
           setEstado(estadoData);
+          setUltimoExito(Date.now());
 
           // Detectar la cámara conectada (la que esté activa)
           const cam = estadoData.camaras.find(c => c.activa) || estadoData.camaras[0];
@@ -102,13 +117,24 @@ export default function LiveMonitor() {
         (payload) => {
           const nuevoEvento = payload.new as Evento;
 
+          if (nuevoEvento.estado === "FRAUDE") {
+            setFraudesPendientes((prev) => [nuevoEvento, ...prev].slice(0, 20));
+            sonarAlerta();
+          }
+
           setPanel((prev) => {
             // Solo procesar eventos de la cámara que estamos mostrando
             if (nuevoEvento.camera_id !== prev.cameraId) return prev;
 
             const isFraude = nuevoEvento.estado === "FRAUDE";
             const timeSinceLastFocus = Date.now() - prev.lastFocusTime;
-            
+
+            /*
+             * La tarjeta de veredicto no cambia si han pasado menos de 5 s
+             * desde el ultimo cambio, para que no parpadee con una cola de
+             * gente. El evento NO se pierde: sigue entrando entero en el log
+             * de la derecha, que es de donde sale el recuento de abajo.
+             */
             const updateFocus = isFraude || timeSinceLastFocus > 5000;
             const newUltimoEvento = updateFocus ? nuevoEvento : prev.ultimoEvento;
             const newLastFocusTime = updateFocus ? Date.now() : prev.lastFocusTime;
@@ -129,13 +155,14 @@ export default function LiveMonitor() {
     };
   }, []);
 
-  // Polling del heartbeat cada 30s
+  // Sondeo del heartbeat cada 30s
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
         const estadoData = await getEstadoSistema();
         if (estadoData) {
           setEstado(estadoData);
+          setUltimoExito(Date.now());
           // Actualizar tipo de cámara si cambió, priorizando la activa
           const cam = estadoData.camaras.find(c => c.activa) || estadoData.camaras[0];
           if (cam) {
@@ -147,13 +174,23 @@ export default function LiveMonitor() {
           }
         }
       } catch {
-        /* silenciar */
+        /*
+         * A proposito no se toca `ultimoExito`: el indicador de frescura
+         * envejece solo y acaba avisando. Antes este catch vacio dejaba la
+         * pildora en verde diciendo "EN LINEA" sobre datos muertos.
+         */
       }
-    }, 30_000);
+    }, SONDEO_HEARTBEAT_MS);
     return () => clearInterval(interval);
   }, []);
 
-  const edgeOnline = isEdgeOnline(estado?.ultimo_heartbeat ?? null);
+  const frescura = useFrescura(ultimoExito, SONDEO_HEARTBEAT_MS);
+  /*
+   * Con el dato obsoleto NO afirmamos que el terminal este en linea: lo
+   * unico que sabemos es que hace rato que no lo sabemos. Antes la pildora
+   * seguia en verde indefinidamente aunque el backend estuviera caido.
+   */
+  const edgeOnline = frescura.atenuar ? false : isEdgeOnline(estado?.ultimo_heartbeat ?? null);
   const cam = (estado?.camaras ?? []).find(c => c.activa) || (estado?.camaras ?? [])[0];
   const camaraActiva = cam
     ? isCamaraActiva(cam, estado?.ultimo_heartbeat ?? null)
@@ -190,11 +227,20 @@ export default function LiveMonitor() {
                 edgeOnline ? "text-dg-success" : "text-dg-error"
               }`}
             >
-              {edgeOnline ? "Online" : "Offline"}
+              {frescura.atenuar ? "Sin datos" : edgeOnline ? "En línea" : "Desconectado"}
             </span>
           </div>
         </div>
+        {/* Frescura del dato: cuanto hace que lo de arriba es cierto. */}
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-end px-4 pb-2">
+          <IndicadorFrescura estado={frescura} />
+        </div>
       </header>
+
+      <AlertaFraude
+        eventos={fraudesPendientes}
+        onReconocer={() => setFraudesPendientes([])}
+      />
 
       <main className="flex-1 px-4 py-6 max-w-7xl mx-auto w-full">
         {loading ? (
@@ -202,6 +248,7 @@ export default function LiveMonitor() {
             <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
+          <ContenidoFrescura estado={frescura}>
           <CameraPanel
             data={panel}
             camaraActiva={camaraActiva}
@@ -216,6 +263,7 @@ export default function LiveMonitor() {
               }));
             }}
           />
+          </ContenidoFrescura>
         )}
       </main>
 
@@ -482,8 +530,11 @@ function CameraPanel({
         <div className="divide-y divide-dg-border max-h-[450px] overflow-y-auto custom-scrollbar">
           <AnimatePresence mode="popLayout">
             {eventosRecientes.length === 0 ? (
-              <div className="p-6 text-center text-dg-text-muted text-xs">
-                Sin eventos registrados
+              <div className="flex flex-col items-center gap-2 p-8 text-center">
+                <Activity className="h-6 w-6 text-dg-text-off" aria-hidden="true" />
+                <p className="text-xs text-dg-text-muted">
+                  Sin actividad todavía.<br />Los accesos aparecerán aquí en cuanto ocurran.
+                </p>
               </div>
             ) : (
               eventosRecientes.map((evento) => (
