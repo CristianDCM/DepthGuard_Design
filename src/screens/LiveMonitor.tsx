@@ -19,7 +19,6 @@ import { motion, AnimatePresence } from "motion/react";
 import Navigation from "../components/Navigation";
 import WebRTCPlayer from "../components/WebRTCPlayer";
 import IndicadorFrescura, { useFrescura, ContenidoFrescura } from "../components/IndicadorFrescura";
-import AlertaFraude from "../components/AlertaFraude";
 import { sonarAlerta } from "../lib/alertaSonora";
 import {
   supabase,
@@ -71,8 +70,6 @@ export default function LiveMonitor() {
    * algo cierto por ultima vez.
    */
   const [ultimoExito, setUltimoExito] = useState<number | null>(null);
-  /** Fraudes que nadie ha reconocido todavia, del mas reciente al mas viejo. */
-  const [fraudesPendientes, setFraudesPendientes] = useState<Evento[]>([]);
 
   // Cargar datos iniciales — detecta la primera cámara del heartbeat
   useEffect(() => {
@@ -117,10 +114,9 @@ export default function LiveMonitor() {
         (payload) => {
           const nuevoEvento = payload.new as Evento;
 
-          if (nuevoEvento.estado === "FRAUDE") {
-            setFraudesPendientes((prev) => [nuevoEvento, ...prev].slice(0, 20));
-            sonarAlerta();
-          }
+          // Sin banda superpuesta: el aviso sonoro (opcional, se activa en
+          // Ajustes) y el resalte de la tarjeta bastan.
+          if (nuevoEvento.estado === "FRAUDE") sonarAlerta();
 
           setPanel((prev) => {
             // Solo procesar eventos de la cámara que estamos mostrando
@@ -231,16 +227,17 @@ export default function LiveMonitor() {
             </span>
           </div>
         </div>
-        {/* Frescura del dato: cuanto hace que lo de arriba es cierto. */}
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-end px-4 pb-2">
-          <IndicadorFrescura estado={frescura} />
-        </div>
+        {/*
+          Frescura del dato. Solo se pinta cuando el dato deja de estar
+          fresco: con todo al dia repetia en "En directo" lo que la pildora
+          de al lado ya dice con "En linea".
+        */}
+        {frescura.nivel !== "fresco" && (
+          <div className="mx-auto flex w-full max-w-7xl items-center justify-end px-4 pb-2">
+            <IndicadorFrescura estado={frescura} />
+          </div>
+        )}
       </header>
-
-      <AlertaFraude
-        eventos={fraudesPendientes}
-        onReconocer={() => setFraudesPendientes([])}
-      />
 
       <main id="contenido" className="flex-1 px-4 py-6 max-w-7xl mx-auto w-full">
         {loading ? (
@@ -362,106 +359,82 @@ function CameraPanel({
         {/* Columna Izquierda (o única si es compact) */}
         <div className={layout === "expanded" ? "lg:col-span-8 space-y-4" : "space-y-4"}>
 
+      {/* Preview en vivo. El veredicto vive en UNA sola tarjeta, debajo. */}
+      {camaraActiva && !webrtcFailed ? (
+        <WebRTCPlayer
+          cameraId={cameraId}
+          edgeOnline={edgeOnline}
+          onFallback={() => setWebrtcFailed(true)}
+        />
+      ) : (
+        <LiveSnapshotPreview
+          camaraActiva={camaraActiva}
+          cameraId={cameraId}
+          previewUrl={previewUrl}
+        />
+      )}
+
       {/*
-        Preview en vivo con el veredicto SUPERPUESTO.
+        Tarjeta de estado: el veredicto actual.
 
-        Hasta ahora el resultado aparecia en una tarjeta suelta debajo del
-        video, sin ninguna relacion visual con la imagen. Con dos personas en
-        el encuadre, el operador no podia saber a cual se referia un
-        "FRAUDE". La banda de abajo ata las dos cosas.
+        Una sola fila de cabecera con el estado y la confianza a la derecha,
+        y debajo los detalles solo cuando existen. Antes el titulo iba a 28px
+        con la etiqueta encima, el sujeto en una caja propia y la hora en su
+        propio renglon separado: cuatro bloques apilados para tres datos.
       */}
-      <div className="relative">
-        {camaraActiva && !webrtcFailed ? (
-          <WebRTCPlayer
-            cameraId={cameraId}
-            edgeOnline={edgeOnline}
-            onFallback={() => setWebrtcFailed(true)}
+      <div className={`cyber-card ${statusConfig.borderClass}`}>
+        <div className="flex items-center gap-3 p-4">
+          <statusConfig.icon
+            className="h-6 w-6 shrink-0"
+            style={{ color: statusConfig.accentColor }}
+            aria-hidden="true"
           />
-        ) : (
-          <LiveSnapshotPreview
-            camaraActiva={camaraActiva}
-            cameraId={cameraId}
-            previewUrl={previewUrl}
-          />
-        )}
-
-        {ultimoEvento && camaraActiva && (
-          <VeredictoSobreVideo evento={ultimoEvento} config={statusConfig} />
-        )}
-      </div>
-
-      {/* Status Card — el evento actual */}
-      <div
-        className={`cyber-card relative overflow-hidden ${
-          statusConfig.borderClass
-        }`}
-      >
-        {/* Glow effect for alerts */}
-        {ultimoEvento?.estado === "FRAUDE" && (
-          <div className="absolute inset-0 bg-dg-error/5 animate-pulse pointer-events-none" />
-        )}
-
-        <div className="p-5 relative z-10">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2" style={{ color: statusConfig.accentColor }}>
-                <statusConfig.icon className="w-4 h-4" />
-                <span className="text-2xs font-bold uppercase">
-                  Estatus de Seguridad
-                </span>
-              </div>
-              <h3 className="headline text-2xl font-bold text-dg-text">
-                {statusConfig.title}
-              </h3>
-              {ultimoEvento?.nombre && (
-                <div className="flex items-center gap-3 mt-3 bg-dg-bg p-3 rounded-dg border border-dg-border">
-                  <div className="w-8 h-8 rounded-full bg-dg-input border border-dg-border flex items-center justify-center shrink-0">
-                    <User className="w-4 h-4 text-dg-text-secondary" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <div className="text-2xs text-dg-text-muted uppercase font-bold">
-                      Sujeto
-                    </div>
-                    <div className="text-sm font-bold text-dg-text">
-                      {ultimoEvento.nombre}
-                    </div>
-                  </div>
-                </div>
-              )}
-              {ultimoEvento?.motivo && (
-                <p className="text-xs text-dg-error/80 mt-1 font-medium">
-                  {ultimoEvento.motivo}
-                </p>
-              )}
-            </div>
-            {/* Confidence Badge */}
-            {ultimoEvento?.confianza != null && (
-              <div className="bg-dg-bg px-3 py-2 rounded-dg border border-dg-border flex flex-col items-end shrink-0">
-                <span className="text-2xs text-dg-text-muted font-bold uppercase">
-                  Confianza
-                </span>
-                <span
-                  className="text-2xl headline font-bold tabular"
-                  style={{ color: statusConfig.accentColor }}
-                >
-                  {Math.round(ultimoEvento.confianza * 100)}%
-                </span>
-              </div>
-            )}
+          <div className="min-w-0 flex-1">
+            <p className="text-2xs font-bold uppercase text-dg-text-muted">
+              Estatus de seguridad
+            </p>
+            <h3
+              className="headline truncate text-lg font-bold"
+              style={{ color: statusConfig.accentColor }}
+            >
+              {statusConfig.title}
+            </h3>
           </div>
-          {/* Timestamp */}
-          {ultimoEvento && (
-            <div className="mt-3 text-2xs text-dg-text-muted font-medium tabular border-t border-dg-border/50 pt-2 text-right">
+          {ultimoEvento?.confianza != null && (
+            <div className="shrink-0 text-right">
+              <p className="text-2xs font-bold uppercase text-dg-text-muted">Confianza</p>
+              <p
+                className="headline text-xl font-bold tabular"
+                style={{ color: statusConfig.accentColor }}
+              >
+                {Math.round(ultimoEvento.confianza * 100)}%
+              </p>
+            </div>
+          )}
+        </div>
+
+        {ultimoEvento && (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-dg-border/60 px-4 py-2.5 text-xs">
+            {ultimoEvento.nombre && (
+              <span className="flex items-center gap-1.5 text-dg-text">
+                <User className="h-3.5 w-3.5 text-dg-text-muted" aria-hidden="true" />
+                {ultimoEvento.nombre}
+              </span>
+            )}
+            {ultimoEvento.motivo && (
+              <span className="min-w-0 truncate text-dg-error">{ultimoEvento.motivo}</span>
+            )}
+            <span className="ml-auto shrink-0 text-dg-text-muted tabular">
               {new Date(ultimoEvento.timestamp).toLocaleString("es", {
                 day: "2-digit",
                 month: "short",
                 hour: "2-digit",
                 minute: "2-digit",
-                hour12: true
+                hour12: true,
               })}
-            </div>
-          )}
-        </div>
+            </span>
+          </div>
+        )}
       </div>
       </div>
 
@@ -580,51 +553,6 @@ function CameraPanel({
 // ============================================
 // Sub-componentes
 // ============================================
-
-/**
- * Banda de veredicto anclada al pie del video. Repite el estado que ya
- * muestra la tarjeta de abajo, a proposito: lo que aporta no es el dato sino
- * la union entre el rostro que se ve y el juicio que el sistema ha emitido.
- */
-function VeredictoSobreVideo({
-  evento,
-  config,
-}: {
-  evento: Evento;
-  config: ReturnType<typeof getStatusConfig>;
-}) {
-  const esFraude = evento.estado === "FRAUDE";
-  return (
-    <motion.div
-      key={evento.id}
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="pointer-events-none absolute inset-x-0 bottom-0 z-20 p-3"
-    >
-      <div
-        className="flex items-center gap-2.5 rounded-dg border bg-dg-bg/85 px-3 py-2 backdrop-blur-md"
-        style={{ borderColor: config.accentColor }}
-      >
-        <config.icon className="h-5 w-5 shrink-0" style={{ color: config.accentColor }} aria-hidden="true" />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-bold" style={{ color: config.accentColor }}>
-            {config.title}
-          </p>
-          {(evento.nombre || evento.motivo) && (
-            <p className="truncate text-2xs text-dg-text-secondary">
-              {evento.nombre ?? evento.motivo}
-            </p>
-          )}
-        </div>
-        {evento.confianza != null && !esFraude && (
-          <span className="shrink-0 text-sm font-bold tabular" style={{ color: config.accentColor }}>
-            {Math.round(evento.confianza * 100)}%
-          </span>
-        )}
-      </div>
-    </motion.div>
-  );
-}
 
 function MiniEventRow({ evento, onClick }: { key?: React.Key; evento: Evento; onClick?: () => void }) {
   const config = getEventMiniConfig(evento);
@@ -766,22 +694,6 @@ function formatTime(timestamp: string) {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-    hour12: true
-  });
-}
-
-function formatRelativeTime(timestamp: string) {
-  const diff = Date.now() - new Date(timestamp).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Hace un momento";
-  if (mins < 60) return `Hace ${mins} min`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `Hace ${hours}h`;
-  return new Date(timestamp).toLocaleDateString("es", {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
     hour12: true
   });
 }
