@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
 import {
-  Video,
   Activity,
-  Cloud,
   User,
   Shield,
   ShieldAlert,
   ShieldQuestion,
-  Server,
   CheckCircle,
   AlertTriangle,
   HelpCircle,
@@ -20,6 +17,7 @@ import Navigation from "../components/Navigation";
 import WebRTCPlayer from "../components/WebRTCPlayer";
 import IndicadorFrescura, { useFrescura, ContenidoFrescura } from "../components/IndicadorFrescura";
 import { sonarAlerta } from "../lib/alertaSonora";
+import { usePantallaFija } from "../lib/usePantallaFija";
 import {
   supabase,
   getEventosPorCamara,
@@ -30,7 +28,6 @@ import {
   type EstadoSistema,
   type CameraId,
   type CameraType,
-  type CamaraEstado,
 } from "../lib/supabase";
 
 /** Cada cuanto se pregunta por el estado del terminal. */
@@ -64,6 +61,8 @@ export default function LiveMonitor() {
     eventosRecientes: [],
   });
   const [loading, setLoading] = useState(true);
+  // Lo que se vigila cabe de una vez, sin desplazarse.
+  usePantallaFija();
   /**
    * Marca del ultimo sondeo CORRECTO del heartbeat. No la del ultimo
    * intento: lo que importa no es cuando preguntamos, sino cuando supimos
@@ -193,54 +192,38 @@ export default function LiveMonitor() {
     : false;
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col bg-dg-bg">
+    <div className="h-full pb-16 lg:pb-0 lg:pt-16 flex flex-col overflow-hidden bg-dg-bg">
       {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
           estas. El <h1> se conserva para lectores de pantalla. */}
       <h1 className="sr-only">Monitor en vivo</h1>
 
-      <main id="contenido" className="flex-1 px-4 py-6 max-w-7xl mx-auto w-full">
+      <main
+        id="contenido"
+        // En escritorio la pantalla ocupa el alto libre exacto y no crece:
+        // lo que se vigila cabe de una vez, sin desplazarse. En movil sigue
+        // desplazandose, que ahi apilar es lo correcto.
+        className="flex min-h-0 flex-1 flex-col px-4 py-4 max-w-7xl mx-auto w-full overflow-y-auto lg:overflow-hidden custom-scrollbar"
+      >
         {/*
-          Estado del terminal, antes en la cabecera. Baja al contenido, sobre
-          el propio video, que es lo que describe: si el terminal esta caido,
-          lo que hay debajo no es de fiar.
-        */}
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <div
-            className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 ${
-              edgeOnline
-                ? "bg-dg-success/10 border-dg-success/20"
-                : "bg-dg-error/10 border-dg-error/20"
-            }`}
-          >
-            <Server className={`h-3 w-3 ${edgeOnline ? "text-dg-success" : "text-dg-error"}`} aria-hidden="true" />
-            <span
-              aria-hidden="true"
-              className={`h-1.5 w-1.5 rounded-full ${
-                edgeOnline
-                  ? "bg-dg-success shadow-[0_0_6px_var(--color-dg-success)] animate-pulse"
-                  : "bg-dg-error"
-              }`}
-            />
-            <span
-              className={`text-2xs font-bold uppercase ${
-                edgeOnline ? "text-dg-success" : "text-dg-error"
-              }`}
-            >
-              {frescura.atenuar ? "Sin datos" : edgeOnline ? "En línea" : "Desconectado"}
-            </span>
-          </div>
+          El estado del terminal ya lo dice la fila de la camara con
+          "Activa / Inactiva", que sale del mismo latido. La pildora aparte
+          repetia el dato y gastaba una franja de alto.
 
-          {/* Solo cuando el dato deja de estar fresco: con todo al dia
-              repetiria lo que la pildora de al lado ya dice. */}
-          {frescura.nivel !== "fresco" && <IndicadorFrescura estado={frescura} />}
-        </div>
+          El aviso de frescura si se queda, pero solo aparece cuando el dato
+          deja de ser de fiar, que es justo lo que ninguna otra cosa dice.
+        */}
+        {frescura.nivel !== "fresco" && (
+          <div className="mb-3 flex justify-end">
+            <IndicadorFrescura estado={frescura} />
+          </div>
+        )}
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
-          <ContenidoFrescura estado={frescura}>
+          <ContenidoFrescura estado={frescura} className="lg:flex-1 lg:min-h-0">
           <CameraPanel
             data={panel}
             camaraActiva={camaraActiva}
@@ -298,7 +281,7 @@ function CameraPanel({
       transition={{
         delay: cameraId === "entrada_principal" ? 0 : 0.15,
       }}
-      className="space-y-4"
+      className="space-y-3 lg:flex lg:h-full lg:flex-col lg:min-h-0"
     >
       {/* Camera Header - Siempre arriba ocupando todo el ancho */}
       <div className="flex items-center justify-between">
@@ -350,11 +333,14 @@ function CameraPanel({
       </div>
 
       {/* Grid del contenido principal */}
-      <div className={layout === "expanded" ? "grid grid-cols-1 lg:grid-cols-12 gap-6 items-start" : "space-y-4"}>
+      <div className={layout === "expanded" ? "grid grid-cols-1 gap-4 lg:grid-cols-12 lg:flex-1 lg:min-h-0" : "space-y-4"}>
         {/* Columna Izquierda (o única si es compact) */}
-        <div className={layout === "expanded" ? "lg:col-span-8 space-y-4" : "space-y-4"}>
+        <div className={layout === "expanded" ? "lg:col-span-8 space-y-3 lg:flex lg:flex-col lg:min-h-0" : "space-y-4"}>
 
-      {/* Preview en vivo. El veredicto vive en UNA sola tarjeta, debajo. */}
+      {/* Preview en vivo. El veredicto vive en UNA sola tarjeta, debajo.
+          `min-h-0` deja que encoja dentro de la columna en lugar de
+          desbordarla, que es lo que obligaba a desplazarse. */}
+      <div className="lg:min-h-0 lg:flex-1 lg:[&>div]:h-full lg:[&_video]:h-full lg:[&_img]:h-full">
       {camaraActiva && !webrtcFailed ? (
         <WebRTCPlayer
           cameraId={cameraId}
@@ -368,6 +354,7 @@ function CameraPanel({
           previewUrl={previewUrl}
         />
       )}
+      </div>
 
       {/*
         Tarjeta de estado: el veredicto actual.
@@ -434,7 +421,7 @@ function CameraPanel({
       </div>
 
       {/* Columna Derecha (o apilada si es compact) */}
-      <div className={layout === "expanded" ? "lg:col-span-4 space-y-4" : "space-y-4"}>
+      <div className={layout === "expanded" ? "lg:col-span-4 space-y-3 lg:min-h-0 lg:overflow-y-auto custom-scrollbar" : "space-y-4"}>
       {/* Anti-spoofing Metrics (solo si hay evento con métricas) */}
       {ultimoEvento?.metricas_json && (
         <div className="cyber-card p-4">
@@ -495,7 +482,7 @@ function CameraPanel({
             {eventosRecientes.length} registros
           </span>
         </div>
-        <div className="divide-y divide-dg-border max-h-[450px] overflow-y-auto custom-scrollbar">
+        <div className="divide-y divide-dg-border max-h-[45vh] lg:max-h-[38vh] overflow-y-auto custom-scrollbar">
           <AnimatePresence mode="popLayout">
             {eventosRecientes.length === 0 ? (
               <div className="flex flex-col items-center gap-2 p-8 text-center">
@@ -517,28 +504,6 @@ function CameraPanel({
         </div>
       </div>
 
-      {/* Connection footer */}
-      <div className="flex items-center justify-between cyber-card p-4">
-        <div className="flex items-center gap-2">
-          <div className="relative w-6 h-6 flex items-center justify-center bg-dg-success/10 rounded-dg-sm">
-            <Cloud className="w-3.5 h-3.5 text-dg-success" aria-hidden="true" />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-dg-success rounded-full border border-dg-card animate-pulse" />
-          </div>
-          <div>
-            <div className="text-2xs font-bold text-dg-text-muted uppercase">
-              Supabase Realtime
-            </div>
-            <div className="text-2xs font-bold text-dg-success flex items-center gap-1">
-              <span className="w-1 h-1 rounded-full bg-dg-success" aria-hidden="true" />
-              Suscrito
-            </div>
-          </div>
-        </div>
-        <div className="text-2xs px-2 py-1 rounded-dg-sm bg-white/5 font-mono text-dg-text-muted">
-          {cameraId === "entrada_principal" ? "CAM-01" : "CAM-02"} ·{" "}
-          {cameraType}
-        </div>
-      </div>
       </div>
       </div>
     </motion.div>

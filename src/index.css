@@ -283,6 +283,18 @@
 
 @layer utilities {
   /*
+   * Lienzo fijo: el documento no se desplaza y ruedan los contenedores de
+   * dentro. Lo activa `usePantallaFija` en las pantallas que deben caber de
+   * una vez (monitor en vivo, historial).
+   */
+  .pantalla-fija,
+  .pantalla-fija body {
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  /*
    * Area segura de iOS (notch e indicador de home).
    * Requiere viewport-fit=cover en el <meta name="viewport"> de index.html,
    * si no env() devuelve siempre 0 y la barra inferior queda tapada.

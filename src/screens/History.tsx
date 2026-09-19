@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import Navigation from "../components/Navigation";
 import { getHistorialPaginado, type Evento, type EstadoEvento } from "../lib/supabase";
 import { exportToCSV } from "../lib/exportUtils";
+import { usePantallaFija } from "../lib/usePantallaFija";
 
 export default function History() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -13,6 +14,8 @@ export default function History() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  // La lista rueda por dentro; la pagina no crece con cada "Cargar mas".
+  usePantallaFija();
   const [fechaDesde, setFechaDesde] = useState("");
   const [fechaHasta, setFechaHasta] = useState("");
   const limit = 50;
@@ -116,12 +119,24 @@ export default function History() {
   }, {});
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col">
+    <div className="h-full pb-16 lg:pb-0 lg:pt-16 flex flex-col overflow-hidden">
       {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
           estas. El <h1> se conserva para lectores de pantalla. */}
       <h1 className="sr-only">Historial de accesos</h1>
 
-      <main id="contenido" className="flex-1 px-4 py-4 space-y-3 max-w-7xl mx-auto w-full">
+      <main
+        id="contenido"
+        /*
+          Alto fijo, no crecedero.
+
+          Antes cada "Cargar mas eventos" alargaba la pagina: con doscientos
+          registros, la barra de desplazamiento del navegador se volvia
+          inservible y los filtros quedaban a kilometros del final. Ahora la
+          pantalla ocupa el alto libre y es LA LISTA la que se desplaza por
+          dentro, con los filtros siempre a la vista.
+        */
+        className="flex min-h-0 flex-1 flex-col gap-3 px-4 py-4 max-w-7xl mx-auto w-full overflow-hidden"
+      >
         {/*
           Barra de herramientas. Los filtros y la exportacion vivian en la
           cabecera; al quitarla bajan aqui, justo encima de lo que filtran.
@@ -227,7 +242,7 @@ export default function History() {
             )}
           </div>
         ) : (
-          <>
+          <div className="flex min-h-0 flex-1 flex-col">
           {/*
             Tabla real a partir de 1024px.
 
@@ -237,7 +252,7 @@ export default function History() {
             monitor ancho desperdicia el espacio que hace util la comparacion.
             Debajo de 1024px las tarjetas siguen siendo lo correcto.
           */}
-          <div className="hidden lg:block overflow-auto max-h-[calc(100vh-15rem)] rounded-dg border border-dg-border custom-scrollbar">
+          <div className="hidden lg:block overflow-auto rounded-dg border border-dg-border custom-scrollbar lg:min-h-0 lg:flex-1">
             <table className="w-full border-collapse text-sm">
               <caption className="sr-only">
                 Historial de accesos. {events.length} eventos cargados.
@@ -296,7 +311,7 @@ export default function History() {
             </table>
           </div>
 
-          <div className="lg:hidden">
+          <div className="lg:hidden min-h-0 flex-1 overflow-y-auto custom-scrollbar pb-2">
           {(Object.entries(groupedEvents) as [string, Evento[]][]).map(([dateLabel, dateEvents]) => (
             <div key={dateLabel}>
               <div className="text-xs font-bold text-dg-text-muted uppercase mb-2 mt-4">{dateLabel}</div>
@@ -332,11 +347,11 @@ export default function History() {
             </div>
           ))}
           </div>
-          </>
+          </div>
         )}
 
         {!loading && hasMore && events.length > 0 && (
-          <div className="pt-4 pb-8 flex justify-center">
+          <div className="flex shrink-0 justify-center pt-1 pb-2">
             <button 
               onClick={cargarMas}
               className="px-6 py-2 rounded-full border border-dg-action-text/50 text-dg-action-text font-semibold text-sm hover:bg-dg-action-text/10 transition-colors"
