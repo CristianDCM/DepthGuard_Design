@@ -63,13 +63,20 @@ export default function IndicadorFrescura({
 export function ContenidoFrescura({
   estado,
   children,
+  className = "",
 }: {
   estado: EstadoFrescura;
   children: React.ReactNode;
+  /** Permite que el envoltorio herede el alto de su contenedor. */
+  className?: string;
 }) {
   return (
-    <div className="relative">
-      <div className={estado.atenuar ? "pointer-events-none opacity-40 transition-opacity" : "transition-opacity"}>
+    <div className={`relative flex flex-col ${className}`}>
+      <div
+        className={`flex min-h-0 flex-1 flex-col transition-opacity ${
+          estado.atenuar ? "pointer-events-none opacity-40" : ""
+        }`}
+      >
         {children}
       </div>
     </div>

@@ -74,11 +74,8 @@ function BarraSuperior() {
       className="fixed inset-x-0 top-0 z-50 hidden h-16 border-b border-dg-border bg-dg-bg/90 backdrop-blur-md lg:block"
     >
       <div className="relative mx-auto flex h-full max-w-7xl items-center px-6">
-        <Link to="/dashboard" className="flex shrink-0 items-center gap-2.5 rounded-dg">
-          <img src="/logo.svg" alt="" aria-hidden="true" className="h-7 w-7 object-contain" />
-          <span className="headline text-base font-bold text-dg-text">
-            Depth<span className="text-dg-brand">Guard</span>
-          </span>
+        <Link to="/dashboard" aria-label="DepthGuard — ir al inicio" className="flex shrink-0 items-center rounded-dg">
+          <img src="/logo.svg" alt="" aria-hidden="true" className="h-8 w-8 object-contain" />
         </Link>
 
         {/*
