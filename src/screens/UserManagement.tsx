@@ -48,59 +48,53 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-0 lg:pl-60 flex flex-col">
-      <header className="sticky top-0 z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between px-4 py-4">
-            <div className="flex items-center gap-3">
-              <Users className="w-6 h-6 text-dg-text-secondary" aria-hidden="true" />
-              <h1 className="text-xl font-bold tracking-tight headline">Usuarios</h1>
-            </div>
-            <button 
-              onClick={() => navigate("/register/start")}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-dg bg-dg-action text-white text-sm font-semibold hover:bg-dg-action-hover active:scale-[0.98] transition-colors"
-            >
-              <Plus className="w-4 h-4" /> Registrar
-            </button>
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col">
+      {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
+          estas. El <h1> se conserva para lectores de pantalla. */}
+      <h1 className="sr-only">Usuarios registrados</h1>
+
+      <main id="contenido" className="flex-1 px-4 py-4 space-y-4 max-w-7xl mx-auto w-full">
+        {/* Buscador y alta, antes en la cabecera. */}
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-dg-text-muted w-4 h-4" aria-hidden="true" />
+            <input 
+              id="buscar-usuario"
+              type="search"
+              aria-label="Buscar usuario por nombre"
+              placeholder="Buscar usuario..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-dg-card border border-dg-border rounded-dg py-2.5 pl-10 pr-4 text-base focus:border-dg-focus transition-colors placeholder:text-dg-text-muted text-dg-text"
+            />
           </div>
-          
-          <div className="px-4 pb-4 space-y-4">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-dg-text-muted w-4 h-4" />
-              <input 
-                id="buscar-usuario"
-                type="search"
-                aria-label="Buscar usuario por nombre"
-                placeholder="Buscar usuario..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-dg-card border border-dg-border rounded-dg py-2.5 pl-10 pr-4 text-base focus:border-dg-focus transition-colors placeholder:text-dg-text-muted text-dg-text"
-              />
-            </div>
-            
-            <div className="bg-dg-card/50 border border-dg-border rounded-dg p-3 flex justify-around text-center max-w-2xl">
-              <div>
-                <p className="text-dg-text font-bold text-sm">{users.length}</p>
-                <p className="text-2xs text-dg-text-muted uppercase">Registrados</p>
-              </div>
-              <div className="w-[1px] bg-dg-border" />
-              <div>
-                <p className="text-dg-text font-bold text-sm">{totalAccesos}</p>
-                <p className="text-2xs text-dg-text-muted uppercase">Accesos</p>
-              </div>
-              <div className="w-[1px] bg-dg-border" />
-              <div>
-                <p className="text-dg-text font-bold text-sm flex items-center justify-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-dg-success animate-pulse" aria-hidden="true" /> {estadoCount.activos} / {estadoCount.inactivos}
-                </p>
-                <p className="text-2xs text-dg-text-muted uppercase">Activos / Inactivos</p>
-              </div>
-            </div>
+          <button 
+            onClick={() => navigate("/register/start")}
+            className="flex shrink-0 items-center gap-1.5 px-4 py-2.5 rounded-dg bg-dg-action text-white text-sm font-semibold hover:bg-dg-action-hover active:scale-[0.98] transition-colors"
+          >
+            <Plus className="w-4 h-4" aria-hidden="true" /> Registrar
+          </button>
+        </div>
+
+        <div className="bg-dg-card/50 border border-dg-border rounded-dg p-3 flex justify-around text-center max-w-2xl">
+          <div>
+            <p className="text-dg-text font-bold text-sm tabular">{users.length}</p>
+            <p className="text-2xs text-dg-text-muted uppercase">Registrados</p>
+          </div>
+          <div className="w-[1px] bg-dg-border" />
+          <div>
+            <p className="text-dg-text font-bold text-sm tabular">{totalAccesos}</p>
+            <p className="text-2xs text-dg-text-muted uppercase">Accesos</p>
+          </div>
+          <div className="w-[1px] bg-dg-border" />
+          <div>
+            <p className="text-dg-text font-bold text-sm flex items-center justify-center gap-1 tabular">
+              <span className="w-1.5 h-1.5 rounded-full bg-dg-success animate-pulse" aria-hidden="true" /> {estadoCount.activos} / {estadoCount.inactivos}
+            </p>
+            <p className="text-2xs text-dg-text-muted uppercase">Activos / Inactivos</p>
           </div>
         </div>
-      </header>
 
-      <main id="contenido" className="flex-1 px-4 py-4 space-y-3 max-w-7xl mx-auto w-full">
         <div className="text-xs font-bold text-dg-text-muted uppercase mb-2">Personal Autorizado</div>
         
         {loading ? (

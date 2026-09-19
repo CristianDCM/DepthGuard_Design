@@ -82,6 +82,16 @@ export default function History() {
     }
   }
 
+  /** Etiqueta del estado, sin mezclarla con el nombre de la persona. */
+  function etiquetaEstado(evento: Evento) {
+    switch (evento.estado) {
+      case "ACCESO_PERMITIDO": return "Acceso autorizado";
+      case "FRAUDE": return "Intento de fraude";
+      case "DESCONOCIDO": return "Desconocido";
+      default: return "Estado no reconocido";
+    }
+  }
+
   function formatTime(timestamp: string) {
     return new Date(timestamp).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
   }
@@ -106,25 +116,18 @@ export default function History() {
   }, {});
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-0 lg:pl-60 flex flex-col">
-      <header className="sticky top-0 z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between px-4 py-4">
-            <div className="flex items-center gap-3">
-              <HistoryIcon className="w-6 h-6 text-dg-text-secondary" aria-hidden="true" />
-              <h1 className="text-xl font-bold tracking-tight headline">Historial</h1>
-            </div>
-            <button 
-              onClick={handleExportCSV}
-              disabled={events.length === 0}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dg-card border border-dg-border text-dg-text-muted hover:text-dg-text hover:border-dg-action-text transition-all text-xs font-bold disabled:opacity-50"
-            >
-              <Download className="w-3.5 h-3.5" /> CSV
-            </button>
-          </div>
-          
-          <div className="px-4 pb-4 space-y-3">
-            <div className="flex flex-col md:flex-row gap-2 md:items-center">
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col">
+      {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
+          estas. El <h1> se conserva para lectores de pantalla. */}
+      <h1 className="sr-only">Historial de accesos</h1>
+
+      <main id="contenido" className="flex-1 px-4 py-4 space-y-3 max-w-7xl mx-auto w-full">
+        {/*
+          Barra de herramientas. Los filtros y la exportacion vivian en la
+          cabecera; al quitarla bajan aqui, justo encima de lo que filtran.
+        */}
+        <div className="space-y-3">
+          <div className="flex flex-col md:flex-row gap-2 md:items-center">
               <div className="relative flex-1 md:max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-dg-text-muted w-4 h-4" />
                 <input 
@@ -171,17 +174,29 @@ export default function History() {
                 )}
               </div>
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+          {/*
+            Filtros y exportacion: la exportacion vuelca justo lo que los
+            filtros dejan a la vista, asi que van juntos. En pantalla
+            estrecha el boton baja a su propia fila; compartiendo fila,
+            recortaba el ultimo chip de la tira desplazable.
+          */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar sm:flex-1">
               <FilterChip label="Todos" active={activeFilter === "Todos"} onClick={() => setActiveFilter("Todos")} />
               <FilterChip label="Autorizados" icon={CheckCircle} iconColor="text-dg-success" active={activeFilter === "Autorizados"} onClick={() => setActiveFilter("Autorizados")} />
               <FilterChip label="Fraude" icon={AlertTriangle} iconColor="text-dg-error" active={activeFilter === "Fraude"} onClick={() => setActiveFilter("Fraude")} />
               <FilterChip label="Desconocido" icon={HelpCircle} iconColor="text-dg-warning" active={activeFilter === "Desconocido"} onClick={() => setActiveFilter("Desconocido")} />
             </div>
+            <button 
+              onClick={handleExportCSV}
+              disabled={events.length === 0}
+              className="flex shrink-0 items-center gap-1.5 self-end px-3 py-1.5 rounded-full bg-dg-card border border-dg-border text-dg-text-muted hover:text-dg-text hover:border-dg-action-text transition-colors text-xs font-bold disabled:opacity-50 sm:self-auto"
+            >
+              <Download className="w-3.5 h-3.5" aria-hidden="true" /> CSV
+            </button>
           </div>
         </div>
-      </header>
 
-      <main id="contenido" className="flex-1 px-4 py-4 space-y-3 max-w-7xl mx-auto w-full">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
@@ -259,7 +274,7 @@ export default function History() {
                           className={`inline-flex items-center gap-2 font-semibold ${config.color} hover:underline`}
                         >
                           <config.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                          {config.title}
+                          {etiquetaEstado(evento)}
                           <span className="sr-only">
                             , ver detalle del evento de las {formatTime(evento.timestamp)}
                           </span>
