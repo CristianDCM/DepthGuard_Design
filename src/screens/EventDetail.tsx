@@ -116,8 +116,8 @@ export default function EventDetail() {
   };
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-0 lg:pl-60 flex flex-col">
-      <header className="sticky top-0 z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col">
+      <header className="sticky top-0 lg:top-16 z-40 bg-dg-bg/90 backdrop-blur-md border-b border-dg-border">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between w-full">
           <div className="flex items-center gap-4">
             <button onClick={() => navigate(-1)} aria-label="Volver a la pantalla anterior" className="active:scale-95 transition-transform">

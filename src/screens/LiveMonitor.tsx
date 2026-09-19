@@ -193,26 +193,29 @@ export default function LiveMonitor() {
     : false;
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-0 lg:pl-60 flex flex-col bg-dg-bg">
-      <header className="sticky top-0 z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between w-full">
-          <div className="flex items-center gap-3">
-            <Video className="w-6 h-6 text-dg-text-secondary" aria-hidden="true" />
-            <h1 className="text-xl font-bold tracking-tight headline">
-              Monitor en Vivo
-            </h1>
-          </div>
-          {/* Edge Status Pill */}
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col bg-dg-bg">
+      {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
+          estas. El <h1> se conserva para lectores de pantalla. */}
+      <h1 className="sr-only">Monitor en vivo</h1>
+
+      <main id="contenido" className="flex-1 px-4 py-6 max-w-7xl mx-auto w-full">
+        {/*
+          Estado del terminal, antes en la cabecera. Baja al contenido, sobre
+          el propio video, que es lo que describe: si el terminal esta caido,
+          lo que hay debajo no es de fiar.
+        */}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div
-            className={`flex items-center gap-1.5 px-2 py-1 rounded-full border ${
+            className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 ${
               edgeOnline
                 ? "bg-dg-success/10 border-dg-success/20"
                 : "bg-dg-error/10 border-dg-error/20"
             }`}
           >
-            <Server className={`w-3 h-3 ${edgeOnline ? "text-dg-success" : "text-dg-error"}`} aria-hidden="true" />
+            <Server className={`h-3 w-3 ${edgeOnline ? "text-dg-success" : "text-dg-error"}`} aria-hidden="true" />
             <span
-              className={`w-1.5 h-1.5 rounded-full ${
+              aria-hidden="true"
+              className={`h-1.5 w-1.5 rounded-full ${
                 edgeOnline
                   ? "bg-dg-success shadow-[0_0_6px_var(--color-dg-success)] animate-pulse"
                   : "bg-dg-error"
@@ -226,20 +229,12 @@ export default function LiveMonitor() {
               {frescura.atenuar ? "Sin datos" : edgeOnline ? "En línea" : "Desconectado"}
             </span>
           </div>
-        </div>
-        {/*
-          Frescura del dato. Solo se pinta cuando el dato deja de estar
-          fresco: con todo al dia repetia en "En directo" lo que la pildora
-          de al lado ya dice con "En linea".
-        */}
-        {frescura.nivel !== "fresco" && (
-          <div className="mx-auto flex w-full max-w-7xl items-center justify-end px-4 pb-2">
-            <IndicadorFrescura estado={frescura} />
-          </div>
-        )}
-      </header>
 
-      <main id="contenido" className="flex-1 px-4 py-6 max-w-7xl mx-auto w-full">
+          {/* Solo cuando el dato deja de estar fresco: con todo al dia
+              repetiria lo que la pildora de al lado ya dice. */}
+          {frescura.nivel !== "fresco" && <IndicadorFrescura estado={frescura} />}
+        </div>
+
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />

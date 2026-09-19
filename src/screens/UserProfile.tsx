@@ -55,8 +55,8 @@ export default function UserProfile() {
   const alertas = eventos.filter(e => e.estado !== "ACCESO_PERMITIDO").length;
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-0 lg:pl-60 flex flex-col bg-dg-bg">
-      <header className="fixed top-0 w-full z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col bg-dg-bg">
+      <header className="sticky top-0 lg:top-16 z-40 w-full bg-dg-bg/90 backdrop-blur-md border-b border-dg-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between w-full">
           <div className="flex items-center gap-4">
             <button onClick={() => navigate(-1)} aria-label="Volver a la pantalla anterior" className="active:scale-95 transition-transform">
@@ -67,7 +67,7 @@ export default function UserProfile() {
         </div>
       </header>
 
-      <main id="contenido" className="pt-24 px-6 max-w-7xl mx-auto pb-32 w-full">
+      <main id="contenido" className="px-6 py-6 max-w-7xl mx-auto pb-32 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column: Profile Info & Actions */}
           <div className="lg:col-span-4 space-y-6">

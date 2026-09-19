@@ -305,17 +305,11 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-0 lg:pl-60 flex flex-col bg-dg-bg">
-      <header className="sticky top-0 z-50 bg-dg-bg/80 backdrop-blur-md border-b border-dg-border">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between px-4 py-4">
-            <div className="flex items-center gap-2">
-              <Home className="w-6 h-6 text-dg-text-secondary" aria-hidden="true" />
-              <h1 className="text-xl font-bold tracking-tight headline">Inicio</h1>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col bg-dg-bg">
+      {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
+          estas. El <h1> se conserva para lectores de pantalla, que si
+          necesitan oir el nombre de la pagina al entrar. */}
+      <h1 className="sr-only">Inicio</h1>
 
       <main id="contenido" className="flex-1 px-4 py-6 space-y-6 max-w-7xl mx-auto w-full">
         {loading ? (

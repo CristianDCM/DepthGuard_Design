@@ -5,14 +5,13 @@ import { cn } from "@/src/lib/utils";
 /**
  * Navegación principal, en dos formas según el tamaño de pantalla.
  *
- * Antes había una sola: la barra de pestañas inferior, anclada al borde de
- * la ventana en TODOS los tamaños. Un puesto de control de 27 pulgadas
- * recibía una barra de pestañas de teléfono pegada abajo del todo, con
- * 2.500 píxeles de ancho desaprovechados a los lados.
+ * En escritorio es una barra horizontal fija arriba, con el logotipo a la
+ * izquierda y los destinos centrados sobre el ancho completo. En móvil se
+ * mantiene la barra de pestañas inferior, que ahí es lo correcto: queda al
+ * alcance del pulgar.
  *
- * A partir de 1024px pasa a barra lateral fija de 240px, que es lo que
- * espera alguien que usa esto como herramienta de trabajo durante un turno
- * entero. Los destinos son los mismos: cambia el envase, no el mapa.
+ * Las pantallas ya no llevan cabecera propia con su título, así que esta
+ * barra es también la que dice dónde estás: el destino activo va resaltado.
  */
 
 const ITEMS = [
@@ -23,14 +22,14 @@ const ITEMS = [
   { name: "Ajustes", icon: Settings, path: "/settings" },
 ];
 
-/** Ancho de la barra lateral. Las pantallas compensan con `lg:pl-60`. */
-export const ANCHO_LATERAL = "15rem"; // 240px
+/** Alto de la barra superior. Las pantallas compensan con `lg:pt-16`. */
+export const ALTO_SUPERIOR = "4rem";
 
 export default function Navigation() {
   return (
     <>
       <BarraInferior />
-      <BarraLateral />
+      <BarraSuperior />
     </>
   );
 }
@@ -50,8 +49,8 @@ function BarraInferior() {
               key={item.name}
               to={item.path}
               aria-current={activo ? "page" : undefined}
-              // min-w/min-h explicitos: antes el area pulsable era solo la
-              // del icono y el texto, por debajo de los 44px recomendados.
+              // min-w/min-h explicitos: el area pulsable debe llegar a los
+              // 44px aunque el icono y el texto ocupen menos.
               className={cn(
                 "flex min-h-[44px] min-w-[64px] flex-col items-center justify-center gap-1 rounded-dg transition-colors",
                 activo ? "text-dg-action-text" : "text-dg-text-muted hover:text-dg-text"
@@ -67,46 +66,49 @@ function BarraInferior() {
   );
 }
 
-function BarraLateral() {
+function BarraSuperior() {
   const location = useLocation();
   return (
     <nav
       aria-label="Navegación principal"
-      className="fixed inset-y-0 left-0 z-50 hidden w-60 flex-col border-r border-dg-border bg-dg-card lg:flex"
+      className="fixed inset-x-0 top-0 z-50 hidden h-16 border-b border-dg-border bg-dg-bg/90 backdrop-blur-md lg:block"
     >
-      <div className="flex items-center gap-2.5 px-5 py-5">
-        <img src="/logo.svg" alt="" aria-hidden="true" className="h-7 w-7 object-contain" />
-        <span className="headline text-base font-bold text-dg-text">
-          Depth<span className="text-dg-brand">Guard</span>
-        </span>
+      <div className="relative mx-auto flex h-full max-w-7xl items-center px-6">
+        <Link to="/dashboard" className="flex shrink-0 items-center gap-2.5 rounded-dg">
+          <img src="/logo.svg" alt="" aria-hidden="true" className="h-7 w-7 object-contain" />
+          <span className="headline text-base font-bold text-dg-text">
+            Depth<span className="text-dg-brand">Guard</span>
+          </span>
+        </Link>
+
+        {/*
+          Centrado respecto al ancho completo, no respecto al hueco que deja
+          el logotipo: con `justify-center` sobre el resto de la fila, los
+          destinos quedarian desplazados a la derecha.
+        */}
+        <ul className="absolute left-1/2 flex -translate-x-1/2 items-center gap-1">
+          {ITEMS.map((item) => {
+            const activo = location.pathname === item.path;
+            return (
+              <li key={item.name}>
+                <Link
+                  to={item.path}
+                  aria-current={activo ? "page" : undefined}
+                  className={cn(
+                    "flex items-center gap-2 rounded-dg px-4 py-2 text-sm font-medium transition-colors",
+                    activo
+                      ? "bg-dg-action/12 text-dg-action-text"
+                      : "text-dg-text-secondary hover:bg-dg-input hover:text-dg-text"
+                  )}
+                >
+                  <item.icon aria-hidden="true" className="h-4 w-4 shrink-0" />
+                  {item.name}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </div>
-
-      <ul className="flex flex-1 flex-col gap-1 px-3">
-        {ITEMS.map((item) => {
-          const activo = location.pathname === item.path;
-          return (
-            <li key={item.name}>
-              <Link
-                to={item.path}
-                aria-current={activo ? "page" : undefined}
-                className={cn(
-                  "flex items-center gap-3 rounded-dg px-3 py-2.5 text-sm font-medium transition-colors",
-                  activo
-                    ? "bg-dg-action/12 text-dg-action-text"
-                    : "text-dg-text-secondary hover:bg-dg-input hover:text-dg-text"
-                )}
-              >
-                <item.icon aria-hidden="true" className="h-4.5 w-4.5 shrink-0" />
-                {item.name}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-
-      <p className="px-5 py-4 text-2xs text-dg-text-off">
-        Control de acceso biométrico 3D
-      </p>
     </nav>
   );
 }
