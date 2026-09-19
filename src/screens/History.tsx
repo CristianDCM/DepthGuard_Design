@@ -14,6 +14,8 @@ export default function History() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  /** Hay una peticion en curso sobre datos que YA se estan mostrando. */
+  const [recargando, setRecargando] = useState(false);
   // La lista rueda por dentro; la pagina no crece con cada "Cargar mas".
   usePantallaFija();
   const [fechaDesde, setFechaDesde] = useState("");
@@ -26,7 +28,12 @@ export default function History() {
 
   useEffect(() => {
     async function cargarInicial() {
-      setLoading(true);
+      // Solo se vacia la pantalla en la PRIMERA carga. Al cambiar de filtro
+      // se conserva lo que ya hay: antes la lista entera se sustituia por un
+      // aro azul girando que aparecia y desaparecia en un parpadeo, y el
+      // salto de la pagina a un hueco vacio y de vuelta se leia como un
+      // fallo.
+      setRecargando(true);
       setPage(0);
       try {
         const filtroMap: Record<string, EstadoEvento | undefined> = {
@@ -42,6 +49,7 @@ export default function History() {
         console.error("Error cargando historial:", err);
       } finally {
         setLoading(false);
+        setRecargando(false);
       }
     }
     // Debounce la búsqueda
@@ -212,9 +220,18 @@ export default function History() {
           </div>
         </div>
 
+        {/*
+          Indicador de recarga: una linea fina sobre la lista, que no mueve
+          nada de sitio. El aro giratorio anterior vaciaba la pantalla y
+          volvia a llenarla en un parpadeo cada vez que se tocaba un filtro.
+        */}
+        <div aria-hidden="true" className="h-0.5 shrink-0 overflow-hidden rounded-full bg-dg-border/40">
+          {recargando && <div className="h-full w-1/3 animate-pulse rounded-full bg-dg-info" />}
+        </div>
+
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
+          <div className="flex flex-1 items-center justify-center">
+            <p className="text-sm text-dg-text-muted">Cargando historial…</p>
           </div>
         ) : events.length === 0 ? (
           /*
@@ -242,7 +259,7 @@ export default function History() {
             )}
           </div>
         ) : (
-          <div className="flex min-h-0 flex-1 flex-col">
+          <div className={`flex min-h-0 flex-1 flex-col transition-opacity ${recargando ? "opacity-60" : ""}`}>
           {/*
             Tabla real a partir de 1024px.
 

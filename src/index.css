@@ -295,6 +295,18 @@
   }
 
   /*
+   * El contenedor donde monta React tambien necesita altura.
+   *
+   * Sin esto, el `h-full` de la pantalla resolvia contra un #root de altura
+   * automatica, es decir contra nada: todo crecia con el contenido, `html`
+   * lo recortaba a la altura de la ventana y la lista se quedaba SIN PODER
+   * DESPLAZARSE, porque tampoco a ella le llegaba ningun techo.
+   */
+  .pantalla-fija #root {
+    height: 100%;
+  }
+
+  /*
    * Area segura de iOS (notch e indicador de home).
    * Requiere viewport-fit=cover en el <meta name="viewport"> de index.html,
    * si no env() devuelve siempre 0 y la barra inferior queda tapada.
