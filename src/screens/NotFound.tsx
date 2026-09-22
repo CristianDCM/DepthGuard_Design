@@ -9,15 +9,15 @@ import { SearchX, Home } from "lucide-react";
  */
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-dg-bg flex items-center justify-center p-4">
-      <div className="cyber-card p-8 max-w-md w-full text-center space-y-5">
-        <div className="w-16 h-16 mx-auto rounded-full bg-dg-warning/10 border border-dg-warning/30 flex items-center justify-center">
+    <div className="mini min-h-screen bg-dg-bg flex items-center justify-center p-4">
+      <div className="mini-card w-full max-w-md space-y-5 p-8 text-center">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center border border-dg-warning/50">
           <SearchX className="w-8 h-8 text-dg-warning" aria-hidden="true" />
         </div>
 
         <div className="space-y-2">
-          <p className="text-5xl font-black headline text-dg-text-muted">404</p>
-          <h1 className="text-xl font-bold headline text-dg-text">
+          <p className="tabular text-5xl font-bold tracking-[0.8px] text-dg-text-muted">404</p>
+          <h1 className="text-xl font-bold uppercase tracking-[0.8px] text-dg-text">
             Página no encontrada
           </h1>
           <p className="text-sm text-dg-text-muted leading-relaxed">
@@ -27,7 +27,7 @@ export default function NotFound() {
 
         <Link
           to="/dashboard"
-          className="btn-primary w-full flex items-center justify-center gap-2"
+          className="mini-btn mini-btn-strong flex w-full items-center justify-center gap-2 py-3 text-sm"
         >
           <Home className="w-4 h-4" aria-hidden="true" />
           Volver al inicio

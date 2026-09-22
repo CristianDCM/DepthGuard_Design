@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shield, Lock, Eye, EyeOff, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
 import { setNewPassword, getSessionActual } from "../lib/supabase";
 
 /**
@@ -85,9 +84,8 @@ export default function SetPassword() {
   // Estado: validando token
   if (validatingToken) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-6">
-        <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
-        <p className="text-dg-text-muted text-sm mt-4">Validando invitación...</p>
+      <main className="mini min-h-screen flex flex-col items-center justify-center p-6">
+        <p role="status" className="text-xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Validando invitación</p>
       </main>
     );
   }
@@ -95,25 +93,21 @@ export default function SetPassword() {
   // Estado: token inválido o expirado
   if (!tokenValid) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="cyber-card p-8 max-w-sm w-full text-center space-y-4"
-        >
-          <AlertTriangle className="w-16 h-16 text-dg-error mx-auto" />
-          <h1 className="text-xl font-bold headline">Enlace inválido</h1>
+      <main className="mini min-h-screen flex flex-col items-center justify-center p-6">
+        <div className="mini-card w-full max-w-sm space-y-4 p-8 text-center">
+          <AlertTriangle className="mx-auto h-16 w-16 text-dg-error" aria-hidden="true" />
+          <h1 className="text-xl font-bold uppercase tracking-[0.8px]">Enlace inválido</h1>
           <p className="text-dg-text-muted text-sm">
             Este enlace de invitación ha expirado o ya fue utilizado.
             Contacta al administrador para recibir una nueva invitación.
           </p>
           <button
             onClick={() => navigate("/")}
-            className="btn-primary w-full py-3 mt-4"
+            className="mini-btn mini-btn-strong mt-4 w-full py-3 text-sm"
           >
             Ir al inicio de sesión
           </button>
-        </motion.div>
+        </div>
       </main>
     );
   }
@@ -121,67 +115,37 @@ export default function SetPassword() {
   // Estado: éxito
   if (success) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="cyber-card p-8 max-w-sm w-full text-center space-y-4"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", delay: 0.2 }}
-          >
-            <CheckCircle className="w-20 h-20 text-dg-success mx-auto" />
-          </motion.div>
-          <h1 className="text-xl font-bold headline">¡Contraseña establecida!</h1>
-          <p className="text-dg-text-muted text-sm">
-            Tu cuenta ha sido activada exitosamente. Serás redirigido al inicio de sesión...
+      <main className="mini min-h-screen flex flex-col items-center justify-center p-6">
+        <div className="mini-card w-full max-w-sm space-y-4 p-8 text-center">
+          <CheckCircle className="mx-auto h-20 w-20 text-dg-success" aria-hidden="true" />
+          <h1 className="text-xl font-bold uppercase tracking-[0.8px]">¡Contraseña establecida!</h1>
+          <p className="text-sm text-dg-text-muted">
+            Tu cuenta ha sido activada exitosamente. Serás redirigido al inicio de sesión.
           </p>
-          <div className="w-full bg-dg-border rounded-full h-1 overflow-hidden">
-            <motion.div
-              className={`h-full ${strength.color}`}
-              initial={{ width: "0%" }}
-              animate={{ width: "100%" }}
-              transition={{ duration: 3 }}
-            />
-          </div>
-        </motion.div>
+        </div>
       </main>
     );
   }
 
   // Formulario principal
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6">
+    <main className="mini min-h-screen flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm flex flex-col items-center">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8 flex flex-col items-center"
-        >
-          <div className="relative mb-4">
-            <img
-              src="/logo.svg"
-              alt="DepthGuard Logo"
-              className="w-24 h-24 object-contain z-10 relative"
-            />
-            <div className="absolute inset-0 bg-dg-brand/10 blur-3xl rounded-full -z-10" />
-          </div>
-          <h1 className="text-3xl font-bold text-dg-text tracking-tight headline">Bienvenido</h1>
-          <p className="text-dg-text-muted text-sm mt-1">Establece tu contraseña para activar tu cuenta</p>
-        </motion.div>
+        <div className="mb-8 flex flex-col items-center">
+          <img
+            src="/logo.svg"
+            alt="DepthGuard Logo"
+            className="mb-4 h-24 w-24 object-contain"
+          />
+          <h1 className="text-3xl font-bold tracking-[0.8px] text-dg-text">Bienvenido</h1>
+          <p className="mt-2 text-xs uppercase tracking-[0.8px] text-dg-text-muted">Establece tu contraseña para activar tu cuenta</p>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1 }}
-          className="w-full cyber-card p-8 shadow-2xl"
-        >
+        <div className="mini-card w-full p-8">
           <form className="space-y-5" onSubmit={handleSubmit}>
             {/* Campo: Nueva contraseña */}
             <div className="space-y-2">
-              <label htmlFor="input-password" className="block text-sm font-medium text-dg-text-secondary">
+              <label htmlFor="input-password" className="block text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">
                 Nueva contraseña
               </label>
               <div className="relative">
@@ -194,14 +158,14 @@ export default function SetPassword() {
                   placeholder="••••••••"
                   required
                   autoComplete="new-password"
-                  className="w-full bg-dg-input border border-dg-border text-dg-text rounded-dg pl-10 pr-12 py-3 text-base focus:border-dg-focus transition-colors"
+                  className="w-full border border-dg-border bg-transparent py-3 pl-10 pr-12 text-base text-dg-text placeholder:text-dg-text-muted focus:border-dg-text"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   aria-pressed={showPassword}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dg-text-muted hover:text-dg-text transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dg-text-muted hover:text-dg-text"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
                 </button>
@@ -209,27 +173,21 @@ export default function SetPassword() {
             </div>
 
             {/* Indicador de fortaleza */}
-            <AnimatePresence>
-              {password.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="space-y-3"
-                >
+            {password.length > 0 && (
+              <div className="space-y-3">
                   {/* Barra de fuerza */}
                   <div className="space-y-1.5">
                     <div className="flex gap-1">
                       {[1, 2, 3, 4, 5].map((i) => (
                         <div
                           key={i}
-                          className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                          className={`h-1.5 flex-1 ${
                             i <= strength.level ? strength.color : "bg-dg-border"
                           }`}
                         />
                       ))}
                     </div>
-                    <p className={`text-2xs font-bold uppercase ${
+                    <p className={`text-2xs font-bold uppercase tracking-[0.8px] ${
                       strength.level >= 4 ? "text-dg-success" : strength.level >= 3 ? "text-dg-warning" : "text-dg-error"
                     }`}>
                       {strength.label}
@@ -254,13 +212,12 @@ export default function SetPassword() {
                       );
                     })}
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+              </div>
+            )}
 
             {/* Campo: Confirmar contraseña */}
             <div className="space-y-2">
-              <label htmlFor="input-confirm-password" className="block text-sm font-medium text-dg-text-secondary">
+              <label htmlFor="input-confirm-password" className="block text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">
                 Confirmar contraseña
               </label>
               <div className="relative">
@@ -273,12 +230,12 @@ export default function SetPassword() {
                   placeholder="••••••••"
                   required
                   autoComplete="new-password"
-                  className={`w-full bg-dg-input border text-dg-text rounded-dg pl-10 pr-12 py-3 text-base transition-colors ${
+                  className={`w-full border bg-transparent py-3 pl-10 pr-12 text-base text-dg-text placeholder:text-dg-text-muted ${
                     confirm.length > 0
                       ? passwordsMatch
-                        ? "border-dg-success focus:border-dg-success"
-                        : "border-dg-error focus:border-dg-error"
-                      : "border-dg-border focus:border-dg-focus"
+                        ? "border-dg-success"
+                        : "border-dg-error"
+                      : "border-dg-border focus:border-dg-text"
                   }`}
                 />
                 <button
@@ -286,57 +243,34 @@ export default function SetPassword() {
                   onClick={() => setShowConfirm(!showConfirm)}
                   aria-label={showConfirm ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"}
                   aria-pressed={showConfirm}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dg-text-muted hover:text-dg-text transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dg-text-muted hover:text-dg-text"
                 >
                   {showConfirm ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
                 </button>
               </div>
-              <AnimatePresence>
-                {confirm.length > 0 && !passwordsMatch && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="text-xs text-dg-error"
-                  >
-                    Las contraseñas no coinciden
-                  </motion.p>
-                )}
-              </AnimatePresence>
+              {confirm.length > 0 && !passwordsMatch && (
+                <p className="text-xs text-dg-error">Las contraseñas no coinciden</p>
+              )}
             </div>
 
             {/* Error */}
-            <AnimatePresence>
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className="bg-dg-error/10 border border-dg-error text-dg-error text-sm py-2 px-3 rounded-dg text-center"
-                >
-                  {error}
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {error && (
+              <div role="alert" className="border border-dg-error px-3 py-2 text-center text-sm text-dg-error">
+                {error}
+              </div>
+            )}
 
             {/* Submit */}
             <button
               id="btn-set-password"
               type="submit"
               disabled={!canSubmit}
-              className="btn-primary w-full py-4 flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
+              className="mini-btn mini-btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:cursor-not-allowed disabled:opacity-30"
             >
-              {isLoading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Guardando...
-                </>
-              ) : (
-                "Activar cuenta"
-              )}
+              {isLoading ? "Guardando" : "Activar cuenta"}
             </button>
           </form>
-        </motion.div>
+        </div>
       </div>
     </main>
   );

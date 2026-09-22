@@ -108,13 +108,13 @@ export default class ErrorBoundary extends Component<Props, State> {
 
     return (
       <div className="min-h-screen bg-dg-bg flex items-center justify-center p-4">
-        <div className="cyber-card p-8 max-w-lg w-full space-y-5">
+        <div className="mini-card w-full max-w-lg space-y-5 p-8">
           <div className="flex flex-col items-center gap-4 text-center">
-            <div className="w-16 h-16 rounded-full bg-dg-error/10 border border-dg-error/30 flex items-center justify-center">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center border border-dg-error/50">
               <AlertTriangle className="w-8 h-8 text-dg-error" aria-hidden="true" />
             </div>
             <div className="space-y-2">
-              <h1 className="text-xl font-bold headline text-dg-text">Algo salió mal</h1>
+              <h1 className="text-xl font-bold uppercase tracking-[0.8px] text-dg-text">Algo salió mal</h1>
               <p className="text-sm text-dg-text-secondary leading-relaxed">
                 La aplicación encontró un error inesperado. Tus datos no se han
                 visto afectados: puedes recargar la vista y continuar.
@@ -123,17 +123,17 @@ export default class ErrorBoundary extends Component<Props, State> {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            <button onClick={this.handleReload} className="btn-primary flex-1 flex items-center justify-center gap-2">
+            <button onClick={this.handleReload} className="mini-btn mini-btn-strong flex flex-1 items-center justify-center gap-2 py-3 text-sm">
               <RotateCcw className="w-4 h-4" aria-hidden="true" />
               Recargar a fondo
             </button>
-            <button onClick={this.handleGoHome} className="btn-secondary flex-1 flex items-center justify-center gap-2">
+            <button onClick={this.handleGoHome} className="mini-btn flex flex-1 items-center justify-center gap-2 py-3 text-sm">
               <Home className="w-4 h-4" aria-hidden="true" />
               Ir al inicio
             </button>
           </div>
 
-          <details className="rounded-dg border border-dg-border bg-dg-bg">
+          <details className="border border-dg-border">
             <summary className="cursor-pointer px-4 py-2.5 text-xs font-semibold text-dg-text-secondary select-none">
               Detalles técnicos
             </summary>
@@ -143,7 +143,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               </pre>
               <button
                 onClick={this.handleCopy}
-                className="inline-flex items-center gap-1.5 rounded-dg-sm border border-dg-border px-2.5 py-1.5 text-2xs font-semibold text-dg-text-secondary transition-colors hover:text-dg-text"
+                className="mini-btn inline-flex items-center gap-1.5 px-2.5 py-1.5 text-2xs"
               >
                 {this.state.copiado ? (
                   <><Check className="h-3 w-3 text-dg-success" aria-hidden="true" /> Copiado</>

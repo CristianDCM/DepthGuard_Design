@@ -53,12 +53,10 @@ function InviteRedirect({ children }: { children: ReactNode }) {
 /** Indicador mientras se descarga el chunk de la pantalla solicitada. */
 function PantallaCargando() {
   return (
-    <div className="min-h-screen bg-dg-bg flex items-center justify-center">
-      <div
-        role="status"
-        aria-label="Cargando"
-        className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin"
-      />
+    <div className="mini min-h-screen bg-dg-bg flex items-center justify-center">
+      <p role="status" className="text-xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">
+        Cargando
+      </p>
     </div>
   );
 }
@@ -78,7 +76,7 @@ export default function App() {
           */}
           <a
             href="#contenido"
-            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-dg focus:bg-dg-action focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:bg-dg-text focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:uppercase focus:tracking-[0.8px] focus:text-dg-bg"
           >
             Saltar al contenido
           </a>

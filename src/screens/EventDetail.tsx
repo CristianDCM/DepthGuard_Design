@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { ArrowLeft, Video, ExternalLink, Fingerprint, ShieldAlert, UserSearch, Plus, FileText, Download } from "lucide-react";
-import { motion } from "motion/react";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from "recharts";
 import Navigation from "../components/Navigation";
 import { getEventoPorId, type Evento } from "../lib/supabase";
@@ -33,7 +32,7 @@ export default function EventDetail() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dg-bg">
-        <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
+        <p role="status" className="text-xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Cargando</p>
       </div>
     );
   }
@@ -116,14 +115,14 @@ export default function EventDetail() {
   };
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col">
-      <header className="sticky top-0 lg:top-16 z-40 bg-dg-bg/90 backdrop-blur-md border-b border-dg-border">
+    <div className="mini min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col">
+      <header className="sticky top-0 lg:top-16 z-40 border-b border-dg-border bg-dg-bg">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between w-full">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate(-1)} aria-label="Volver a la pantalla anterior" className="active:scale-95 transition-transform">
-              <ArrowLeft className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
+            <button onClick={() => navigate(-1)} aria-label="Volver a la pantalla anterior" className="text-dg-action-text hover:text-dg-text">
+              <ArrowLeft className="h-6 w-6" aria-hidden="true" />
             </button>
-            <h1 className="headline font-bold tracking-tight text-lg text-dg-text">{headerTitle}</h1>
+            <h1 className="text-lg font-bold uppercase tracking-[0.8px] text-dg-text">{headerTitle}</h1>
           </div>
         </div>
       </header>
@@ -134,31 +133,26 @@ export default function EventDetail() {
           <div className="lg:col-span-7 space-y-6">
             <section className="flex justify-center lg:justify-start">
               {isAuthorized && (
-                <div className="px-6 py-3 rounded-full border-2 border-dg-success/30 bg-dg-success/10 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-dg-success" aria-hidden="true" />
-                  <span className="headline font-bold text-dg-success text-sm uppercase">ACCESO PERMITIDO</span>
+                <div className="flex items-center gap-2 border border-dg-success/50 px-6 py-3">
+                  <span className="h-2 w-2 bg-dg-success" aria-hidden="true" />
+                  <span className="text-sm font-bold uppercase tracking-[0.8px] text-dg-success">Acceso permitido</span>
                 </div>
               )}
               {isFraud && (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-dg-error/30 bg-dg-error/10">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-dg-error opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-dg-error" />
-                  </span>
-                  <span className="headline font-bold text-xs text-dg-error uppercase">FRAUDE DETECTADO</span>
+                <div className="flex items-center gap-2 border border-dg-error/50 px-6 py-3">
+                  <span className="h-2 w-2 bg-dg-error" aria-hidden="true" />
+                  <span className="text-sm font-bold uppercase tracking-[0.8px] text-dg-error">Fraude detectado</span>
                 </div>
               )}
               {isUnknown && (
-                <div className="bg-dg-warning/10 border border-dg-warning/30 px-4 py-2 rounded-full flex items-center gap-3">
-                  <div className="relative flex items-center justify-center">
-                    <span className="w-2.5 h-2.5 bg-dg-warning rounded-full animate-pulse" />
-                  </div>
-                  <span className="headline font-bold text-dg-warning text-xs uppercase">PERSONA DESCONOCIDA</span>
+                <div className="flex items-center gap-2 border border-dg-warning/50 px-6 py-3">
+                  <span className="h-2 w-2 bg-dg-warning" aria-hidden="true" />
+                  <span className="text-sm font-bold uppercase tracking-[0.8px] text-dg-warning">Persona desconocida</span>
                 </div>
               )}
             </section>
 
-            <div className={`relative rounded-dg overflow-hidden cyber-card shadow-2xl border border-dg-border ${isUnknown ? 'aspect-video' : 'aspect-[4/3]'}`}>
+            <div className={`relative overflow-hidden border border-dg-border bg-dg-canvas ${isUnknown ? 'aspect-video' : 'aspect-[4/3]'}`}>
               {isFraud && <div className="absolute inset-0 bg-dg-error/20 mix-blend-overlay z-10 pointer-events-none" />}
               {evento.foto_url ? (
                 <img 
@@ -172,8 +166,9 @@ export default function EventDetail() {
                 </div>
               )}
               
-              <div className="absolute inset-0 bg-gradient-to-t from-dg-bg via-transparent to-transparent" />
-              <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-dg">
+              {/* Se retira el degradado sobre la foto: la hora ya va en su
+                  propia caja y el degradado solo oscurecia la captura. */}
+              <div className="absolute bottom-4 right-4 border border-dg-border bg-dg-bg/80 px-3 py-1.5">
                 <p className="font-mono tabular text-xs text-white/90">{timestamp}</p>
               </div>
             </div>
@@ -182,18 +177,18 @@ export default function EventDetail() {
           {/* Right Column: Details and Actions */}
           <div className="lg:col-span-5 space-y-6">
             {isAuthorized && evento.nombre && (
-              <div className="cyber-card p-5 flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-dg-input border border-dg-border-hi flex items-center justify-center text-dg-text-secondary headline font-bold text-xl">
+              <div className="mini-card flex items-center gap-4 p-5">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center border border-dg-border text-xl font-bold text-dg-text-secondary">
                   {evento.nombre.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-grow">
-                  <h3 className="text-dg-text headline font-bold text-lg">{evento.nombre}</h3>
+                  <h3 className="text-lg font-bold text-dg-text">{evento.nombre}</h3>
                   <p className="text-dg-text-muted text-xs font-mono tabular">ID: #{evento.usuario_id?.substring(0, 8) ?? "—"}</p>
                 </div>
                 {evento.usuario_id && (
                   <button 
                     onClick={() => navigate(`/profile/${evento.usuario_id}`)}
-                    className="text-dg-action-text text-xs font-bold headline flex items-center gap-1 hover:underline transition-colors"
+                    className="flex items-center gap-1 text-xs font-bold uppercase tracking-[0.8px] text-dg-action-text hover:underline"
                   >
                     Ver Perfil <ExternalLink className="w-4 h-4" />
                   </button>
@@ -203,18 +198,18 @@ export default function EventDetail() {
 
             {isFraud && (
               <div className="grid grid-cols-1 gap-4">
-                <div className="bg-dg-card p-6 rounded-dg-lg flex items-center gap-5 border border-dg-border">
-                  <div className="h-14 w-14 rounded-full bg-dg-error/20 flex items-center justify-center shrink-0">
-                    <ShieldAlert className="w-8 h-8 text-dg-error" />
+                <div className="mini-card flex items-center gap-5 p-6">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-dg-error/50">
+                    <ShieldAlert className="h-8 w-8 text-dg-error" aria-hidden="true" />
                   </div>
                   <div>
-                    <h3 className="headline font-bold text-xl text-dg-text">Intento de Suplantación</h3>
+                    <h3 className="text-xl font-bold uppercase tracking-[0.8px] text-dg-text">Intento de Suplantación</h3>
                     <p className="text-dg-text-muted text-sm">Ningún usuario identificado</p>
                   </div>
                 </div>
 
-                <div className="bg-dg-card p-6 rounded-dg-lg border border-dg-border">
-                  <h4 className="headline font-bold text-xs text-dg-error mb-3 uppercase">Motivo de Detección</h4>
+                <div className="mini-card p-6">
+                  <h4 className="mb-3 text-xs font-bold uppercase tracking-[0.8px] text-dg-error">Motivo de Detección</h4>
                   <p className="text-dg-text text-base leading-relaxed">
                     {evento.motivo ?? "Superficie plana detectada — Varianza de profundidad insuficiente para rostro real"}
                   </p>
@@ -224,33 +219,33 @@ export default function EventDetail() {
 
             {isUnknown && (
               <>
-                <div className="bg-dg-card rounded-dg p-8 text-center space-y-4 border border-dg-border">
-                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-dg-warning/10 text-dg-warning mb-2">
-                    <UserSearch className="w-10 h-10" />
+                <div className="mini-card space-y-4 p-8 text-center">
+                  <div className="mb-2 inline-flex h-20 w-20 items-center justify-center border border-dg-warning/50 text-dg-warning">
+                    <UserSearch className="h-10 w-10" aria-hidden="true" />
                   </div>
                   <div>
-                    <h2 className="headline text-2xl font-bold text-dg-text tracking-tight">Persona No Registrada</h2>
+                    <h2 className="text-2xl font-bold uppercase tracking-[0.8px] text-dg-text">Persona No Registrada</h2>
                     <p className="text-dg-text-muted text-sm mt-1">No se encontró coincidencia en la base de datos</p>
                   </div>
                 </div>
 
                 <button 
                   onClick={() => navigate("/register/start")}
-                  className="btn-primary w-full py-4 flex items-center justify-center gap-2"
+                  className="mini-btn mini-btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm"
                 >
-                  <Plus className="w-6 h-6" /> Registrar esta persona
+                  <Plus className="h-5 w-5" aria-hidden="true" /> Registrar esta persona
                 </button>
               </>
             )}
 
-            <div className="cyber-card p-5 space-y-6">
+            <div className="mini-card space-y-6 p-5">
               <div className="flex items-center justify-between">
-                <h2 className="headline font-bold text-dg-text text-base">Análisis Biométrico 3D</h2>
+                <h2 className="mini-h2">Análisis Biométrico 3D</h2>
                 <Fingerprint className={`w-6 h-6 ${isFraud ? 'text-dg-error' : isUnknown ? 'text-dg-warning' : 'text-dg-success'}`} />
               </div>
 
               {metricas && (
-                <div className="h-64 w-full bg-black/20 rounded-dg p-2 border border-white/5 relative">
+                <div className="relative h-64 w-full border border-dg-border p-2">
                   <ResponsiveContainer width="100%" height="100%">
                     <RadarChart cx="50%" cy="50%" outerRadius="70%" data={[
                       { metric: "Varianza", value: Math.min(((metricas.varianza ?? 0) / 3) * 100, 100) },
@@ -261,30 +256,31 @@ export default function EventDetail() {
                       <PolarGrid stroke="var(--color-dg-border)" />
                       <PolarAngleAxis dataKey="metric" tick={{ fill: 'var(--color-dg-text-muted)', fontSize: 10, fontWeight: 'bold' }} />
                       <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                      <Tooltip contentStyle={{ backgroundColor: 'var(--color-dg-card)', border: '1px solid var(--color-dg-border)', borderRadius: '10px', fontSize: '12px' }} />
+                      <Tooltip contentStyle={{ backgroundColor: 'var(--color-dg-card)', border: '1px solid var(--color-dg-border)', borderRadius: 0, fontSize: '12px', letterSpacing: '0.8px' }} />
                       <Radar 
                         name="Huella 3D" 
                         dataKey="value" 
                         stroke={isFraud ? "var(--color-dg-error)" : "var(--color-dg-success)"} 
                         fill={isFraud ? "var(--color-dg-error)" : "var(--color-dg-success)"} 
-                        fillOpacity={0.4} 
+                        fillOpacity={0.25}
+                        isAnimationActive={false}
                       />
                     </RadarChart>
                   </ResponsiveContainer>
                   {isFraud && (
-                    <div className="absolute top-2 left-2 px-2 py-1 bg-dg-error/20 border border-dg-error/30 text-2xs font-bold text-dg-error uppercase rounded-dg-sm backdrop-blur-sm">
+                    <div className="absolute left-2 top-2 border border-dg-error/50 bg-dg-bg px-2 py-1 text-2xs font-bold uppercase tracking-[0.8px] text-dg-error">
                       Firma Plana Detectada
                     </div>
                   )}
                   {isAuthorized && (
-                    <div className="absolute top-2 left-2 px-2 py-1 bg-dg-success/20 border border-dg-success/30 text-2xs font-bold text-dg-success uppercase rounded-dg-sm backdrop-blur-sm">
+                    <div className="absolute left-2 top-2 border border-dg-success/50 bg-dg-bg px-2 py-1 text-2xs font-bold uppercase tracking-[0.8px] text-dg-success">
                       Volumen Facial Confirmado
                     </div>
                   )}
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2 border-t border-white/5">
+              <div className="grid grid-cols-1 gap-6 border-t border-dg-border pt-6 sm:grid-cols-2">
                 <MetricItem 
                   label="Confianza Facial" 
                   value={confianzaPct != null ? `${confianzaPct}%` : "N/A"} 
@@ -316,13 +312,10 @@ export default function EventDetail() {
               <button 
                 onClick={descargarInforme}
                 disabled={generandoPdf}
-                className="btn-primary w-full py-4 flex items-center justify-center gap-2 disabled:opacity-60"
+                className="mini-btn mini-btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:opacity-60"
               >
                 {generandoPdf ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-dg-bg border-t-transparent rounded-full animate-spin" />
-                    Generando...
-                  </>
+                  "Generando"
                 ) : (
                   <>
                     <Download className="w-5 h-5" aria-hidden="true" />
@@ -334,14 +327,14 @@ export default function EventDetail() {
               {errorInforme && (
                 <p
                   role="alert"
-                  className="text-xs text-dg-warning bg-dg-warning/5 border border-dg-warning/30 rounded-dg p-3 text-center"
+                  className="border border-dg-warning/50 p-3 text-center text-xs text-dg-warning"
                 >
                   {errorInforme}
                 </p>
               )}
               <button 
                 onClick={() => navigate(-1)}
-                className="btn-secondary w-full py-4"
+                className="mini-btn w-full py-4 text-sm"
               >
                 Cerrar Detalles
               </button>
@@ -350,7 +343,7 @@ export default function EventDetail() {
         </div>
       </main>
 
-      <Navigation />
+      <Navigation variante="minimal" />
     </div>
   );
 }
@@ -359,15 +352,12 @@ function MetricItem({ label, value, progress, color = "bg-dg-info" }: { label: s
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-end">
-        <span className="text-dg-text-muted text-xs font-semibold">{label}</span>
-        <span className={`${color.replace('bg-', 'text-')} font-bold text-sm`}>{value}</span>
+        <span className="text-xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">{label}</span>
+        <span className={`${color.replace('bg-', 'text-')} tabular text-sm font-bold`}>{value}</span>
       </div>
-      <div className="w-full bg-dg-bg rounded-full h-1.5 overflow-hidden">
-        <motion.div 
-          initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
-          className={`${color} h-full rounded-full`} 
-        />
+      {/* Recta y quieta: antes crecia desde cero en cada render. */}
+      <div className="h-1 w-full bg-white/5">
+        <div className={`${color} h-full`} style={{ width: `${Math.min(progress, 100)}%` }} />
       </div>
     </div>
   );
