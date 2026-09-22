@@ -57,7 +57,7 @@ export default function DeleteConfirmModal() {
             <AlertTriangle className="h-9 w-9 text-dg-error" aria-hidden="true" />
           </div>
           
-          <h2 className="mb-3 text-xl font-bold uppercase tracking-[0.8px] text-dg-text">¿Eliminar usuario?</h2>
+          <h1 className="mb-3 text-xl font-bold uppercase tracking-[0.8px] text-dg-text">¿Eliminar usuario?</h1>
           
           <p className="text-dg-text-secondary text-sm leading-relaxed mb-6 px-2">
             Se borrará su plantilla facial y su registro. Dejará de tener acceso

@@ -57,7 +57,7 @@ export default function EditUserModal() {
           <div className="mb-4 flex h-12 w-12 items-center justify-center border border-dg-border">
             <Edit2 className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
           </div>
-          <h2 className="text-2xl font-bold uppercase tracking-[0.8px] text-dg-text">Editar Usuario</h2>
+          <h1 className="text-2xl font-bold uppercase tracking-[0.8px] text-dg-text">Editar Usuario</h1>
           <p className="mt-2 text-xs uppercase tracking-[0.8px] text-dg-text-muted">{user?.nombre ?? "—"} — ID #{id?.substring(0, 8)}</p>
         </div>
 

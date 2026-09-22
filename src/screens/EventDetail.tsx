@@ -301,7 +301,7 @@ export default function EventDetail() {
                 />
                 <MetricItem 
                   label="Distancia Física" 
-                  value={metricas?.distancia ? `${metricas.distancia} cm` : "—"} 
+                  value={metricas?.distancia ? `${metricas.distancia.toFixed(0)} cm` : "—"} 
                   progress={Math.min((metricas?.distancia ?? 0) / 150 * 100, 100)} 
                   color="bg-dg-info"
                 />
@@ -352,7 +352,7 @@ function MetricItem({ label, value, progress, color = "bg-dg-info" }: { label: s
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-end">
-        <span className="text-xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">{label}</span>
+        <span className="text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">{label}</span>
         <span className={`${color.replace('bg-', 'text-')} tabular text-sm font-bold`}>{value}</span>
       </div>
       {/* Recta y quieta: antes crecia desde cero en cada render. */}
