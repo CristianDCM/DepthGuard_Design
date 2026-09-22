@@ -119,7 +119,7 @@ export default function EventDetail() {
   };
 
   return (
-    <div className="h-full pb-16 lg:pb-0 lg:pt-16 flex flex-col overflow-hidden">
+    <div className="h-full pb-barra lg:pb-0 lg:pt-16 flex flex-col overflow-hidden">
       <header className="shrink-0 border-b border-dg-border bg-dg-bg">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between w-full">
           <div className="flex items-center gap-4">

@@ -47,7 +47,7 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col">
+    <div className="min-h-screen pb-barra lg:pb-0 lg:pt-16 flex flex-col">
       {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
           estas. El <h1> se conserva para lectores de pantalla. */}
       <h1 className="sr-only">Usuarios registrados</h1>

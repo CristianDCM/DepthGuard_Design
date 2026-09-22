@@ -316,7 +316,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-dg-bg pb-24 lg:pb-0 lg:pt-16">
+    <div className="min-h-screen flex flex-col bg-dg-bg pb-barra lg:pb-0 lg:pt-16">
       {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
           estas. El <h1> se conserva para lectores de pantalla, que si
           necesitan oir el nombre de la pagina al entrar. */}

@@ -270,6 +270,20 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
+  /*
+   * Hueco para la barra inferior de navegacion en movil.
+   *
+   * La barra mide 4rem MAS el area segura del dispositivo, porque lleva
+   * `pb-safe`: en un telefono con indicador de inicio o barra de gestos
+   * crece entre 20 y 34px. Las pantallas reservaban 4rem o 6rem fijos, sin
+   * el env(), asi que en esos telefonos la barra se comia justo el final de
+   * la pantalla: en el detalle de evento, los botones de descargar informe
+   * y cerrar. Los 0.5rem de mas son el aire entre el contenido y la barra.
+   */
+  .pb-barra {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
   .pt-safe {
     padding-top: env(safe-area-inset-top, 0px);
   }

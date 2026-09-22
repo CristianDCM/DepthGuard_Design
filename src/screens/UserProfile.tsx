@@ -54,7 +54,7 @@ export default function UserProfile() {
   const alertas = eventos.filter(e => e.estado !== "ACCESO_PERMITIDO").length;
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col bg-dg-bg">
+    <div className="min-h-screen pb-barra lg:pb-0 lg:pt-16 flex flex-col bg-dg-bg">
       <header className="sticky top-0 lg:top-16 z-40 w-full border-b border-dg-border bg-dg-bg">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between w-full">
           <div className="flex items-center gap-4">

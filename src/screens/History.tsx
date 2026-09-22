@@ -223,7 +223,7 @@ export default function History() {
   };
 
   return (
-    <div className="h-full pb-16 lg:pb-0 lg:pt-16 flex flex-col overflow-hidden">
+    <div className="h-full pb-barra lg:pb-0 lg:pt-16 flex flex-col overflow-hidden">
       {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
           estas. El <h1> se conserva para lectores de pantalla. */}
       <h1 className="sr-only">Historial de accesos</h1>

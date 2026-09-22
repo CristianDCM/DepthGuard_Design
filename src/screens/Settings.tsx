@@ -213,7 +213,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col bg-dg-bg">
+    <div className="min-h-screen pb-barra lg:pb-0 lg:pt-16 flex flex-col bg-dg-bg">
       {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
           estas. El <h1> se conserva para lectores de pantalla, que si
           necesitan oir el nombre de la pagina al entrar. */}

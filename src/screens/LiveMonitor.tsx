@@ -191,7 +191,7 @@ export default function LiveMonitor() {
     : false;
 
   return (
-    <div className="h-full pb-16 lg:pb-0 lg:pt-16 flex flex-col overflow-hidden bg-dg-bg">
+    <div className="h-full pb-barra lg:pb-0 lg:pt-16 flex flex-col overflow-hidden bg-dg-bg">
       {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
           estas. El <h1> se conserva para lectores de pantalla. */}
       <h1 className="sr-only">Monitor en vivo</h1>
