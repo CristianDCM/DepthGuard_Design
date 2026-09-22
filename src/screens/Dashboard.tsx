@@ -319,29 +319,10 @@ export default function Dashboard() {
     // `mini` fija el interletraje de 0.8px del portafolio para toda la
     // pantalla. La paleta es la de siempre: aqui no se anade ni un color.
     <div className="mini min-h-screen flex flex-col bg-dg-bg pb-24 lg:pb-0 lg:pt-16">
-      {/*
-        A diferencia del resto del panel, esta pantalla SI lleva cabecera
-        propia: es el banner del portafolio (rotulo, titular grande, parrafo
-        gris y boton de filete), que es lo que le da su caracter. El <h1>
-        pasa de sr-only a visible.
-      */}
-      <header className="border-b border-dg-border px-4 pb-8 pt-8 sm:pb-10 sm:pt-12">
-        <div className="mx-auto w-full max-w-7xl">
-          <p className="mini-eyebrow">Panel de control</p>
-          <h1 className="mini-h1 mt-2">Inicio</h1>
-          <p className="mini-body mt-4 max-w-2xl">
-            Accesos, intentos de fraude y estado del nodo de vigilancia. Los datos se
-            actualizan en vivo a medida que el borde los envia.
-          </p>
-          <button
-            type="button"
-            onClick={() => navigate("/history")}
-            className="mini-btn mt-6 px-6 py-3 text-sm"
-          >
-            Ver historial completo
-          </button>
-        </div>
-      </header>
+      {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
+          estas. El <h1> se conserva para lectores de pantalla, que si
+          necesitan oir el nombre de la pagina al entrar. */}
+      <h1 className="sr-only">Inicio</h1>
 
       <main id="contenido" className="mx-auto w-full max-w-7xl flex-1 space-y-8 px-4 py-8">
         {loading ? (

@@ -76,8 +76,13 @@ interface WebRTCPlayerProps {
    * "bare" elimina la tarjeta, la relacion de aspecto y los mensajes de
    * estado propios: el video llena al contenedor y quien manda es el padre.
    * Lo usa BiometricFrame, que dibuja su propio marco encima.
+   *
+   * "plano" es la misma tarjeta que "card" en la variante minimalista:
+   * esquina viva, filete de 1px, franjas solidas en vez de degradados y
+   * ninguna animacion (ni el punto de grabacion, ni el desvanecido del
+   * video, ni la ruleta de espera). La pide el monitor en vivo.
    */
-  variante?: "card" | "bare";
+  variante?: "card" | "bare" | "plano";
 }
 
 // ──────────────────────────────────────────────
@@ -272,9 +277,18 @@ export default function WebRTCPlayer({
   // ──────────────────────────────────────────────
 
   const bare = variante === "bare";
+  const plano = variante === "plano";
 
   return (
-    <div className={bare ? "relative h-full w-full" : "cyber-card overflow-hidden relative"}>
+    <div
+      className={
+        bare
+          ? "relative h-full w-full"
+          : plano
+            ? "mini-card relative overflow-hidden"
+            : "cyber-card overflow-hidden relative"
+      }
+    >
       {/* Video element — oculto hasta conectar */}
       <video
         ref={videoRef}
@@ -284,7 +298,7 @@ export default function WebRTCPlayer({
         aria-label="Vídeo en directo de la cámara de acceso"
         className={`${
           bare ? "h-full w-full object-cover" : "w-full aspect-video object-contain"
-        } bg-dg-canvas transition-opacity duration-500 ${
+        } bg-dg-canvas ${plano ? "" : "transition-opacity duration-500"} ${
           status === "conectado" ? "opacity-100" : "opacity-0 absolute"
         }`}
       />
@@ -306,8 +320,10 @@ export default function WebRTCPlayer({
         >
           {status === "iniciando" || status === "conectando" ? (
             <>
-              <Loader2 className="h-7 w-7 text-dg-info animate-spin" aria-hidden="true" />
-              <span className="text-sm font-medium">Conectando con la cámara…</span>
+              {!plano && <Loader2 className="h-7 w-7 text-dg-info animate-spin" aria-hidden="true" />}
+              <span className={plano ? "text-xs font-bold uppercase tracking-[0.8px]" : "text-sm font-medium"}>
+                {plano ? "Conectando con la cámara" : "Conectando con la cámara…"}
+              </span>
             </>
           ) : (
             <>
@@ -322,16 +338,31 @@ export default function WebRTCPlayer({
 
       {/* Cabecera del preview — solo con video y fuera de los modos minimal/bare */}
       {status === "conectado" && !minimal && !bare && (
-        <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 py-2 bg-gradient-to-b from-black/70 to-transparent">
+        <div
+          className={`absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 py-2 ${
+            plano ? "bg-black/70" : "bg-gradient-to-b from-black/70 to-transparent"
+          }`}
+        >
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-dg-error animate-pulse shadow-[0_0_6px_var(--color-dg-error)]" aria-hidden="true" />
-            <span className="text-2xs font-bold text-white/90 uppercase">
+            <span
+              aria-hidden="true"
+              className={
+                plano
+                  ? "h-2 w-2 bg-dg-error"
+                  : "w-2 h-2 rounded-full bg-dg-error animate-pulse shadow-[0_0_6px_var(--color-dg-error)]"
+              }
+            />
+            <span className={`text-2xs font-bold uppercase text-white/90 ${plano ? "tracking-[0.8px]" : ""}`}>
               En Vivo
             </span>
           </div>
-          <div className="flex items-center gap-1.5 bg-black/40 px-2 py-0.5 rounded-full">
+          <div
+            className={`flex items-center gap-1.5 px-2 py-0.5 ${
+              plano ? "border border-dg-success/50" : "bg-black/40 rounded-full"
+            }`}
+          >
             <Wifi className="w-3 h-3 text-dg-success" aria-hidden="true" />
-            <span className="text-2xs font-bold text-dg-success uppercase">
+            <span className={`text-2xs font-bold uppercase text-dg-success ${plano ? "tracking-[0.8px]" : ""}`}>
               Directo
             </span>
           </div>

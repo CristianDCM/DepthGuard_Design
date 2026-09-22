@@ -370,7 +370,7 @@
 }
 
 /* ============================================================
-   VARIANTE MINIMALISTA — solo la pestaña Inicio
+   VARIANTE MINIMALISTA — pestañas Inicio y Vivo
    ============================================================
    Traslado del lenguaje visual del portafolio (cristiandcm) a la
    consola, para poder verlo aplicado antes de decidir si se
@@ -406,30 +406,10 @@
     @apply border border-dg-border bg-transparent;
   }
 
-  /* Titular de pantalla (el h1 del banner del portafolio). */
-  .mini-h1 {
-    @apply text-3xl font-bold text-dg-text sm:text-4xl;
-    letter-spacing: 0.8px;
-    line-height: 1.05;
-  }
-
-  /* Rotulo sobre el titular. */
-  .mini-eyebrow {
-    @apply text-xs font-medium uppercase text-dg-text-muted;
-    letter-spacing: 0.8px;
-  }
-
-  /* Titulo de panel. */
+  /* Titulo de panel (tarjetas de Inicio y del monitor). */
   .mini-h2 {
     @apply text-sm font-bold uppercase text-dg-text;
     letter-spacing: 0.8px;
-  }
-
-  /* Cuerpo secundario (el parrafo gris del banner). */
-  .mini-body {
-    @apply text-sm text-dg-text-secondary;
-    letter-spacing: 0.8px;
-    line-height: 1.6;
   }
 
   /* Boton del portafolio: filete, transparente, se invierte al
