@@ -344,19 +344,40 @@ export default function Dashboard() {
                     las tres tarjetas comparten filete en vez de dibujar cada
                     una el suyo, que es como se compone una tabla plana.
                   */
-                  className="flex flex-col gap-2 bg-dg-bg p-3 sm:gap-3 sm:p-6"
+                  className="flex flex-col gap-2 bg-dg-bg p-3 sm:p-4"
                 >
+                  {/*
+                    La cifra comparte fila con el icono, y la etiqueta va
+                    debajo a todo el ancho. Al contrario, "Desconocidos" es
+                    una palabra de doce letras que no puede encoger: en una
+                    columna de un tercio de pantalla desbordaba la fila y
+                    empujaba el icono fuera de la tarjeta.
+                  */}
                   <div className="flex items-start justify-between gap-2">
-                    <span className="text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted sm:text-xs">
-                      {stat.label}
-                    </span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className={`tabular text-2xl font-bold leading-none sm:text-3xl ${stat.color}`}>
+                        {stat.value}
+                      </span>
+                      {stat.sub && (
+                        <span className="hidden text-2xs uppercase tracking-[0.8px] text-dg-text-muted sm:inline">
+                          {stat.sub}
+                        </span>
+                      )}
+                    </div>
                     <stat.icon aria-hidden="true" className={`h-4 w-4 shrink-0 ${stat.color}`} />
                   </div>
-                  <span className={`tabular text-3xl font-bold leading-none sm:text-4xl ${stat.color}`}>
-                    {stat.value}
-                  </span>
-                  <span className="text-2xs uppercase tracking-[0.8px] text-dg-text-muted">
-                    {stat.sub}
+                  {/* break-words es la red de seguridad para pantallas de
+                      320px, donde la etiqueta tampoco cabe entera. */}
+                  <span
+                    // El hueco util de la tarjeta a 390px es de 94px medidos,
+                    // y "DESCONOCIDOS" a 11px ocupa 100 con el interletraje de
+                    // 0.8px: sin el caben los 90 que necesita. A partir de sm
+                    // la columna es ancha y recupera la medida del diseño. Por
+                    // debajo de 360px no cabe de ninguna forma, y ahi parte con
+                    // guion en vez de desbordar.
+                    className="hyphens-auto break-words text-2xs font-bold uppercase tracking-normal text-dg-text-muted sm:tracking-[0.8px]"
+                  >
+                    {stat.label}
                   </span>
                 </div>
               ))}
