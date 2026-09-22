@@ -368,3 +368,92 @@
     background-color: var(--color-dg-text-muted);
   }
 }
+
+/* ============================================================
+   VARIANTE MINIMALISTA — solo la pestaña Inicio
+   ============================================================
+   Traslado del lenguaje visual del portafolio (cristiandcm) a la
+   consola, para poder verlo aplicado antes de decidir si se
+   extiende al resto de pantallas. Lo que se toma de alli:
+
+   - Esquina viva: radio 0 en todo. Ni tarjetas, ni botones, ni
+     celdas. Es el rasgo que mas define el original.
+   - Superficie plana: el fondo de pagina es el unico fondo. Las
+     tarjetas se dibujan con un filete de 1px, sin relleno ni
+     sombra, asi que la jerarquia la da el borde y el espacio.
+   - Inversion como estado activo: lo seleccionado se rellena con
+     el color del texto y escribe en el color del fondo, igual que
+     los enlaces del navbar del portafolio. Es neutro: no anade
+     ningun color nuevo a la paleta.
+   - Interletraje 0.8px y mayusculas en rotulos, que es la medida
+     exacta del original.
+   - Sin movimiento: ninguna de estas clases anima ni transiciona.
+
+   La paleta NO cambia: se siguen usando los tokens --color-dg-* de
+   arriba, incluidos los cuatro colores de estado. El tipo tambien
+   sigue siendo Inter; Montserrat (la del portafolio) exigiria
+   sumar otra familia al paquete de fuentes.
+   ============================================================ */
+@layer components {
+  /* Contenedor de pantalla: fija el interletraje del portafolio
+     para todo lo que cuelgue dentro. */
+  .mini {
+    letter-spacing: 0.8px;
+  }
+
+  /* Equivalente plano de .cyber-card: filete, sin relleno ni sombra. */
+  .mini-card {
+    @apply border border-dg-border bg-transparent;
+  }
+
+  /* Titular de pantalla (el h1 del banner del portafolio). */
+  .mini-h1 {
+    @apply text-3xl font-bold text-dg-text sm:text-4xl;
+    letter-spacing: 0.8px;
+    line-height: 1.05;
+  }
+
+  /* Rotulo sobre el titular. */
+  .mini-eyebrow {
+    @apply text-xs font-medium uppercase text-dg-text-muted;
+    letter-spacing: 0.8px;
+  }
+
+  /* Titulo de panel. */
+  .mini-h2 {
+    @apply text-sm font-bold uppercase text-dg-text;
+    letter-spacing: 0.8px;
+  }
+
+  /* Cuerpo secundario (el parrafo gris del banner). */
+  .mini-body {
+    @apply text-sm text-dg-text-secondary;
+    letter-spacing: 0.8px;
+    line-height: 1.6;
+  }
+
+  /* Boton del portafolio: filete, transparente, se invierte al
+     pasar por encima. Sin transicion: el cambio es inmediato. */
+  .mini-btn {
+    @apply border border-dg-border bg-transparent px-4 py-2 text-xs font-bold uppercase text-dg-text-secondary;
+    letter-spacing: 0.8px;
+  }
+
+  .mini-btn:hover {
+    @apply border-dg-text bg-dg-text text-dg-bg;
+  }
+
+  /* Estado activo: la misma inversion, ya fijada. */
+  .mini-btn-on {
+    @apply border-dg-text bg-dg-text text-dg-bg;
+  }
+
+  .mini-input {
+    @apply border border-dg-border bg-transparent px-2 py-1 text-2xs text-dg-text-secondary [color-scheme:dark];
+    letter-spacing: 0.8px;
+  }
+
+  .mini-input:focus {
+    @apply border-dg-text;
+  }
+}
