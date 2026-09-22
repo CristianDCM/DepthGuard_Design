@@ -4,7 +4,6 @@ import {
   UserPlus,
   Info,
   Video,
-  Users,
   Check,
   CheckCircle,
   ArrowLeft,
@@ -13,7 +12,6 @@ import {
   ShieldCheck,
   FileCheck2,
 } from "lucide-react";
-import { motion } from "motion/react";
 import WebRTCPlayer from "../components/WebRTCPlayer";
 import BiometricFrame, { type EstadoMarco, type Pose } from "../components/BiometricFrame";
 import { leerCalidad, consejoPrioritario, type CalidadCaptura } from "../lib/calidadCaptura";
@@ -315,51 +313,49 @@ export default function RegisterStart() {
   // ============================================
 
   return (
-    <div className="min-h-screen bg-dg-bg overflow-hidden relative">
-      {/* Blurred background content */}
-      <div className="absolute inset-0 blur-md opacity-40 pointer-events-none">
-        <header className="bg-dg-bg border-b border-dg-border px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <Users className="w-6 h-6 text-dg-text-secondary" aria-hidden="true" />
-            <h1 className="text-xl font-bold tracking-tight headline">Usuarios</h1>
-          </div>
-        </header>
-        <main className="p-4 space-y-3 max-w-7xl mx-auto w-full">
-          <div className="cyber-card h-20 w-full" />
-          <div className="cyber-card h-20 w-full" />
-        </main>
-      </div>
+    <div className="mini min-h-screen bg-dg-bg overflow-hidden relative">
+      {/*
+        El unico encabezado de la pantalla estaba en la cabecera falsa del
+        decorado, y decia "Usuarios". Al retirarlo la pagina se quedaba sin
+        <h1>: este dice de verdad donde esta quien entra, como en el resto
+        del panel.
+      */}
+      <h1 className="sr-only">Registrar nuevo usuario</h1>
 
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm z-40" />
+      {/*
+        Velo plano. Antes debajo habia una cabecera y dos tarjetas falsas,
+        desenfocadas, imitando la pantalla de Usuarios: decorado que ni es
+        contenido real ni se puede tocar, y que el desenfoque del velo
+        volvia a tapar. Sin el, el lienzo se ve como lo que es.
+      */}
+      <div className="absolute inset-0 z-40 bg-dg-canvas/80" />
 
       {/* Hoja inferior en movil; en escritorio se centra como tarjeta en
           lugar de estirarse de borde a borde de la pantalla. */}
-      <motion.div 
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
+      <div
         // overscroll-contain: sin esto, un scroll de mas dentro de la hoja
-              // propaga al documento y dispara el pull-to-refresh del
-              // navegador, que recarga la pagina EN MITAD del escaneo facial
-              // y pierde el registro.
-              style={{ overscrollBehavior: "contain", touchAction: "pan-y" }}
-              className="fixed bottom-0 left-0 right-0 z-50 bg-dg-bg rounded-t-dg-lg border-t border-x border-dg-border p-6 shadow-dg-lg max-h-[92vh] overflow-y-auto md:max-w-2xl md:mx-auto md:bottom-8 md:rounded-dg-lg md:border"
+        // propaga al documento y dispara el pull-to-refresh del navegador,
+        // que recarga la pagina EN MITAD del escaneo facial y pierde el
+        // registro.
+        style={{ overscrollBehavior: "contain", touchAction: "pan-y" }}
+        className="fixed bottom-0 left-0 right-0 z-50 max-h-[92vh] overflow-y-auto border-t border-x border-dg-border bg-dg-bg p-6 md:mx-auto md:bottom-8 md:max-w-2xl md:border"
       >
-        <div className="w-12 h-1 bg-dg-border rounded-full mx-auto mb-8 shrink-0" />
+        <div className="mx-auto mb-8 h-1 w-12 shrink-0 bg-dg-border" />
         
         {/* ============ FORMULARIO ============ */}
         {step === "form" && (
           <>
             <div className="flex items-center gap-4 mb-6 shrink-0">
-              <div className="w-10 h-10 rounded-dg bg-dg-action/10 flex items-center justify-center">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-dg-border">
                 <UserPlus className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
               </div>
-              <h2 className="text-xl font-bold text-dg-text tracking-tight headline">Registrar Nuevo Usuario</h2>
+              <h2 className="text-xl font-bold uppercase tracking-[0.8px] text-dg-text">Registrar Nuevo Usuario</h2>
             </div>
 
             <div className="space-y-6 pb-10">
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="registro-nombre" className="block text-sm font-medium text-dg-text-secondary px-1">Nombre completo</label>
+                  <label htmlFor="registro-nombre" className="block px-1 text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Nombre completo</label>
                   <input 
                     id="registro-nombre"
                     type="text" 
@@ -370,12 +366,12 @@ export default function RegisterStart() {
                     disabled={isSubmitting}
                     aria-invalid={error ? true : undefined}
                     aria-describedby={error ? "registro-nombre-error" : undefined}
-                    className={`w-full bg-dg-card border ${error ? 'border-dg-error' : 'border-dg-border'} rounded-dg px-4 py-3 text-dg-text placeholder:text-dg-text-muted focus:border-dg-focus transition-colors text-base disabled:opacity-50`}
+                    className={`w-full border bg-transparent ${error ? 'border-dg-error' : 'border-dg-border'} px-4 py-3 text-base text-dg-text placeholder:text-dg-text-muted focus:border-dg-text disabled:opacity-50`}
                   />
                   {error && <p id="registro-nombre-error" role="alert" className="text-xs text-dg-error px-1 mt-1">{error}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <label htmlFor="registro-notas" className="block text-sm font-medium text-dg-text-secondary px-1">Notas <span className="text-dg-text-muted font-normal">(opcional)</span></label>
+                  <label htmlFor="registro-notas" className="block px-1 text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Notas <span className="font-normal">(opcional)</span></label>
                   <input 
                     id="registro-notas"
                     type="text" 
@@ -383,12 +379,12 @@ export default function RegisterStart() {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     disabled={isSubmitting}
-                    className="w-full bg-dg-card border border-dg-border rounded-dg px-4 py-3 text-dg-text placeholder:text-dg-text-muted focus:border-dg-focus transition-colors text-base disabled:opacity-50"
+                    className="w-full border border-dg-border bg-transparent px-4 py-3 text-base text-dg-text placeholder:text-dg-text-muted focus:border-dg-text disabled:opacity-50"
                   />
                 </div>
               </div>
 
-              <div className="bg-dg-card border border-dg-border rounded-dg-lg p-4 flex gap-4">
+              <div className="mini-card flex gap-4 p-4">
                 <Info className="w-6 h-6 text-dg-info shrink-0" aria-hidden="true" />
                 <div className="space-y-2">
                   <p className="text-sm text-dg-text leading-snug">
@@ -403,11 +399,11 @@ export default function RegisterStart() {
               <div className="space-y-4 pt-4">
                 <div className="flex gap-2 w-full max-w-xs mx-auto">
                   {ANGULOS.map((a) => (
-                    <div key={a.step} className="h-1 flex-1 rounded-full bg-dg-border/40" />
+                    <div key={a.step} className="h-1 flex-1 bg-dg-border" />
                   ))}
                 </div>
                 <div className="text-center">
-                  <p className="text-2xs text-dg-text-muted uppercase font-bold">5 Fases de Captura</p>
+                  <p className="text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">5 Fases de Captura</p>
                 </div>
               </div>
 
@@ -415,23 +411,20 @@ export default function RegisterStart() {
                 <button 
                   onClick={handleGoToConsent}
                   disabled={isSubmitting}
-                  className="btn-primary w-full py-4 flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="mini-btn mini-btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:opacity-50"
                 >
                   {isSubmitting ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-                      Comprobando…
-                    </>
+                    "Comprobando"
                   ) : (
                     <>
-                      <Video className="w-5 h-5" /> Continuar
+                      <Video className="h-5 w-5" aria-hidden="true" /> Continuar
                     </>
                   )}
                 </button>
                 <button 
                   onClick={() => navigate("/users")}
                   disabled={isSubmitting}
-                  className="btn-secondary w-full py-4 disabled:opacity-50"
+                  className="mini-btn w-full py-4 text-sm disabled:opacity-50"
                 >
                   Cancelar
                 </button>
@@ -444,11 +437,11 @@ export default function RegisterStart() {
         {step === "consent" && (
           <>
             <div className="flex items-center gap-4 mb-6 shrink-0">
-              <div className="w-10 h-10 rounded-dg bg-dg-action/10 flex items-center justify-center">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-dg-border">
                 <ShieldCheck className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-dg-text tracking-tight headline">Autorización Biométrica</h2>
+                <h2 className="text-xl font-bold uppercase tracking-[0.8px] text-dg-text">Autorización Biométrica</h2>
                 <p className="text-2xs text-dg-text-muted font-medium mt-0.5">
                   {name.trim()} · Paso obligatorio
                 </p>
@@ -457,10 +450,10 @@ export default function RegisterStart() {
 
             <div className="space-y-5 pb-10">
               {/* Texto legal */}
-              <div className="bg-dg-card border border-dg-border rounded-dg-lg p-5 space-y-4">
+              <div className="mini-card space-y-4 p-5">
                 <div className="flex items-center gap-3 mb-1">
                   <FileCheck2 className="w-5 h-5 text-dg-action-text shrink-0" aria-hidden="true" />
-                  <h3 className="text-sm font-bold text-dg-text">Consentimiento para Tratamiento de Datos Biométricos</h3>
+                  <h3 className="text-sm font-bold uppercase tracking-[0.8px] text-dg-text">Consentimiento para Tratamiento de Datos Biométricos</h3>
                 </div>
 
                 <div className="text-xs text-dg-text-muted leading-relaxed space-y-3">
@@ -499,20 +492,27 @@ export default function RegisterStart() {
               </div>
 
               {/* Checkbox */}
-              <label className="flex items-start gap-3 cursor-pointer group p-3 rounded-dg border border-dg-border/50 hover:border-dg-action-text/40 transition-colors">
+              <label className="group flex cursor-pointer items-start gap-3 border border-dg-border p-3 hover:bg-white/5">
                 <div className="relative mt-0.5 shrink-0">
                   <input 
                     type="checkbox" 
                     checked={consentChecked}
                     onChange={(e) => setConsentChecked(e.target.checked)}
-                    className="sr-only"
+                    className="sr-only peer"
                   />
-                  <div className={`w-5 h-5 rounded-dg-sm border-2 flex items-center justify-center transition-all ${
-                    consentChecked 
-                      ? 'bg-dg-action border-dg-action' 
+                  {/*
+                    El <input> real esta oculto y la casilla que se ve es un
+                    <div>, asi que el anillo de foco del navegador se dibujaba
+                    sobre un elemento recortado a 1px: invisible. Con `peer`
+                    lo hereda la casilla dibujada, que es donde hay que verlo
+                    (WCAG 2.4.7). Esto faltaba desde antes.
+                  */}
+                  <div className={`flex h-5 w-5 items-center justify-center border peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-dg-focus ${
+                    consentChecked
+                      ? 'border-dg-text bg-dg-text'
                       : 'border-dg-border group-hover:border-dg-text-muted'
                   }`}>
-                    {consentChecked && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
+                    {consentChecked && <Check className="h-3.5 w-3.5 text-dg-bg" strokeWidth={3} aria-hidden="true" />}
                   </div>
                 </div>
                 <span className="text-xs text-dg-text-muted leading-relaxed">
@@ -527,23 +527,20 @@ export default function RegisterStart() {
                 <button 
                   onClick={handleAcceptConsent}
                   disabled={!consentChecked || isSubmitting}
-                  className="btn-primary w-full py-4 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="mini-btn mini-btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {isSubmitting ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-                      Iniciando…
-                    </>
+                    "Iniciando"
                   ) : (
                     <>
-                      <ShieldCheck className="w-5 h-5" aria-hidden="true" /> Aceptar y comenzar
+                      <ShieldCheck className="h-5 w-5" aria-hidden="true" /> Aceptar y comenzar
                     </>
                   )}
                 </button>
                 <button 
                   onClick={() => { setStep("form"); setConsentChecked(false); }}
                   disabled={isSubmitting}
-                  className="btn-secondary w-full py-4 disabled:opacity-50"
+                  className="mini-btn w-full py-4 text-sm disabled:opacity-50"
                 >
                   Volver
                 </button>
@@ -556,11 +553,11 @@ export default function RegisterStart() {
         {step === "waiting_edge" && (
           <>
             <div className="flex items-center gap-4 mb-6 shrink-0">
-              <div className="w-10 h-10 rounded-dg bg-dg-action/10 flex items-center justify-center">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-dg-border">
                 <UserPlus className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-dg-text tracking-tight headline">Registrar Nuevo Usuario</h2>
+                <h2 className="text-xl font-bold uppercase tracking-[0.8px] text-dg-text">Registrar Nuevo Usuario</h2>
                 {usuarioCreado && (
                   <p className="text-2xs text-dg-text-muted font-medium mt-0.5">
                     {usuarioCreado.nombre} · ID: {usuarioCreado.id.substring(0, 8)}
@@ -580,11 +577,11 @@ export default function RegisterStart() {
                 anunciaba con la senal visual de una averia.
               */}
               {esperaAgotada ? (
-                <div className="cyber-card p-6 text-center" role="alert">
+                <div className="mini-card p-6 text-center" role="alert">
                   <div className="mb-4 flex justify-center">
                     <AlertTriangle className="h-10 w-10 text-dg-warning" aria-hidden="true" />
                   </div>
-                  <h3 className="mb-2 text-lg font-bold text-dg-text">
+                  <h3 className="mb-2 text-lg font-bold uppercase tracking-[0.8px] text-dg-text">
                     El terminal no responde
                   </h3>
                   <p className="mx-auto mb-5 max-w-sm text-sm text-dg-text-secondary">
@@ -594,41 +591,37 @@ export default function RegisterStart() {
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <button
                       onClick={() => setEsperaAgotada(false)}
-                      className="btn-primary flex-1"
+                      className="mini-btn mini-btn-strong flex-1 py-3 text-sm"
                     >
                       Seguir esperando
                     </button>
                     <button
                       onClick={() => navigate("/settings")}
-                      className="btn-secondary flex-1"
+                      className="mini-btn flex-1 py-3 text-sm"
                     >
                       Ver estado del sistema
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="cyber-card p-8 text-center" role="status">
+                <div className="mini-card p-8 text-center" role="status">
                   <div className="mb-4 flex justify-center">
                     <ScanFace className="h-12 w-12 text-dg-info" aria-hidden="true" />
                   </div>
-                  <h3 className="mb-2 text-lg font-bold text-dg-text">
+                  <h3 className="mb-2 text-lg font-bold uppercase tracking-[0.8px] text-dg-text">
                     Preparando la cámara
                   </h3>
                   <p className="mx-auto max-w-sm text-sm text-dg-text-secondary">
                     Conectando con el terminal de acceso. Suele tardar unos segundos.
                   </p>
-                  <div
-                    aria-hidden="true"
-                    className="mx-auto mt-5 h-1 w-40 overflow-hidden rounded-full bg-dg-canvas"
-                  >
-                    <div className="h-full w-1/3 rounded-full bg-dg-info animate-pulse" />
-                  </div>
+                  {/* Linea entera y quieta: la anterior latia en bucle. */}
+                  <div aria-hidden="true" className="mx-auto mt-5 h-1 w-40 bg-dg-info" />
                 </div>
               )}
 
               <button 
                 onClick={handleCancelScanning}
-                className="btn-secondary w-full py-4"
+                className="mini-btn w-full py-4 text-sm"
               >
                 Cancelar
               </button>
@@ -640,11 +633,11 @@ export default function RegisterStart() {
         {step === "scanning" && (
           <>
             <div className="flex items-center gap-4 mb-6 shrink-0">
-              <div className="w-10 h-10 rounded-dg bg-dg-action/10 flex items-center justify-center">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-dg-border">
                 <UserPlus className="w-6 h-6 text-dg-action-text" aria-hidden="true" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-dg-text tracking-tight headline">Escaneando el rostro</h2>
+                <h2 className="text-xl font-bold uppercase tracking-[0.8px] text-dg-text">Escaneando el rostro</h2>
                 {usuarioCreado && (
                   <p className="text-2xs text-dg-text-muted font-medium mt-0.5">
                     {usuarioCreado.nombre} · ID: {usuarioCreado.id.substring(0, 8)}
@@ -689,7 +682,7 @@ export default function RegisterStart() {
               {/* Botón cancelar */}
               <button 
                 onClick={handleCancelScanning}
-                className="btn-secondary w-full py-4"
+                className="mini-btn w-full py-4 text-sm"
               >
                 Cancelar Registro
               </button>
@@ -703,7 +696,7 @@ export default function RegisterStart() {
             <div className="flex flex-col items-center text-center space-y-4">
               <AlertTriangle className="h-14 w-14 text-dg-error" aria-hidden="true" />
               <div>
-                <h2 className="text-xl font-bold text-dg-text leading-tight headline">
+                <h2 className="text-xl font-bold uppercase leading-tight tracking-[0.8px] text-dg-text">
                   {errorUi.titulo}
                 </h2>
                 <p className="mx-auto mt-2 max-w-sm text-sm text-dg-text-secondary">
@@ -721,14 +714,14 @@ export default function RegisterStart() {
                       ? navigate(accion.destino)
                       : (setStep("form"), setErrorUi(null), setError(""))
                   }
-                  className={`w-full h-14 ${accion.tipo === "navegar" ? "btn-secondary" : "btn-primary"}`}
+                  className={`mini-btn h-14 w-full text-sm ${accion.tipo === "navegar" ? "" : "mini-btn-strong"}`}
                 >
                   {accion.etiqueta}
                 </button>
               ))}
               <button 
                 onClick={() => navigate("/users")}
-                className="btn-secondary w-full h-14"
+                className="mini-btn h-14 w-full text-sm"
               >
                 Volver a Usuarios
               </button>
@@ -746,21 +739,18 @@ export default function RegisterStart() {
         {step === "success" && (
           <div className="px-2 pb-10 space-y-8">
             <div className="flex flex-col items-center text-center space-y-4">
-              <div className="relative">
-                <div className="absolute inset-0 bg-dg-success/20 blur-xl rounded-full" />
-                <CheckCircle className="w-16 h-16 text-dg-success relative z-10 fill-dg-success/10" />
-              </div>
+              <CheckCircle className="h-16 w-16 text-dg-success" aria-hidden="true" />
               <div>
-                <h2 className="text-xl font-bold text-dg-text leading-tight headline">¡Registro Exitoso!</h2>
+                <h2 className="text-xl font-bold uppercase leading-tight tracking-[0.8px] text-dg-text">¡Registro Exitoso!</h2>
                 <p className="text-dg-text-secondary text-sm mt-1">
                   {(usuarioCreado?.nombre ?? name).split(" ")[0]} ya puede acceder.
                 </p>
               </div>
             </div>
 
-            <div className="bg-dg-card p-4 rounded-dg-lg flex items-center justify-between border border-dg-border">
+            <div className="mini-card flex items-center justify-between p-4">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-dg-input border border-dg-border flex items-center justify-center">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-dg-border">
                   <span className="text-dg-text-secondary font-bold text-lg">
                     {(usuarioCreado?.nombre ?? name).split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'U'}
                   </span>
@@ -772,9 +762,9 @@ export default function RegisterStart() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 bg-dg-success/20 px-3 py-1 rounded-full border border-dg-success/30">
-                <span className="w-2 h-2 rounded-full bg-dg-success" />
-                <span className="text-2xs font-bold text-dg-success uppercase">Activo</span>
+              <div className="flex items-center gap-1.5 border border-dg-success/50 px-3 py-1">
+                <span aria-hidden="true" className="h-2 w-2 bg-dg-success" />
+                <span className="text-2xs font-bold uppercase tracking-[0.8px] text-dg-success">Activo</span>
               </div>
             </div>
 
@@ -783,38 +773,38 @@ export default function RegisterStart() {
                 <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-dg-success -translate-y-1/2 z-0" />
                 {ANGULOS.map((a) => (
                   <div key={a.step} className="relative z-10 flex flex-col items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-dg-success flex items-center justify-center">
+                    <div className="flex h-6 w-6 items-center justify-center bg-dg-success">
                       <Check className="w-4 h-4 text-dg-bg" strokeWidth={3} aria-hidden="true" />
                     </div>
                   </div>
                 ))}
               </div>
-              <p className="text-center text-dg-text-muted text-2xs font-medium tracking-wide">
+              <p className="text-center text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">
                 {usuarioCreado?.num_angulos ?? 5} de 5 ángulos capturados
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-dg-card p-4 rounded-dg border border-dg-border flex flex-col items-center justify-center">
-                <span className="text-dg-text text-2xl font-bold headline tabular">{usuarioCreado?.num_angulos ?? 5}</span>
-                <span className="text-dg-text-muted text-2xs uppercase font-semibold">Ángulos</span>
+              <div className="mini-card flex flex-col items-center justify-center p-4">
+                <span className="tabular text-2xl font-bold text-dg-text">{usuarioCreado?.num_angulos ?? 5}</span>
+                <span className="text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Ángulos</span>
               </div>
-              <div className="bg-dg-card p-4 rounded-dg border border-dg-border flex flex-col items-center justify-center text-center">
+              <div className="mini-card flex flex-col items-center justify-center p-4 text-center">
                 <ShieldCheck className="h-6 w-6 text-dg-success" aria-hidden="true" />
-                <span className="mt-1 text-dg-text-muted text-2xs uppercase font-semibold">Plantilla cifrada</span>
+                <span className="mt-1 text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Plantilla cifrada</span>
               </div>
             </div>
 
             <button 
               onClick={() => navigate("/users")}
-              className="btn-primary w-full h-14 flex items-center justify-center gap-2"
+              className="mini-btn mini-btn-strong flex h-14 w-full items-center justify-center gap-2 text-sm"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="h-5 w-5" aria-hidden="true" />
               <span>Volver a Usuarios</span>
             </button>
           </div>
         )}
-      </motion.div>
+      </div>
     </div>
   );
 }

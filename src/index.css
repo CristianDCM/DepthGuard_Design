@@ -428,6 +428,13 @@
     @apply border-dg-text bg-dg-text text-dg-bg;
   }
 
+  /* Accion principal: el mismo boton con el filete claro, que es como el
+     portafolio marca su llamada a la accion. Sigue invirtiendose al pasar
+     por encima, porque .mini-btn:hover tiene mas especificidad. */
+  .mini-btn-strong {
+    @apply border-dg-text text-dg-text;
+  }
+
   .mini-input {
     @apply border border-dg-border bg-transparent px-2 py-1 text-2xs text-dg-text-secondary [color-scheme:dark];
     letter-spacing: 0.8px;

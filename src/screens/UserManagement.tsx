@@ -69,7 +69,7 @@ export default function UserManagement() {
           </div>
           <button 
             onClick={() => navigate("/register/start")}
-            className="mini-btn flex shrink-0 items-center justify-center gap-1.5 border-dg-text px-4 py-2.5 text-sm text-dg-text"
+            className="mini-btn mini-btn-strong flex shrink-0 items-center justify-center gap-1.5 px-4 py-2.5 text-sm"
           >
             <Plus className="w-4 h-4" aria-hidden="true" /> Registrar
           </button>

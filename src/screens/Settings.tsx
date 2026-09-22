@@ -450,7 +450,7 @@ export default function Settings() {
                           <button
                             type="submit"
                             disabled={inviteLoading || !inviteEmail.trim()}
-                            className="mini-btn flex items-center gap-2 border-dg-text px-4 py-2.5 text-sm text-dg-text disabled:cursor-not-allowed disabled:opacity-50"
+                            className="mini-btn mini-btn-strong flex items-center gap-2 px-4 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {inviteLoading ? "Enviando" : "Enviar"}
                           </button>
