@@ -4,6 +4,7 @@ import { ArrowLeft, Video, ExternalLink, Fingerprint, ShieldAlert, UserSearch, P
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from "recharts";
 import Navigation from "../components/Navigation";
 import { getEventoPorId, type Evento } from "../lib/supabase";
+import { usePantallaFija } from "../lib/usePantallaFija";
 import { escapeHtml } from "../lib/sanitize";
 
 export default function EventDetail() {
@@ -13,6 +14,9 @@ export default function EventDetail() {
   const [loading, setLoading] = useState(true);
   const [generandoPdf, setGenerandoPdf] = useState(false);
   const [errorInforme, setErrorInforme] = useState<string | null>(null);
+  // En escritorio el detalle cabe de una vez: descargar el informe y cerrar
+  // no pueden quedar por debajo del pliegue.
+  usePantallaFija();
 
   useEffect(() => {
     async function cargar() {
@@ -115,8 +119,8 @@ export default function EventDetail() {
   };
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col">
-      <header className="sticky top-0 lg:top-16 z-40 border-b border-dg-border bg-dg-bg">
+    <div className="h-full pb-16 lg:pb-0 lg:pt-16 flex flex-col overflow-hidden">
+      <header className="shrink-0 border-b border-dg-border bg-dg-bg">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between w-full">
           <div className="flex items-center gap-4">
             <button onClick={() => navigate(-1)} aria-label="Volver a la pantalla anterior" className="text-dg-action-text hover:text-dg-text">
@@ -127,11 +131,14 @@ export default function EventDetail() {
         </div>
       </header>
 
-      <main id="contenido" className="px-4 py-6 max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <main
+        id="contenido"
+        className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4 max-w-7xl mx-auto w-full custom-scrollbar lg:overflow-hidden lg:py-5"
+      >
+        <div className="grid grid-cols-1 gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-12 lg:gap-5">
           {/* Left Column: Image and Status */}
-          <div className="lg:col-span-7 space-y-6">
-            <section className="flex justify-center lg:justify-start">
+          <div className="space-y-6 lg:col-span-7 lg:flex lg:min-h-0 lg:flex-col lg:space-y-4">
+            <section className="flex shrink-0 justify-center lg:justify-start">
               {isAuthorized && (
                 <div className="flex items-center gap-2 border border-dg-success/50 px-6 py-3">
                   <span className="h-2 w-2 bg-dg-success" aria-hidden="true" />
@@ -152,7 +159,9 @@ export default function EventDetail() {
               )}
             </section>
 
-            <div className={`relative overflow-hidden border border-dg-border bg-dg-canvas ${isUnknown ? 'aspect-video' : 'aspect-[4/3]'}`}>
+            {/* En escritorio la foto se adapta al alto libre; en movil
+                manda su proporcion, que ahi la pagina si se desplaza. */}
+            <div className={`relative overflow-hidden border border-dg-border bg-dg-canvas lg:aspect-auto lg:min-h-0 lg:flex-1 ${isUnknown ? 'aspect-video' : 'aspect-[4/3]'}`}>
               {isFraud && <div className="absolute inset-0 bg-dg-error/20 mix-blend-overlay z-10 pointer-events-none" />}
               {evento.foto_url ? (
                 <img 
@@ -175,7 +184,8 @@ export default function EventDetail() {
           </div>
 
           {/* Right Column: Details and Actions */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="space-y-6 lg:col-span-5 lg:flex lg:min-h-0 lg:flex-col lg:space-y-4">
+            <div className="space-y-6 lg:min-h-0 lg:flex-1 lg:space-y-4 lg:overflow-y-auto lg:pr-1 custom-scrollbar">
             {isAuthorized && evento.nombre && (
               <div className="card flex items-center gap-4 p-5">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center border border-dg-border text-xl font-bold text-dg-text-secondary">
@@ -196,21 +206,23 @@ export default function EventDetail() {
               </div>
             )}
 
+            {/* Una sola tarjeta: el veredicto y su motivo son el mismo dato,
+                y en dos tarjetas costaban 50px de relleno y hueco que sacaban
+                las acciones del pliegue a 768px de alto. */}
             {isFraud && (
-              <div className="grid grid-cols-1 gap-4">
-                <div className="card flex items-center gap-5 p-6">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-dg-error/50">
-                    <ShieldAlert className="h-8 w-8 text-dg-error" aria-hidden="true" />
+              <div className="card space-y-4 p-5">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-dg-error/50">
+                    <ShieldAlert className="h-7 w-7 text-dg-error" aria-hidden="true" />
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold uppercase tracking-[0.8px] text-dg-text">Intento de Suplantación</h3>
-                    <p className="text-dg-text-muted text-sm">Ningún usuario identificado</p>
+                  <div className="min-w-0">
+                    <h3 className="text-lg font-bold uppercase tracking-[0.8px] text-dg-text">Intento de Suplantación</h3>
+                    <p className="mt-0.5 text-sm text-dg-text-muted">Ningún usuario identificado</p>
                   </div>
                 </div>
-
-                <div className="card p-6">
-                  <h4 className="mb-3 text-xs font-bold uppercase tracking-[0.8px] text-dg-error">Motivo de Detección</h4>
-                  <p className="text-dg-text text-base leading-relaxed">
+                <div className="border-t border-dg-border pt-4">
+                  <h4 className="mb-2 text-xs font-bold uppercase tracking-[0.8px] text-dg-error">Motivo de Detección</h4>
+                  <p className="text-sm leading-relaxed text-dg-text">
                     {evento.motivo ?? "Superficie plana detectada — Varianza de profundidad insuficiente para rostro real"}
                   </p>
                 </div>
@@ -219,13 +231,13 @@ export default function EventDetail() {
 
             {isUnknown && (
               <>
-                <div className="card space-y-4 p-8 text-center">
-                  <div className="mb-2 inline-flex h-20 w-20 items-center justify-center border border-dg-warning/50 text-dg-warning">
-                    <UserSearch className="h-10 w-10" aria-hidden="true" />
+                <div className="card flex items-center gap-4 p-5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-dg-warning/50 text-dg-warning">
+                    <UserSearch className="h-7 w-7" aria-hidden="true" />
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-bold uppercase tracking-[0.8px] text-dg-text">Persona No Registrada</h2>
-                    <p className="text-dg-text-muted text-sm mt-1">No se encontró coincidencia en la base de datos</p>
+                  <div className="min-w-0">
+                    <h2 className="text-lg font-bold uppercase tracking-[0.8px] text-dg-text">Persona No Registrada</h2>
+                    <p className="mt-0.5 text-sm text-dg-text-muted">No se encontró coincidencia en la base de datos</p>
                   </div>
                 </div>
 
@@ -238,16 +250,29 @@ export default function EventDetail() {
               </>
             )}
 
-            <div className="card space-y-6 p-5">
-              <div className="flex items-center justify-between">
+            <div className="card space-y-5 p-5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="panel-title">Análisis Biométrico 3D</h2>
-                <Fingerprint className={`w-6 h-6 ${isFraud ? 'text-dg-error' : isUnknown ? 'text-dg-warning' : 'text-dg-success'}`} />
+                <div className="flex items-center gap-3">
+                  {isFraud && (
+                    <span className="border border-dg-error/50 px-2 py-1 text-2xs font-bold uppercase tracking-[0.8px] text-dg-error">
+                      Firma Plana Detectada
+                    </span>
+                  )}
+                  {isAuthorized && (
+                    <span className="border border-dg-success/50 px-2 py-1 text-2xs font-bold uppercase tracking-[0.8px] text-dg-success">
+                      Volumen Facial Confirmado
+                    </span>
+                  )}
+                  <Fingerprint aria-hidden="true" className={`w-6 h-6 shrink-0 ${isFraud ? 'text-dg-error' : isUnknown ? 'text-dg-warning' : 'text-dg-success'}`} />
+                </div>
               </div>
 
+              <div className="space-y-5 lg:flex lg:items-stretch lg:gap-5 lg:space-y-0">
               {metricas && (
-                <div className="relative h-64 w-full border border-dg-border p-2">
+                <div className="h-64 w-full border border-dg-border p-2 lg:h-auto lg:w-1/2 lg:shrink-0">
                   <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart cx="50%" cy="50%" outerRadius="70%" data={[
+                    <RadarChart cx="50%" cy="50%" outerRadius="52%" data={[
                       { metric: "Varianza", value: Math.min(((metricas.varianza ?? 0) / 3) * 100, 100) },
                       { metric: "Rango 3D", value: Math.min(((metricas.rango_3d ?? 0) / 10) * 100, 100) },
                       { metric: "Pixeles", value: Math.min(((metricas.pixeles_validos ?? 0)) * 100, 100) },
@@ -267,20 +292,12 @@ export default function EventDetail() {
                       />
                     </RadarChart>
                   </ResponsiveContainer>
-                  {isFraud && (
-                    <div className="absolute left-2 top-2 border border-dg-error/50 bg-dg-bg px-2 py-1 text-2xs font-bold uppercase tracking-[0.8px] text-dg-error">
-                      Firma Plana Detectada
-                    </div>
-                  )}
-                  {isAuthorized && (
-                    <div className="absolute left-2 top-2 border border-dg-success/50 bg-dg-bg px-2 py-1 text-2xs font-bold uppercase tracking-[0.8px] text-dg-success">
-                      Volumen Facial Confirmado
-                    </div>
-                  )}
                 </div>
               )}
 
-              <div className="grid grid-cols-1 gap-6 border-t border-dg-border pt-6 sm:grid-cols-2">
+              {/* En escritorio van en una columna al lado del radar, sin el
+                  filete de separacion, que ahi ya separa el hueco. */}
+              <div className="grid grid-cols-1 gap-6 border-t border-dg-border pt-6 sm:grid-cols-2 lg:flex-1 lg:grid-cols-1 lg:gap-4 lg:border-t-0 lg:pt-0">
                 <MetricItem 
                   label="Confianza Facial" 
                   value={confianzaPct != null ? `${confianzaPct}%` : "N/A"} 
@@ -306,9 +323,14 @@ export default function EventDetail() {
                   color="bg-dg-info"
                 />
               </div>
+              </div>
             </div>
 
-            <div className="flex flex-col gap-3 pt-4">
+            </div>
+
+            {/* Acciones: fuera del area que rueda, para que no se pierdan
+                por debajo del pliegue. */}
+            <div className="flex shrink-0 flex-col gap-3 pt-4 lg:pt-0">
               <button 
                 onClick={descargarInforme}
                 disabled={generandoPdf}
