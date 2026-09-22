@@ -20,6 +20,6 @@ describe("cn", () => {
   });
 
   it("permite sobreescribir estilos desde una prop className", () => {
-    expect(cn("cyber-card p-4", "p-6")).toBe("cyber-card p-6");
+    expect(cn("card p-4", "p-6")).toBe("card p-6");
   });
 });

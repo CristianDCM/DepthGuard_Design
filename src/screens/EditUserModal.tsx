@@ -43,14 +43,14 @@ export default function EditUserModal() {
 
   if (loading) {
     return (
-      <div className="mini min-h-screen flex items-center justify-center bg-dg-canvas/80">
+      <div className="min-h-screen flex items-center justify-center bg-dg-canvas/80">
         <p role="status" className="text-xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Cargando</p>
       </div>
     );
   }
 
   return (
-    <div className="mini min-h-screen flex items-center justify-center p-4 bg-dg-canvas/80">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-dg-canvas/80">
       {/* Superficie opaca, no tarjeta flotante: la hoja va sobre el velo. */}
       <div className="relative z-50 w-full max-w-md border border-dg-border bg-dg-bg">
         <div className="p-6 flex flex-col items-center text-center">
@@ -100,13 +100,13 @@ export default function EditUserModal() {
             <button 
               onClick={handleSave}
               disabled={saving}
-              className="mini-btn mini-btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:opacity-50"
+              className="btn btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:opacity-50"
             >
               <Save className="h-5 w-5" aria-hidden="true" /> {saving ? "Guardando" : "Guardar Cambios"}
             </button>
             <button 
               onClick={() => navigate(-1)}
-              className="mini-btn w-full py-4 text-sm"
+              className="btn w-full py-4 text-sm"
             >
               Cancelar
             </button>

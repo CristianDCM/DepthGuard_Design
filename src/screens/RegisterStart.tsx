@@ -313,7 +313,7 @@ export default function RegisterStart() {
   // ============================================
 
   return (
-    <div className="mini min-h-screen bg-dg-bg overflow-hidden relative">
+    <div className="min-h-screen bg-dg-bg overflow-hidden relative">
       {/*
         El unico encabezado de la pantalla estaba en la cabecera falsa del
         decorado, y decia "Usuarios". Al retirarlo la pagina se quedaba sin
@@ -384,7 +384,7 @@ export default function RegisterStart() {
                 </div>
               </div>
 
-              <div className="mini-card flex gap-4 p-4">
+              <div className="card flex gap-4 p-4">
                 <Info className="w-6 h-6 text-dg-info shrink-0" aria-hidden="true" />
                 <div className="space-y-2">
                   <p className="text-sm text-dg-text leading-snug">
@@ -411,7 +411,7 @@ export default function RegisterStart() {
                 <button 
                   onClick={handleGoToConsent}
                   disabled={isSubmitting}
-                  className="mini-btn mini-btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:opacity-50"
+                  className="btn btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     "Comprobando"
@@ -424,7 +424,7 @@ export default function RegisterStart() {
                 <button 
                   onClick={() => navigate("/users")}
                   disabled={isSubmitting}
-                  className="mini-btn w-full py-4 text-sm disabled:opacity-50"
+                  className="btn w-full py-4 text-sm disabled:opacity-50"
                 >
                   Cancelar
                 </button>
@@ -450,7 +450,7 @@ export default function RegisterStart() {
 
             <div className="space-y-5 pb-10">
               {/* Texto legal */}
-              <div className="mini-card space-y-4 p-5">
+              <div className="card space-y-4 p-5">
                 <div className="flex items-center gap-3 mb-1">
                   <FileCheck2 className="w-5 h-5 text-dg-action-text shrink-0" aria-hidden="true" />
                   <h3 className="text-sm font-bold uppercase tracking-[0.8px] text-dg-text">Consentimiento para Tratamiento de Datos Biométricos</h3>
@@ -527,7 +527,7 @@ export default function RegisterStart() {
                 <button 
                   onClick={handleAcceptConsent}
                   disabled={!consentChecked || isSubmitting}
-                  className="mini-btn mini-btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+                  className="btn btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {isSubmitting ? (
                     "Iniciando"
@@ -540,7 +540,7 @@ export default function RegisterStart() {
                 <button 
                   onClick={() => { setStep("form"); setConsentChecked(false); }}
                   disabled={isSubmitting}
-                  className="mini-btn w-full py-4 text-sm disabled:opacity-50"
+                  className="btn w-full py-4 text-sm disabled:opacity-50"
                 >
                   Volver
                 </button>
@@ -577,7 +577,7 @@ export default function RegisterStart() {
                 anunciaba con la senal visual de una averia.
               */}
               {esperaAgotada ? (
-                <div className="mini-card p-6 text-center" role="alert">
+                <div className="card p-6 text-center" role="alert">
                   <div className="mb-4 flex justify-center">
                     <AlertTriangle className="h-10 w-10 text-dg-warning" aria-hidden="true" />
                   </div>
@@ -591,20 +591,20 @@ export default function RegisterStart() {
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <button
                       onClick={() => setEsperaAgotada(false)}
-                      className="mini-btn mini-btn-strong flex-1 py-3 text-sm"
+                      className="btn btn-strong flex-1 py-3 text-sm"
                     >
                       Seguir esperando
                     </button>
                     <button
                       onClick={() => navigate("/settings")}
-                      className="mini-btn flex-1 py-3 text-sm"
+                      className="btn flex-1 py-3 text-sm"
                     >
                       Ver estado del sistema
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="mini-card p-8 text-center" role="status">
+                <div className="card p-8 text-center" role="status">
                   <div className="mb-4 flex justify-center">
                     <ScanFace className="h-12 w-12 text-dg-info" aria-hidden="true" />
                   </div>
@@ -621,7 +621,7 @@ export default function RegisterStart() {
 
               <button 
                 onClick={handleCancelScanning}
-                className="mini-btn w-full py-4 text-sm"
+                className="btn w-full py-4 text-sm"
               >
                 Cancelar
               </button>
@@ -682,7 +682,7 @@ export default function RegisterStart() {
               {/* Botón cancelar */}
               <button 
                 onClick={handleCancelScanning}
-                className="mini-btn w-full py-4 text-sm"
+                className="btn w-full py-4 text-sm"
               >
                 Cancelar Registro
               </button>
@@ -714,14 +714,14 @@ export default function RegisterStart() {
                       ? navigate(accion.destino)
                       : (setStep("form"), setErrorUi(null), setError(""))
                   }
-                  className={`mini-btn h-14 w-full text-sm ${accion.tipo === "navegar" ? "" : "mini-btn-strong"}`}
+                  className={`btn h-14 w-full text-sm ${accion.tipo === "navegar" ? "" : "btn-strong"}`}
                 >
                   {accion.etiqueta}
                 </button>
               ))}
               <button 
                 onClick={() => navigate("/users")}
-                className="mini-btn h-14 w-full text-sm"
+                className="btn h-14 w-full text-sm"
               >
                 Volver a Usuarios
               </button>
@@ -748,7 +748,7 @@ export default function RegisterStart() {
               </div>
             </div>
 
-            <div className="mini-card flex items-center justify-between p-4">
+            <div className="card flex items-center justify-between p-4">
               <div className="flex items-center gap-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-dg-border">
                   <span className="text-dg-text-secondary font-bold text-lg">
@@ -785,11 +785,11 @@ export default function RegisterStart() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="mini-card flex flex-col items-center justify-center p-4">
+              <div className="card flex flex-col items-center justify-center p-4">
                 <span className="tabular text-2xl font-bold text-dg-text">{usuarioCreado?.num_angulos ?? 5}</span>
                 <span className="text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Ángulos</span>
               </div>
-              <div className="mini-card flex flex-col items-center justify-center p-4 text-center">
+              <div className="card flex flex-col items-center justify-center p-4 text-center">
                 <ShieldCheck className="h-6 w-6 text-dg-success" aria-hidden="true" />
                 <span className="mt-1 text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Plantilla cifrada</span>
               </div>
@@ -797,7 +797,7 @@ export default function RegisterStart() {
 
             <button 
               onClick={() => navigate("/users")}
-              className="mini-btn mini-btn-strong flex h-14 w-full items-center justify-center gap-2 text-sm"
+              className="btn btn-strong flex h-14 w-full items-center justify-center gap-2 text-sm"
             >
               <ArrowLeft className="h-5 w-5" aria-hidden="true" />
               <span>Volver a Usuarios</span>

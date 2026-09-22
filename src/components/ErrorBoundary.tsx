@@ -108,7 +108,7 @@ export default class ErrorBoundary extends Component<Props, State> {
 
     return (
       <div className="min-h-screen bg-dg-bg flex items-center justify-center p-4">
-        <div className="mini-card w-full max-w-lg space-y-5 p-8">
+        <div className="card w-full max-w-lg space-y-5 p-8">
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center border border-dg-error/50">
               <AlertTriangle className="w-8 h-8 text-dg-error" aria-hidden="true" />
@@ -123,11 +123,11 @@ export default class ErrorBoundary extends Component<Props, State> {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            <button onClick={this.handleReload} className="mini-btn mini-btn-strong flex flex-1 items-center justify-center gap-2 py-3 text-sm">
+            <button onClick={this.handleReload} className="btn btn-strong flex flex-1 items-center justify-center gap-2 py-3 text-sm">
               <RotateCcw className="w-4 h-4" aria-hidden="true" />
               Recargar a fondo
             </button>
-            <button onClick={this.handleGoHome} className="mini-btn flex flex-1 items-center justify-center gap-2 py-3 text-sm">
+            <button onClick={this.handleGoHome} className="btn flex flex-1 items-center justify-center gap-2 py-3 text-sm">
               <Home className="w-4 h-4" aria-hidden="true" />
               Ir al inicio
             </button>
@@ -143,7 +143,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               </pre>
               <button
                 onClick={this.handleCopy}
-                className="mini-btn inline-flex items-center gap-1.5 px-2.5 py-1.5 text-2xs"
+                className="btn inline-flex items-center gap-1.5 px-2.5 py-1.5 text-2xs"
               >
                 {this.state.copiado ? (
                   <><Check className="h-3 w-3 text-dg-success" aria-hidden="true" /> Copiado</>

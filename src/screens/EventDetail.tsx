@@ -115,7 +115,7 @@ export default function EventDetail() {
   };
 
   return (
-    <div className="mini min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col">
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col">
       <header className="sticky top-0 lg:top-16 z-40 border-b border-dg-border bg-dg-bg">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between w-full">
           <div className="flex items-center gap-4">
@@ -177,7 +177,7 @@ export default function EventDetail() {
           {/* Right Column: Details and Actions */}
           <div className="lg:col-span-5 space-y-6">
             {isAuthorized && evento.nombre && (
-              <div className="mini-card flex items-center gap-4 p-5">
+              <div className="card flex items-center gap-4 p-5">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center border border-dg-border text-xl font-bold text-dg-text-secondary">
                   {evento.nombre.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()}
                 </div>
@@ -198,7 +198,7 @@ export default function EventDetail() {
 
             {isFraud && (
               <div className="grid grid-cols-1 gap-4">
-                <div className="mini-card flex items-center gap-5 p-6">
+                <div className="card flex items-center gap-5 p-6">
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-dg-error/50">
                     <ShieldAlert className="h-8 w-8 text-dg-error" aria-hidden="true" />
                   </div>
@@ -208,7 +208,7 @@ export default function EventDetail() {
                   </div>
                 </div>
 
-                <div className="mini-card p-6">
+                <div className="card p-6">
                   <h4 className="mb-3 text-xs font-bold uppercase tracking-[0.8px] text-dg-error">Motivo de Detección</h4>
                   <p className="text-dg-text text-base leading-relaxed">
                     {evento.motivo ?? "Superficie plana detectada — Varianza de profundidad insuficiente para rostro real"}
@@ -219,7 +219,7 @@ export default function EventDetail() {
 
             {isUnknown && (
               <>
-                <div className="mini-card space-y-4 p-8 text-center">
+                <div className="card space-y-4 p-8 text-center">
                   <div className="mb-2 inline-flex h-20 w-20 items-center justify-center border border-dg-warning/50 text-dg-warning">
                     <UserSearch className="h-10 w-10" aria-hidden="true" />
                   </div>
@@ -231,16 +231,16 @@ export default function EventDetail() {
 
                 <button 
                   onClick={() => navigate("/register/start")}
-                  className="mini-btn mini-btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm"
+                  className="btn btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm"
                 >
                   <Plus className="h-5 w-5" aria-hidden="true" /> Registrar esta persona
                 </button>
               </>
             )}
 
-            <div className="mini-card space-y-6 p-5">
+            <div className="card space-y-6 p-5">
               <div className="flex items-center justify-between">
-                <h2 className="mini-h2">Análisis Biométrico 3D</h2>
+                <h2 className="panel-title">Análisis Biométrico 3D</h2>
                 <Fingerprint className={`w-6 h-6 ${isFraud ? 'text-dg-error' : isUnknown ? 'text-dg-warning' : 'text-dg-success'}`} />
               </div>
 
@@ -312,7 +312,7 @@ export default function EventDetail() {
               <button 
                 onClick={descargarInforme}
                 disabled={generandoPdf}
-                className="mini-btn mini-btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:opacity-60"
+                className="btn btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:opacity-60"
               >
                 {generandoPdf ? (
                   "Generando"
@@ -334,7 +334,7 @@ export default function EventDetail() {
               )}
               <button 
                 onClick={() => navigate(-1)}
-                className="mini-btn w-full py-4 text-sm"
+                className="btn w-full py-4 text-sm"
               >
                 Cerrar Detalles
               </button>
@@ -343,7 +343,7 @@ export default function EventDetail() {
         </div>
       </main>
 
-      <Navigation variante="minimal" />
+      <Navigation />
     </div>
   );
 }

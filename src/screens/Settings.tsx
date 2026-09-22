@@ -213,7 +213,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="mini min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col bg-dg-bg">
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col bg-dg-bg">
       {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
           estas. El <h1> se conserva para lectores de pantalla, que si
           necesitan oir el nombre de la pagina al entrar. */}
@@ -249,8 +249,8 @@ export default function Settings() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-6">
-              <section className="mini-card space-y-4 p-5">
-                <h2 className="mini-h2">Estado del Sistema</h2>
+              <section className="card space-y-4 p-5">
+                <h2 className="panel-title">Estado del Sistema</h2>
                 <div className="space-y-4">
                   <StatusRow label="Nodo Edge" icon={Server} connected={servidorConectado} />
                   {(() => {
@@ -271,8 +271,8 @@ export default function Settings() {
                 </div>
               </section>
 
-              <section className="mini-card space-y-5 p-5">
-                <h2 className="mini-h2">Notificaciones</h2>
+              <section className="card space-y-5 p-5">
+                <h2 className="panel-title">Notificaciones</h2>
                 <div className="space-y-6">
                   {/* Push Notifications Toggle */}
                   <div className="space-y-3">
@@ -409,16 +409,16 @@ export default function Settings() {
 
             <div className="space-y-6">
               {/* ====== SECCIÓN DE ADMINISTRADORES ====== */}
-              <section className="mini-card space-y-5 p-5">
+              <section className="card space-y-5 p-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-dg-text-secondary" aria-hidden="true" />
-                    <h2 className="mini-h2">Administradores</h2>
+                    <h2 className="panel-title">Administradores</h2>
                   </div>
                   {callerRole === "owner" && (
                     <button
                       onClick={() => { setShowInviteForm(!showInviteForm); setInviteResult(null); }}
-                      className="mini-btn flex items-center gap-1.5 px-3 py-1.5 text-2xs"
+                      className="btn flex items-center gap-1.5 px-3 py-1.5 text-2xs"
                     >
                       <UserPlus className="w-3.5 h-3.5" />
                       Invitar
@@ -450,7 +450,7 @@ export default function Settings() {
                           <button
                             type="submit"
                             disabled={inviteLoading || !inviteEmail.trim()}
-                            className="mini-btn mini-btn-strong flex items-center gap-2 px-4 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                            className="btn btn-strong flex items-center gap-2 px-4 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {inviteLoading ? "Enviando" : "Enviar"}
                           </button>
@@ -580,8 +580,8 @@ export default function Settings() {
                 )}
               </section>
 
-              <section className="mini-card space-y-4 p-5">
-                <h2 className="mini-h2">Información Técnica</h2>
+              <section className="card space-y-4 p-5">
+                <h2 className="panel-title">Información Técnica</h2>
                 <div className="border border-dg-border">
                   <table className="w-full text-left text-xs">
                     <tbody className="divide-y divide-dg-border">
@@ -615,7 +615,7 @@ export default function Settings() {
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirmLogout(false)}
-                className="mini-btn flex-1 py-3 text-sm"
+                className="btn flex-1 py-3 text-sm"
               >
                 Cancelar
               </button>
@@ -638,7 +638,7 @@ export default function Settings() {
         )}
       </main>
 
-      <Navigation variante="minimal" />
+      <Navigation />
     </div>
   );
 }

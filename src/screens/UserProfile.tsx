@@ -36,7 +36,7 @@ export default function UserProfile() {
 
   if (loading) {
     return (
-      <div className="mini min-h-screen flex items-center justify-center bg-dg-bg">
+      <div className="min-h-screen flex items-center justify-center bg-dg-bg">
         <p role="status" className="text-xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Cargando</p>
       </div>
     );
@@ -44,7 +44,7 @@ export default function UserProfile() {
 
   if (!user) {
     return (
-      <div className="mini min-h-screen flex items-center justify-center bg-dg-bg">
+      <div className="min-h-screen flex items-center justify-center bg-dg-bg">
         <p className="text-sm uppercase tracking-[0.8px] text-dg-text-muted">Usuario no encontrado</p>
       </div>
     );
@@ -54,7 +54,7 @@ export default function UserProfile() {
   const alertas = eventos.filter(e => e.estado !== "ACCESO_PERMITIDO").length;
 
   return (
-    <div className="mini min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col bg-dg-bg">
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col bg-dg-bg">
       <header className="sticky top-0 lg:top-16 z-40 w-full border-b border-dg-border bg-dg-bg">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between w-full">
           <div className="flex items-center gap-4">
@@ -70,7 +70,7 @@ export default function UserProfile() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column: Profile Info & Actions */}
           <div className="lg:col-span-4 space-y-6">
-            <section className="mini-card flex flex-col items-center space-y-4 py-8 text-center">
+            <section className="card flex flex-col items-center space-y-4 py-8 text-center">
               <div className="relative">
                 <div className="flex h-24 w-24 items-center justify-center border border-dg-border">
                   <span className="text-3xl font-bold text-dg-text-secondary">{initials}</span>
@@ -88,11 +88,11 @@ export default function UserProfile() {
             </section>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="mini-card p-5">
+              <div className="card p-5">
                 <p className="text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Accesos Totales</p>
                 <p className="tabular mt-2 text-3xl font-bold text-dg-text">{accesos}</p>
               </div>
-              <div className="mini-card p-5">
+              <div className="card p-5">
                 <p className="text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Alertas Generadas</p>
                 <p className="tabular mt-2 text-3xl font-bold text-dg-text">{alertas}</p>
               </div>
@@ -101,7 +101,7 @@ export default function UserProfile() {
             <div className="space-y-3 pt-4 lg:pt-0">
               <button 
                 onClick={() => navigate(`/users/edit/${user.id}`)}
-                className="mini-btn w-full py-4 text-sm"
+                className="btn w-full py-4 text-sm"
               >
                 Editar Usuario
               </button>
@@ -116,8 +116,8 @@ export default function UserProfile() {
 
           {/* Right Column: Details & Captures */}
           <div className="lg:col-span-8 space-y-6">
-            <div className="mini-card space-y-4 p-6">
-              <h3 className="mini-h2 mb-4">Información</h3>
+            <div className="card space-y-4 p-6">
+              <h3 className="panel-title mb-4">Información</h3>
               <div className="space-y-4">
                 <InfoRow label="ID" value={`#${user.id.substring(0, 8)}`} mono />
                 <InfoRow label="Fecha de Registro" value={new Date(user.fecha_registro).toLocaleDateString("es")} />
@@ -128,8 +128,8 @@ export default function UserProfile() {
             </div>
 
             {eventos.length > 0 && (
-              <div className="mini-card p-6">
-                <h3 className="mini-h2 mb-4">Últimas Capturas</h3>
+              <div className="card p-6">
+                <h3 className="panel-title mb-4">Últimas Capturas</h3>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                   {eventos.filter(e => e.foto_url).map((evento) => (
                     <Link
@@ -154,7 +154,7 @@ export default function UserProfile() {
         </div>
       </main>
 
-      <Navigation variante="minimal" />
+      <Navigation />
     </div>
   );
 }

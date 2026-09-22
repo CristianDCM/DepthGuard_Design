@@ -161,7 +161,7 @@ function Aviso({
       className={`fixed inset-x-0 z-[64] px-3 ${desplazado ? "top-9" : "top-0 pt-safe"}`}
       role="status"
     >
-      <div className="mini mx-auto mt-2 flex max-w-xl items-center gap-3 border border-dg-border bg-dg-bg px-4 py-2.5">
+      <div className="mx-auto mt-2 flex max-w-xl items-center gap-3 border border-dg-border bg-dg-bg px-4 py-2.5">
         <span className="shrink-0">{icono}</span>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-dg-text">{titulo}</p>
@@ -170,7 +170,7 @@ function Aviso({
         {accion && (
           <button
             onClick={accion.alPulsar}
-            className="mini-btn mini-btn-strong shrink-0 px-3 py-1.5 text-xs"
+            className="btn btn-strong shrink-0 px-3 py-1.5 text-xs"
           >
             {accion.etiqueta}
           </button>

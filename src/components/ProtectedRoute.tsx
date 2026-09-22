@@ -136,7 +136,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   // Estado: verificando sesión
   if (checking) {
     return (
-      <div className="mini min-h-screen bg-dg-bg flex items-center justify-center">
+      <div className="min-h-screen bg-dg-bg flex items-center justify-center">
         <p role="status" className="text-xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Cargando</p>
       </div>
     );
@@ -154,7 +154,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
       {/* Aviso de inactividad */}
       {showWarning && (
-        <div className="mini fixed inset-0 z-[9999] flex items-center justify-center bg-dg-canvas/80 p-4">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-dg-canvas/80 p-4">
           <div className="w-full max-w-sm space-y-4 border border-dg-border bg-dg-bg p-6 text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center border border-dg-warning/50">
               <span className="tabular text-3xl font-bold text-dg-warning">{countdown}</span>
@@ -166,7 +166,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
             </p>
             <button
               onClick={resetInactivityTimer}
-              className="mini-btn mini-btn-strong w-full py-3 text-sm"
+              className="btn btn-strong w-full py-3 text-sm"
             >
               Continuar sesión
             </button>

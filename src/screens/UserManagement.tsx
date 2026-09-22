@@ -47,7 +47,7 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="mini min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col">
+    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col">
       {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
           estas. El <h1> se conserva para lectores de pantalla. */}
       <h1 className="sr-only">Usuarios registrados</h1>
@@ -69,13 +69,13 @@ export default function UserManagement() {
           </div>
           <button 
             onClick={() => navigate("/register/start")}
-            className="mini-btn mini-btn-strong flex shrink-0 items-center justify-center gap-1.5 px-4 py-2.5 text-sm"
+            className="btn btn-strong flex shrink-0 items-center justify-center gap-1.5 px-4 py-2.5 text-sm"
           >
             <Plus className="w-4 h-4" aria-hidden="true" /> Registrar
           </button>
         </div>
 
-        <div className="mini-card flex max-w-2xl justify-around p-3 text-center">
+        <div className="card flex max-w-2xl justify-around p-3 text-center">
           <div>
             <p className="text-dg-text font-bold text-sm tabular">{users.length}</p>
             <p className="text-2xs uppercase tracking-[0.8px] text-dg-text-muted">Registrados</p>
@@ -111,7 +111,7 @@ export default function UserManagement() {
             {filteredUsers.map((user, index) => (
             <div
               key={user.id}
-              className={`mini-card flex items-start gap-4 p-4 ${!user.activo ? 'opacity-50' : ''}`}
+              className={`card flex items-start gap-4 p-4 ${!user.activo ? 'opacity-50' : ''}`}
             >
               <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-dg-border">
                 <span className={`font-bold text-sm ${user.activo ? 'text-dg-text-secondary' : 'text-dg-text-off'}`}>
@@ -163,7 +163,7 @@ export default function UserManagement() {
         </div>
       </main>
 
-      <Navigation variante="minimal" />
+      <Navigation />
     </div>
   );
 }

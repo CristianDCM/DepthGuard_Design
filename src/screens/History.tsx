@@ -126,7 +126,7 @@ export default function History() {
   }, {});
 
   return (
-    <div className="mini h-full pb-16 lg:pb-0 lg:pt-16 flex flex-col overflow-hidden">
+    <div className="h-full pb-16 lg:pb-0 lg:pt-16 flex flex-col overflow-hidden">
       {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
           estas. El <h1> se conserva para lectores de pantalla. */}
       <h1 className="sr-only">Historial de accesos</h1>
@@ -212,7 +212,7 @@ export default function History() {
             <button 
               onClick={handleExportCSV}
               disabled={events.length === 0}
-              className="mini-btn flex shrink-0 items-center gap-1.5 self-end px-3 py-1.5 disabled:opacity-50 sm:self-auto"
+              className="btn flex shrink-0 items-center gap-1.5 self-end px-3 py-1.5 disabled:opacity-50 sm:self-auto"
             >
               <Download className="w-3.5 h-3.5" aria-hidden="true" /> CSV
             </button>
@@ -251,7 +251,7 @@ export default function History() {
             {hayFiltros && (
               <button
                 onClick={() => { setSearchQuery(""); setFechaDesde(""); setFechaHasta(""); setActiveFilter("Todos"); }}
-                className="mini-btn mt-1 px-5 py-2.5 text-sm"
+                className="btn mt-1 px-5 py-2.5 text-sm"
               >
                 Quitar filtros
               </button>
@@ -338,7 +338,7 @@ export default function History() {
                 return (
                   <div
                     key={evento.id}
-                    className={`mini-card card-linked relative mb-3 flex items-center gap-4 p-4 hover:bg-white/5 ${config.highlight ? 'border-dg-warning/50' : ''}`}
+                    className={`card card-linked relative mb-3 flex items-center gap-4 p-4 hover:bg-white/5 ${config.highlight ? 'border-dg-warning/50' : ''}`}
                   >
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-dg-border">
                       <config.icon className={`h-7 w-7 ${config.color}`} aria-hidden="true" />
@@ -371,7 +371,7 @@ export default function History() {
           <div className="flex shrink-0 justify-center pt-1 pb-2">
             <button 
               onClick={cargarMas}
-              className="mini-btn px-6 py-2.5 text-sm"
+              className="btn px-6 py-2.5 text-sm"
             >
               Cargar más eventos
             </button>
@@ -379,7 +379,7 @@ export default function History() {
         )}
       </main>
 
-      <Navigation variante="minimal" />
+      <Navigation />
     </div>
   );
 }
@@ -391,7 +391,7 @@ function FilterChip({ label, active, icon: Icon, iconColor, onClick }: { label: 
       aria-pressed={active}
       // `group`: al invertirse el chip, el icono tiene que oscurecerse con
       // el texto. Un icono verde sobre relleno claro se queda en 3:1.
-      className={`mini-btn group flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 ${active ? "mini-btn-on" : ""}`}>
+      className={`btn group flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 ${active ? "btn-on" : ""}`}>
       {Icon && (
         <Icon
           aria-hidden="true"

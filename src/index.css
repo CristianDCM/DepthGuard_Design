@@ -140,30 +140,13 @@
   --color-dg-focus: #58a0ff;
 
   /* ==========================================================
-     RADIOS — exactamente tres
-     Antes convivian siete valores distintos en una misma vista.
+     NI RADIOS NI SOMBRAS
+     Aqui vivian tres radios y tres elevaciones. La interfaz es
+     ahora de esquina viva y superficie plana: la jerarquia la dan
+     el filete de 1px y el espacio, asi que los tokens se retiran
+     en vez de quedarse sin usar. Tampoco queda el giro lento de
+     los estados de espera: no hay nada que gire.
      ========================================================== */
-  --radius-dg-sm: 6px;   /* chips, badges, celdas */
-  --radius-dg: 10px;     /* tarjetas, botones, campos */
-  --radius-dg-lg: 16px;  /* hojas, modales, marco de video */
-
-  /* ==========================================================
-     ELEVACION — profundidad por sombra, no por resplandor
-     El glow queda reservado para lo que esta vivo ahora mismo
-     (el punto de "en vivo"), no para la estructura.
-     ========================================================== */
-  --shadow-dg-sm: 0 1px 2px rgb(0 0 0 / 0.40);
-  --shadow-dg-md: 0 4px 12px rgb(0 0 0 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.04);
-  --shadow-dg-lg: 0 16px 48px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.06);
-
-  /* Giro lento para los estados de espera del registro biometrico. */
-  --animate-spin-slow: spin-slow 2.4s linear infinite;
-
-  @keyframes spin-slow {
-    to {
-      transform: rotate(360deg);
-    }
-  }
 }
 
 @layer base {
@@ -171,10 +154,13 @@
     @apply bg-dg-bg text-dg-text font-sans;
     min-height: 100vh;
     /* cv05: la l con cola, para no confundirla con la I mayuscula en
-       nombres y matriculas. -0.011em compensa el ancho de Inter en
-       interfaz densa. */
+       nombres y matriculas.
+
+       0.8px de interletraje: es la medida del diseño, la misma que lleva
+       el portafolio del que sale. Antes era -0.011em, pensado para una
+       interfaz densa; aqui el aire entre letras es parte del lenguaje. */
     font-feature-settings: "cv05";
-    letter-spacing: -0.011em;
+    letter-spacing: 0.8px;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -209,8 +195,9 @@
    * y un panel de seguridad se deja abierto durante todo un turno. Sin esto,
    * un usuario con trastorno vestibular no puede usarlo.
    *
-   * Las animaciones de Motion no pasan por CSS: se neutralizan aparte con
-   * <MotionConfig reducedMotion="user"> en App.tsx.
+   * Ya no hay animaciones de JavaScript que neutralizar aparte: la
+   * interfaz no anima nada por su cuenta, asi que esto cubre lo que
+   * pudiera quedar (una transicion suelta, un scroll suave).
    */
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -238,34 +225,6 @@
 
 @layer components {
   /*
-   * Titulares. Sustituye a `font-headline`, que era un alias apuntando a la
-   * misma familia que el cuerpo y por tanto no hacia absolutamente nada en
-   * sus cuarenta y nueve usos.
-   *
-   * La diferencia la dan ahora el eje de tamano optico de Inter (a 32 el
-   * ojo se abre y los remates se afinan, que es como una fuente display se
-   * comporta de verdad) y un interletraje mas cerrado.
-   */
-  .headline {
-    font-variation-settings: "opsz" 32;
-    letter-spacing: -0.021em;
-  }
-
-  /* Un titular en mayusculas necesita interletraje positivo: con el valor
-     negativo de arriba las capitales se tocaban entre si. */
-  .headline.uppercase {
-    letter-spacing: 0.04em;
-  }
-
-  .cyber-card {
-    @apply bg-dg-card border border-dg-border rounded-dg shadow-dg-sm;
-  }
-
-  .btn-primary {
-    @apply bg-dg-action text-white font-semibold py-3 px-6 rounded-dg transition-colors hover:bg-dg-action-hover active:scale-[0.98];
-  }
-
-  /*
    * Tarjeta cuyo enlace se estira con ::after para cubrirla entera
    * (patron "stretched link"). El anillo de foco tiene que dibujarse
    * alrededor de la tarjeta, no del texto del enlace, que es lo unico
@@ -274,10 +233,6 @@
   .card-linked:has(a:focus-visible) {
     outline: 2px solid var(--color-dg-focus);
     outline-offset: 2px;
-  }
-
-  .btn-secondary {
-    @apply border border-dg-border text-dg-text font-semibold py-3 px-6 rounded-dg transition-colors active:scale-[0.98] hover:bg-dg-input hover:border-dg-border-hi;
   }
 }
 
@@ -370,77 +325,71 @@
 }
 
 /* ============================================================
-   VARIANTE MINIMALISTA — pestañas Inicio y Vivo
+   VOCABULARIO DE LA INTERFAZ
    ============================================================
-   Traslado del lenguaje visual del portafolio (cristiandcm) a la
-   consola, para poder verlo aplicado antes de decidir si se
-   extiende al resto de pantallas. Lo que se toma de alli:
+   El lenguaje visual sale del portafolio de cristiandcm, y desde
+   que se colapso la variante anterior es el unico que hay. Lo que
+   lo define:
 
    - Esquina viva: radio 0 en todo. Ni tarjetas, ni botones, ni
      celdas. Es el rasgo que mas define el original.
    - Superficie plana: el fondo de pagina es el unico fondo. Las
      tarjetas se dibujan con un filete de 1px, sin relleno ni
-     sombra, asi que la jerarquia la da el borde y el espacio.
+     sombra, asi que la jerarquia la dan el borde y el espacio.
    - Inversion como estado activo: lo seleccionado se rellena con
      el color del texto y escribe en el color del fondo, igual que
      los enlaces del navbar del portafolio. Es neutro: no anade
-     ningun color nuevo a la paleta.
-   - Interletraje 0.8px y mayusculas en rotulos, que es la medida
-     exacta del original.
-   - Sin movimiento: ninguna de estas clases anima ni transiciona.
+     ningun color a la paleta.
+   - Interletraje de 0.8px, que es la medida del original, y
+     mayusculas en los rotulos. El interletraje lo pone <body>.
+   - Sin movimiento: ninguna de estas clases anima ni transiciona,
+     y la aplicacion no carga ninguna biblioteca de animacion.
 
-   La paleta NO cambia: se siguen usando los tokens --color-dg-* de
-   arriba, incluidos los cuatro colores de estado. El tipo tambien
-   sigue siendo Inter; Montserrat (la del portafolio) exigiria
-   sumar otra familia al paquete de fuentes.
+   La paleta NO cambia con todo esto: son los tokens --color-dg-*
+   de arriba, incluidos los cuatro colores de estado. El tipo sigue
+   siendo Inter; Montserrat, la del portafolio, exigiria sumar otra
+   familia al paquete de fuentes.
    ============================================================ */
 @layer components {
-  /* Contenedor de pantalla: fija el interletraje del portafolio
-     para todo lo que cuelgue dentro. */
-  .mini {
-    letter-spacing: 0.8px;
-  }
-
-  /* Equivalente plano de .cyber-card: filete, sin relleno ni sombra. */
-  .mini-card {
+  /* Tarjeta: filete, sin relleno ni sombra. */
+  .card {
     @apply border border-dg-border bg-transparent;
   }
 
-  /* Titulo de panel (tarjetas de Inicio y del monitor). */
-  .mini-h2 {
+  /* Titulo de panel. */
+  .panel-title {
     @apply text-sm font-bold uppercase text-dg-text;
-    letter-spacing: 0.8px;
   }
 
-  /* Boton del portafolio: filete, transparente, se invierte al
-     pasar por encima. Sin transicion: el cambio es inmediato. */
-  .mini-btn {
+  /* Boton: filete, transparente, se invierte al pasar por encima.
+     Sin transicion, el cambio es inmediato. */
+  .btn {
     @apply border border-dg-border bg-transparent px-4 py-2 text-xs font-bold uppercase text-dg-text-secondary;
-    letter-spacing: 0.8px;
   }
 
-  .mini-btn:hover {
+  .btn:hover {
     @apply border-dg-text bg-dg-text text-dg-bg;
   }
 
   /* Estado activo: la misma inversion, ya fijada. */
-  .mini-btn-on {
+  .btn-on {
     @apply border-dg-text bg-dg-text text-dg-bg;
   }
 
   /* Accion principal: el mismo boton con el filete claro, que es como el
      portafolio marca su llamada a la accion. Sigue invirtiendose al pasar
-     por encima, porque .mini-btn:hover tiene mas especificidad. */
-  .mini-btn-strong {
+     por encima, porque .btn:hover tiene mas especificidad. */
+  .btn-strong {
     @apply border-dg-text text-dg-text;
   }
 
-  .mini-input {
+  /* Campo compacto, para los filtros. Los campos de formulario llevan su
+     propio tamano en cada pantalla. */
+  .input-plano {
     @apply border border-dg-border bg-transparent px-2 py-1 text-2xs text-dg-text-secondary [color-scheme:dark];
-    letter-spacing: 0.8px;
   }
 
-  .mini-input:focus {
+  .input-plano:focus {
     @apply border-dg-text;
   }
 }

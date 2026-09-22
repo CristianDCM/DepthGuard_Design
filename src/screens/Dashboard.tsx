@@ -316,9 +316,7 @@ export default function Dashboard() {
   }
 
   return (
-    // `mini` fija el interletraje de 0.8px del portafolio para toda la
-    // pantalla. La paleta es la de siempre: aqui no se anade ni un color.
-    <div className="mini min-h-screen flex flex-col bg-dg-bg pb-24 lg:pb-0 lg:pt-16">
+    <div className="min-h-screen flex flex-col bg-dg-bg pb-24 lg:pb-0 lg:pt-16">
       {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
           estas. El <h1> se conserva para lectores de pantalla, que si
           necesitan oir el nombre de la pagina al entrar. */}
@@ -380,7 +378,7 @@ export default function Dashboard() {
                         key={p}
                         onClick={() => { setModoFiltro('preset'); setDiasPreset(p); }}
                         aria-pressed={modoFiltro === 'preset' && diasPreset === p}
-                        className={`mini-btn px-3 py-1.5 text-2xs ${modoFiltro === 'preset' && diasPreset === p ? 'mini-btn-on' : ''}`}
+                        className={`btn px-3 py-1.5 text-2xs ${modoFiltro === 'preset' && diasPreset === p ? 'btn-on' : ''}`}
                       >
                         {p}d
                       </button>
@@ -388,7 +386,7 @@ export default function Dashboard() {
                     <button
                       onClick={() => setModoFiltro('custom')}
                       aria-pressed={modoFiltro === 'custom'}
-                      className={`mini-btn flex items-center gap-1.5 px-3 py-1.5 text-2xs ${modoFiltro === 'custom' ? 'mini-btn-on' : ''}`}
+                      className={`btn flex items-center gap-1.5 px-3 py-1.5 text-2xs ${modoFiltro === 'custom' ? 'btn-on' : ''}`}
                     >
                       <Calendar aria-hidden="true" className="h-3 w-3" /> Rango
                     </button>
@@ -400,7 +398,7 @@ export default function Dashboard() {
                         aria-label="Inicio del período personalizado"
                         value={customDesde}
                         onChange={(e) => setCustomDesde(e.target.value)}
-                        className="mini-input"
+                        className="input-plano"
                       />
                       <span className="text-xs text-dg-text-muted">—</span>
                       <input
@@ -408,7 +406,7 @@ export default function Dashboard() {
                         aria-label="Fin del período personalizado"
                         value={customHasta}
                         onChange={(e) => setCustomHasta(e.target.value)}
-                        className="mini-input"
+                        className="input-plano"
                       />
                     </div>
                   )}
@@ -424,7 +422,7 @@ export default function Dashboard() {
                     {filtroDia && (
                       <button
                         onClick={() => { setFiltroDia(null); setOrigenFiltro(null); }}
-                        className="mini-btn mini-btn-on flex items-center gap-1.5 px-2.5 py-1 text-2xs"
+                        className="btn btn-on flex items-center gap-1.5 px-2.5 py-1 text-2xs"
                       >
                         Día: {filtroDia} <span aria-hidden="true">✕</span>
                       </button>
@@ -432,7 +430,7 @@ export default function Dashboard() {
                     {filtroHora !== null && (
                       <button
                         onClick={() => { setFiltroHora(null); if (!filtroDia) setOrigenFiltro(null); }}
-                        className="mini-btn mini-btn-on flex items-center gap-1.5 px-2.5 py-1 text-2xs"
+                        className="btn btn-on flex items-center gap-1.5 px-2.5 py-1 text-2xs"
                       >
                         Hora: {filtroHora}:00 <span aria-hidden="true">✕</span>
                       </button>
@@ -440,22 +438,22 @@ export default function Dashboard() {
                     {filtroMotivo && (
                       <button
                         onClick={() => { setFiltroMotivo(null); setOrigenFiltro(null); }}
-                        className="mini-btn mini-btn-on flex items-center gap-1.5 px-2.5 py-1 text-2xs"
+                        className="btn btn-on flex items-center gap-1.5 px-2.5 py-1 text-2xs"
                       >
                         {filtroMotivo} <span aria-hidden="true">✕</span>
                       </button>
                     )}
                     <button
                       onClick={() => { limpiarFiltros(); setOrigenFiltro(null); }}
-                      className="mini-btn px-2.5 py-1 text-2xs"
+                      className="btn px-2.5 py-1 text-2xs"
                     >
                       Limpiar todo
                     </button>
                   </div>
                 )}
 
-                <div className="mini-card p-4 sm:p-5">
-                  <h2 className="mini-h2 mb-5">Tendencia {periodoLabel}</h2>
+                <div className="card p-4 sm:p-5">
+                  <h2 className="panel-title mb-5">Tendencia {periodoLabel}</h2>
                   <div className="h-48 w-full">
                     <ResponsiveContainer width="100%" height="100%" className="focus:outline-none">
                       {/*
@@ -486,8 +484,8 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="mini-card p-4 sm:p-5">
-                  <h2 className="mini-h2 mb-5">Patrón de Actividad ({periodoLabel})</h2>
+                <div className="card p-4 sm:p-5">
+                  <h2 className="panel-title mb-5">Patrón de Actividad ({periodoLabel})</h2>
                   <div className="relative w-full overflow-x-auto no-scrollbar pb-2">
                     {heatmapMatrix.matrix.length === 0 ? (
                       <div className="flex h-32 items-center justify-center text-xs uppercase tracking-[0.8px] text-dg-text-muted">
@@ -589,8 +587,8 @@ export default function Dashboard() {
                 </div>
 
                 {/* Donut Chart: Vectores de Ataque */}
-                <div className="mini-card flex flex-1 flex-col p-4 sm:p-5">
-                  <h2 className="mini-h2 mb-5">Vectores de Ataque ({periodoLabel})</h2>
+                <div className="card flex flex-1 flex-col p-4 sm:p-5">
+                  <h2 className="panel-title mb-5">Vectores de Ataque ({periodoLabel})</h2>
                   <div className="flex h-auto w-full flex-1 flex-col items-center justify-center gap-6 md:h-40 md:flex-row md:gap-0">
                     {motivosFraude.length === 0 ? (
                       <div className="flex h-40 w-full items-center justify-center text-xs uppercase tracking-[0.8px] text-dg-text-muted md:h-full">
@@ -674,9 +672,9 @@ export default function Dashboard() {
               <section className="order-1 flex flex-col space-y-4 lg:order-2">
                 {/* Spacer para simetría con selector de período */}
                 <div className="hidden h-[30px] lg:block" />
-                <div className="mini-card">
+                <div className="card">
                   <div className="border-b border-dg-border px-4 py-4 sm:px-5">
-                    <h2 className="mini-h2">Estado del Sistema</h2>
+                    <h2 className="panel-title">Estado del Sistema</h2>
                   </div>
                   <div className="divide-y divide-dg-border">
                     <div className="flex items-center justify-between px-4 py-3.5 sm:px-5">
@@ -732,7 +730,7 @@ export default function Dashboard() {
                 {/* Latest Events */}
                 <div className="flex flex-1 flex-col space-y-4">
                   <div className="flex items-center justify-between">
-                    <h2 className="mini-h2">Últimos Eventos</h2>
+                    <h2 className="panel-title">Últimos Eventos</h2>
                     <button
                       onClick={() => navigate("/history")}
                       className="border-b border-dg-text-muted pb-0.5 text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted hover:border-dg-text hover:text-dg-text"
@@ -741,7 +739,7 @@ export default function Dashboard() {
                     </button>
                   </div>
                   {events.length === 0 ? (
-                    <div className="mini-card p-8 text-center text-sm uppercase tracking-[0.8px] text-dg-text-muted">
+                    <div className="card p-8 text-center text-sm uppercase tracking-[0.8px] text-dg-text-muted">
                       No hay eventos registrados aún
                     </div>
                   ) : (
@@ -750,7 +748,7 @@ export default function Dashboard() {
                       de seis tarjetas flotando con hueco entre ellas. Es la
                       lista plana del portafolio.
                     */
-                    <div className="mini-card flex-1 divide-y divide-dg-border">
+                    <div className="card flex-1 divide-y divide-dg-border">
                       {events.map((evento, idx) => {
                         const config = getEventConfig(evento);
                         return (
@@ -794,7 +792,7 @@ export default function Dashboard() {
 
       {/* La cabecera tambien cambia: variante de texto, alineada a la
           derecha y con el destino activo invertido. */}
-      <Navigation variante="minimal" />
+      <Navigation />
     </div>
   );
 }

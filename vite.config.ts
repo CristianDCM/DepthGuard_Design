@@ -60,7 +60,6 @@ export default defineConfig({
           charts: ['recharts'],
           firebase: ['firebase/app', 'firebase/messaging'],
           supabase: ['@supabase/supabase-js'],
-          motion: ['motion'],
         },
       },
     },

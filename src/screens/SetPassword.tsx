@@ -84,7 +84,7 @@ export default function SetPassword() {
   // Estado: validando token
   if (validatingToken) {
     return (
-      <main className="mini min-h-screen flex flex-col items-center justify-center p-6">
+      <main className="min-h-screen flex flex-col items-center justify-center p-6">
         <p role="status" className="text-xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Validando invitación</p>
       </main>
     );
@@ -93,8 +93,8 @@ export default function SetPassword() {
   // Estado: token inválido o expirado
   if (!tokenValid) {
     return (
-      <main className="mini min-h-screen flex flex-col items-center justify-center p-6">
-        <div className="mini-card w-full max-w-sm space-y-4 p-8 text-center">
+      <main className="min-h-screen flex flex-col items-center justify-center p-6">
+        <div className="card w-full max-w-sm space-y-4 p-8 text-center">
           <AlertTriangle className="mx-auto h-16 w-16 text-dg-error" aria-hidden="true" />
           <h1 className="text-xl font-bold uppercase tracking-[0.8px]">Enlace inválido</h1>
           <p className="text-dg-text-muted text-sm">
@@ -103,7 +103,7 @@ export default function SetPassword() {
           </p>
           <button
             onClick={() => navigate("/")}
-            className="mini-btn mini-btn-strong mt-4 w-full py-3 text-sm"
+            className="btn btn-strong mt-4 w-full py-3 text-sm"
           >
             Ir al inicio de sesión
           </button>
@@ -115,8 +115,8 @@ export default function SetPassword() {
   // Estado: éxito
   if (success) {
     return (
-      <main className="mini min-h-screen flex flex-col items-center justify-center p-6">
-        <div className="mini-card w-full max-w-sm space-y-4 p-8 text-center">
+      <main className="min-h-screen flex flex-col items-center justify-center p-6">
+        <div className="card w-full max-w-sm space-y-4 p-8 text-center">
           <CheckCircle className="mx-auto h-20 w-20 text-dg-success" aria-hidden="true" />
           <h1 className="text-xl font-bold uppercase tracking-[0.8px]">¡Contraseña establecida!</h1>
           <p className="text-sm text-dg-text-muted">
@@ -129,7 +129,7 @@ export default function SetPassword() {
 
   // Formulario principal
   return (
-    <main className="mini min-h-screen flex flex-col items-center justify-center p-6">
+    <main className="min-h-screen flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm flex flex-col items-center">
         <div className="mb-8 flex flex-col items-center">
           <img
@@ -141,7 +141,7 @@ export default function SetPassword() {
           <p className="mt-2 text-xs uppercase tracking-[0.8px] text-dg-text-muted">Establece tu contraseña para activar tu cuenta</p>
         </div>
 
-        <div className="mini-card w-full p-8">
+        <div className="card w-full p-8">
           <form className="space-y-5" onSubmit={handleSubmit}>
             {/* Campo: Nueva contraseña */}
             <div className="space-y-2">
@@ -265,7 +265,7 @@ export default function SetPassword() {
               id="btn-set-password"
               type="submit"
               disabled={!canSubmit}
-              className="mini-btn mini-btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:cursor-not-allowed disabled:opacity-30"
+              className="btn btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:cursor-not-allowed disabled:opacity-30"
             >
               {isLoading ? "Guardando" : "Activar cuenta"}
             </button>

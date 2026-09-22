@@ -39,7 +39,7 @@ export default function DeleteConfirmModal() {
 
   if (loading) {
     return (
-      <div className="mini min-h-screen flex items-center justify-center bg-dg-canvas/80">
+      <div className="min-h-screen flex items-center justify-center bg-dg-canvas/80">
         <p role="status" className="text-xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Cargando</p>
       </div>
     );
@@ -48,7 +48,7 @@ export default function DeleteConfirmModal() {
   const initials = user?.nombre?.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase() ?? "??";
 
   return (
-    <div className="mini min-h-screen flex items-center justify-center p-6 bg-dg-canvas/80 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-dg-canvas/80 relative overflow-hidden">
       {/* Se retira el decorado de fondo: dos tarjetas falsas desenfocadas
           imitando una lista que no esta ahi. */}
       <div className="relative z-50 w-full max-w-[340px] border border-dg-border bg-dg-bg p-6">
@@ -85,7 +85,7 @@ export default function DeleteConfirmModal() {
             </button>
             <button 
               onClick={() => navigate(-1)}
-              className="mini-btn w-full py-3.5 text-sm"
+              className="btn w-full py-3.5 text-sm"
             >
               Cancelar
             </button>

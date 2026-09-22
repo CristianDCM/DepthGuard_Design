@@ -191,7 +191,7 @@ export default function LiveMonitor() {
     : false;
 
   return (
-    <div className="mini h-full pb-16 lg:pb-0 lg:pt-16 flex flex-col overflow-hidden bg-dg-bg">
+    <div className="h-full pb-16 lg:pb-0 lg:pt-16 flex flex-col overflow-hidden bg-dg-bg">
       {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
           estas. El <h1> se conserva para lectores de pantalla. */}
       <h1 className="sr-only">Monitor en vivo</h1>
@@ -244,7 +244,7 @@ export default function LiveMonitor() {
         )}
       </main>
 
-      <Navigation variante="minimal" />
+      <Navigation />
     </div>
   );
 }
@@ -327,7 +327,6 @@ function CameraPanel({
           cameraId={cameraId}
           edgeOnline={edgeOnline}
           onFallback={() => setWebrtcFailed(true)}
-          variante="plano"
         />
       ) : (
         <LiveSnapshotPreview
@@ -346,7 +345,7 @@ function CameraPanel({
         con la etiqueta encima, el sujeto en una caja propia y la hora en su
         propio renglon separado: cuatro bloques apilados para tres datos.
       */}
-      <div className={`mini-card ${statusConfig.borderClass}`}>
+      <div className={`card ${statusConfig.borderClass}`}>
         <div className="flex items-center gap-3 p-4">
           <statusConfig.icon
             className="h-6 w-6 shrink-0"
@@ -406,8 +405,8 @@ function CameraPanel({
       <div className={layout === "expanded" ? "lg:col-span-4 space-y-3 lg:min-h-0 lg:overflow-y-auto custom-scrollbar" : "space-y-4"}>
       {/* Anti-spoofing Metrics (solo si hay evento con métricas) */}
       {ultimoEvento?.metricas_json && (
-        <div className="mini-card p-4 sm:p-5">
-          <h4 className="mini-h2 mb-5">
+        <div className="card p-4 sm:p-5">
+          <h4 className="panel-title mb-5">
             {cameraType === "3D"
               ? "Métricas Anti-Spoofing"
               : "Métricas de Detección"}
@@ -455,9 +454,9 @@ function CameraPanel({
       )}
 
       {/* Mini Event Log */}
-      <div className="mini-card">
+      <div className="card">
         <div className="flex items-center justify-between border-b border-dg-border px-4 py-3.5">
-          <h4 className="mini-h2">Últimos Eventos</h4>
+          <h4 className="panel-title">Últimos Eventos</h4>
           <span className="text-2xs font-medium tabular text-dg-text-muted">
             {eventosRecientes.length} registros
           </span>
@@ -688,7 +687,7 @@ function LiveSnapshotPreview({
   // Cámara inactiva — placeholder de desconectada
   if (!camaraActiva) {
     return (
-      <div className="mini-card overflow-hidden">
+      <div className="card overflow-hidden">
         <div className="aspect-video bg-dg-canvas flex flex-col items-center justify-center gap-2 text-dg-text-muted" role="status">
           <VideoOff className="w-8 h-8 opacity-40" aria-hidden="true" />
           <span className="text-sm font-medium">Cámara desconectada</span>
@@ -699,7 +698,7 @@ function LiveSnapshotPreview({
   }
 
   return (
-    <div className="mini-card relative overflow-hidden">
+    <div className="card relative overflow-hidden">
       {/*
         Cabecera honesta.
 

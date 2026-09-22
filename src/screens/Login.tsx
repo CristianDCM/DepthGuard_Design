@@ -126,7 +126,7 @@ export default function Login() {
   };
 
   return (
-    <main className="mini min-h-screen flex flex-col items-center justify-center p-6">
+    <main className="min-h-screen flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm flex flex-col items-center">
         <div className="mb-8 flex flex-col items-center">
           <img
@@ -142,7 +142,7 @@ export default function Login() {
           </p>
         </div>
 
-        <div className="mini-card w-full p-8">
+        <div className="card w-full p-8">
           <form className="space-y-6" onSubmit={handleLogin}>
             <div className="space-y-2">
               <label htmlFor="login-email" className="block text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">
@@ -230,7 +230,7 @@ export default function Login() {
               id="btn-login"
               type="submit"
               disabled={isLoading || isLocked}
-              className="mini-btn mini-btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLoading ? "Verificando" : isLocked ? "Bloqueado" : "Iniciar Sesión"}
             </button>
