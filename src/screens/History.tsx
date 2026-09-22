@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search, SearchX, CheckCircle, AlertTriangle, HelpCircle, ChevronRight, History as HistoryIcon, Download, Calendar, X } from "lucide-react";
-import { motion } from "motion/react";
 import Navigation from "../components/Navigation";
 import { getHistorialPaginado, type Evento, type EstadoEvento } from "../lib/supabase";
 import { exportToCSV } from "../lib/exportUtils";
@@ -127,7 +126,7 @@ export default function History() {
   }, {});
 
   return (
-    <div className="h-full pb-16 lg:pb-0 lg:pt-16 flex flex-col overflow-hidden">
+    <div className="mini h-full pb-16 lg:pb-0 lg:pt-16 flex flex-col overflow-hidden">
       {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
           estas. El <h1> se conserva para lectores de pantalla. */}
       <h1 className="sr-only">Historial de accesos</h1>
@@ -159,37 +158,37 @@ export default function History() {
                   placeholder="Buscar accesos..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-dg-card border-none rounded-dg py-2.5 pl-10 pr-4 text-base focus:ring-2 focus:ring-dg-focus/50 placeholder:text-dg-text-muted text-dg-text"
+                  className="w-full border border-dg-border bg-transparent py-2.5 pl-10 pr-4 text-base text-dg-text placeholder:text-dg-text-muted focus:border-dg-text"
                 />
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="relative flex-1 md:flex-none">
+                <div className="relative min-w-0 flex-1 md:flex-none">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-dg-text-muted w-4 h-4 pointer-events-none z-10" />
                   <input
                     type="date"
                     aria-label="Filtrar desde la fecha"
                     value={fechaDesde}
                     onChange={(e) => setFechaDesde(e.target.value)}
-                    className={`w-full md:w-[145px] bg-dg-card border-none rounded-dg py-2.5 pl-10 pr-4 text-base focus:ring-2 focus:ring-dg-focus/50 appearance-none [color-scheme:dark] relative [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${fechaDesde ? 'text-dg-text' : 'text-dg-text-muted'}`}
+                    className={`w-full md:w-[145px] border border-dg-border bg-transparent py-2.5 pl-10 pr-4 text-base focus:border-dg-text appearance-none [color-scheme:dark] relative [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${fechaDesde ? 'text-dg-text' : 'text-dg-text-muted'}`}
                     placeholder="Desde"
                   />
                 </div>
                 <span className="text-dg-text-muted text-sm font-medium">—</span>
-                <div className="relative flex-1 md:flex-none">
+                <div className="relative min-w-0 flex-1 md:flex-none">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-dg-text-muted w-4 h-4 pointer-events-none z-10" />
                   <input
                     type="date"
                     aria-label="Filtrar hasta la fecha"
                     value={fechaHasta}
                     onChange={(e) => setFechaHasta(e.target.value)}
-                    className={`w-full md:w-[145px] bg-dg-card border-none rounded-dg py-2.5 pl-10 pr-4 text-base focus:ring-2 focus:ring-dg-focus/50 appearance-none [color-scheme:dark] relative [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${fechaHasta ? 'text-dg-text' : 'text-dg-text-muted'}`}
+                    className={`w-full md:w-[145px] border border-dg-border bg-transparent py-2.5 pl-10 pr-4 text-base focus:border-dg-text appearance-none [color-scheme:dark] relative [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${fechaHasta ? 'text-dg-text' : 'text-dg-text-muted'}`}
                     placeholder="Hasta"
                   />
                 </div>
                 {hasFechaFilter && (
                   <button
                     onClick={() => { setFechaDesde(""); setFechaHasta(""); }}
-                    className="p-2.5 rounded-dg bg-dg-error/10 text-dg-error hover:bg-dg-error/20 transition-colors shrink-0"
+                    className="shrink-0 border border-dg-error/50 p-2.5 text-dg-error hover:bg-dg-error hover:text-dg-bg"
                     title="Limpiar fechas"
                   >
                     <X className="w-4 h-4" />
@@ -213,7 +212,7 @@ export default function History() {
             <button 
               onClick={handleExportCSV}
               disabled={events.length === 0}
-              className="flex shrink-0 items-center gap-1.5 self-end px-3 py-1.5 rounded-full bg-dg-card border border-dg-border text-dg-text-muted hover:text-dg-text hover:border-dg-action-text transition-colors text-xs font-bold disabled:opacity-50 sm:self-auto"
+              className="mini-btn flex shrink-0 items-center gap-1.5 self-end px-3 py-1.5 disabled:opacity-50 sm:self-auto"
             >
               <Download className="w-3.5 h-3.5" aria-hidden="true" /> CSV
             </button>
@@ -225,8 +224,8 @@ export default function History() {
           nada de sitio. El aro giratorio anterior vaciaba la pantalla y
           volvia a llenarla en un parpadeo cada vez que se tocaba un filtro.
         */}
-        <div aria-hidden="true" className="h-0.5 shrink-0 overflow-hidden rounded-full bg-dg-border/40">
-          {recargando && <div className="h-full w-1/3 animate-pulse rounded-full bg-dg-info" />}
+        <div aria-hidden="true" className="h-0.5 shrink-0 overflow-hidden bg-dg-border/40">
+          {recargando && <div className="h-full w-full bg-dg-info" />}
         </div>
 
         {loading ? (
@@ -242,7 +241,7 @@ export default function History() {
           <div className="flex flex-col items-center gap-3 py-16 text-center">
             <SearchX className="h-10 w-10 text-dg-text-off" aria-hidden="true" />
             <div>
-              <p className="text-sm font-semibold text-dg-text">Ningún evento coincide</p>
+              <p className="text-sm font-bold uppercase tracking-[0.8px] text-dg-text">Ningún evento coincide</p>
               <p className="mt-1 text-xs text-dg-text-muted">
                 {hayFiltros
                   ? "Pruebe a ampliar el rango de fechas o a quitar algún filtro."
@@ -252,14 +251,14 @@ export default function History() {
             {hayFiltros && (
               <button
                 onClick={() => { setSearchQuery(""); setFechaDesde(""); setFechaHasta(""); setActiveFilter("Todos"); }}
-                className="btn-secondary mt-1 px-5 py-2 text-sm"
+                className="mini-btn mt-1 px-5 py-2.5 text-sm"
               >
                 Quitar filtros
               </button>
             )}
           </div>
         ) : (
-          <div className={`flex min-h-0 flex-1 flex-col transition-opacity ${recargando ? "opacity-60" : ""}`}>
+          <div className={`flex min-h-0 flex-1 flex-col ${recargando ? "opacity-60" : ""}`}>
           {/*
             Tabla real a partir de 1024px.
 
@@ -269,18 +268,20 @@ export default function History() {
             monitor ancho desperdicia el espacio que hace util la comparacion.
             Debajo de 1024px las tarjetas siguen siendo lo correcto.
           */}
-          <div className="hidden lg:block overflow-auto rounded-dg border border-dg-border custom-scrollbar lg:min-h-0 lg:flex-1">
+          <div className="hidden lg:block overflow-auto border border-dg-border custom-scrollbar lg:min-h-0 lg:flex-1">
             <table className="w-full border-collapse text-sm">
               <caption className="sr-only">
                 Historial de accesos. {events.length} eventos cargados.
               </caption>
-              <thead className="sticky top-0 z-10 bg-dg-card">
+              {/* La cabecera fija necesita fondo opaco para tapar las filas
+                  que pasan por debajo; el del lienzo ya lo es. */}
+              <thead className="sticky top-0 z-10 bg-dg-bg">
                 <tr className="border-b border-dg-border text-left">
                   {["Hora", "Estado", "Persona", "Confianza", "Motivo"].map((c) => (
                     <th
                       key={c}
                       scope="col"
-                      className={`px-4 py-3 text-2xs font-bold uppercase text-dg-text-muted ${c === "Confianza" ? "text-right" : ""}`}
+                      className={`px-4 py-3.5 text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted ${c === "Confianza" ? "text-right" : ""}`}
                     >
                       {c}
                     </th>
@@ -293,7 +294,7 @@ export default function History() {
                   return (
                     <tr
                       key={evento.id}
-                      className="border-b border-dg-border/60 transition-colors last:border-0 hover:bg-dg-input has-[a:focus-visible]:bg-dg-input"
+                      className="border-b border-dg-border last:border-0 hover:bg-white/5 has-[a:focus-visible]:bg-white/5"
                     >
                       <td className="whitespace-nowrap px-4 py-2.5 text-dg-text-secondary tabular">
                         {formatDate(evento.timestamp)} · {formatTime(evento.timestamp)}
@@ -303,7 +304,7 @@ export default function History() {
                             la fila entera y es el unico elemento enfocable. */}
                         <Link
                           to={`/event/${evento.id}`}
-                          className={`inline-flex items-center gap-2 font-semibold ${config.color} hover:underline`}
+                          className={`inline-flex items-center gap-2 font-bold uppercase tracking-[0.8px] ${config.color} hover:underline`}
                         >
                           <config.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                           {etiquetaEstado(evento)}
@@ -331,17 +332,16 @@ export default function History() {
           <div className="lg:hidden min-h-0 flex-1 overflow-y-auto custom-scrollbar pb-2">
           {(Object.entries(groupedEvents) as [string, Evento[]][]).map(([dateLabel, dateEvents]) => (
             <div key={dateLabel}>
-              <div className="text-xs font-bold text-dg-text-muted uppercase mb-2 mt-4">{dateLabel}</div>
+              <div className="mb-2 mt-4 text-xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">{dateLabel}</div>
               {dateEvents.map((evento) => {
                 const config = getEventConfig(evento);
                 return (
-                  <motion.div
+                  <div
                     key={evento.id}
-                    whileTap={{ scale: 0.98 }}
-                    className={`cyber-card card-linked p-4 flex items-center gap-4 shadow-sm mb-3 relative hover:border-dg-action-text/40 transition-colors ${config.highlight ? 'border-dg-warning/40 ring-1 ring-dg-warning/10' : ''}`}
+                    className={`mini-card card-linked relative mb-3 flex items-center gap-4 p-4 hover:bg-white/5 ${config.highlight ? 'border-dg-warning/50' : ''}`}
                   >
-                    <div className="w-12 h-12 rounded-dg bg-white/5 flex items-center justify-center shrink-0">
-                      <config.icon className={`w-8 h-8 ${config.color}`} />
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-dg-border">
+                      <config.icon className={`h-7 w-7 ${config.color}`} aria-hidden="true" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
@@ -351,14 +351,14 @@ export default function History() {
                       <p className="text-xs text-dg-text-muted truncate">{config.sub}</p>
                       <Link
                         to={`/event/${evento.id}`}
-                        className="mt-2 text-xs font-bold text-dg-action-text inline-flex items-center gap-1 focus-visible:outline-none after:absolute after:inset-0 after:rounded-dg"
+                        className="mt-2 inline-flex items-center gap-1 text-xs font-bold uppercase tracking-[0.8px] text-dg-action-text focus-visible:outline-none after:absolute after:inset-0"
                       >
                         Ver detalles
                         <ChevronRight className="w-3 h-3" aria-hidden="true" />
                         <span className="sr-only">de {config.title} a las {formatTime(evento.timestamp)}</span>
                       </Link>
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -371,7 +371,7 @@ export default function History() {
           <div className="flex shrink-0 justify-center pt-1 pb-2">
             <button 
               onClick={cargarMas}
-              className="px-6 py-2 rounded-full border border-dg-action-text/50 text-dg-action-text font-semibold text-sm hover:bg-dg-action-text/10 transition-colors"
+              className="mini-btn px-6 py-2.5 text-sm"
             >
               Cargar más eventos
             </button>
@@ -379,7 +379,7 @@ export default function History() {
         )}
       </main>
 
-      <Navigation />
+      <Navigation variante="minimal" />
     </div>
   );
 }
@@ -388,12 +388,16 @@ function FilterChip({ label, active, icon: Icon, iconColor, onClick }: { label: 
   return (
     <button 
       onClick={onClick}
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-      active 
-        ? "bg-dg-action text-white font-bold" 
-        : "bg-dg-card border border-dg-border text-dg-text-muted hover:border-dg-action-text/50"
-    }`}>
-      {Icon && <Icon className={`w-3.5 h-3.5 ${active ? "text-dg-bg" : iconColor}`} />}
+      aria-pressed={active}
+      // `group`: al invertirse el chip, el icono tiene que oscurecerse con
+      // el texto. Un icono verde sobre relleno claro se queda en 3:1.
+      className={`mini-btn group flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 ${active ? "mini-btn-on" : ""}`}>
+      {Icon && (
+        <Icon
+          aria-hidden="true"
+          className={`w-3.5 h-3.5 ${active ? "text-dg-bg" : `${iconColor} group-hover:text-dg-bg`}`}
+        />
+      )}
       {label}
     </button>
   );
