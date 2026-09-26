@@ -134,7 +134,7 @@ export default function Login() {
             alt="DepthGuard Logo"
             className="mb-4 h-24 w-24 object-contain"
           />
-          <h1 className="text-4xl font-bold tracking-[0.8px] text-dg-text">
+          <h1 className="text-4xl font-bold uppercase tracking-[0.8px] text-dg-text">
             Depth<span className="text-dg-brand">Guard</span>
           </h1>
           <p className="mt-2 text-xs uppercase tracking-[0.8px] text-dg-text-muted">
