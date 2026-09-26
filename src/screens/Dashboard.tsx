@@ -1,10 +1,21 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, AlertTriangle, HelpCircle, Video, History, Users, Home, Server, FilterX, CalendarDays, Calendar } from "lucide-react";
-import { motion } from "motion/react";
+import { CheckCircle, AlertTriangle, HelpCircle, Video, History, Users, Server, FilterX, CalendarDays, Calendar } from "lucide-react";
 import Navigation from "../components/Navigation";
 import { supabase, getEstadisticasHoy, getUltimosEventos, getEstadoSistema, isEdgeOnline, isCamaraActiva, getTendenciasSemanales, type Evento, type EstadoSistema } from "../lib/supabase";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
+
+/**
+ * Tooltip de los graficos en la variante minimalista: sin radio y con
+ * el mismo filete de 1px que las tarjetas.
+ */
+const TOOLTIP_PLANO = {
+  backgroundColor: 'var(--color-dg-card)',
+  border: '1px solid var(--color-dg-border)',
+  borderRadius: 0,
+  fontSize: '12px',
+  letterSpacing: '0.8px',
+} as const;
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -305,103 +316,118 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen pb-24 lg:pb-0 lg:pt-16 flex flex-col bg-dg-bg">
+    <div className="min-h-screen flex flex-col bg-dg-bg pb-barra lg:pb-0 lg:pt-16">
       {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
           estas. El <h1> se conserva para lectores de pantalla, que si
           necesitan oir el nombre de la pagina al entrar. */}
       <h1 className="sr-only">Inicio</h1>
 
-      <main id="contenido" className="flex-1 px-4 py-6 space-y-6 max-w-7xl mx-auto w-full">
+      <main id="contenido" className="mx-auto w-full max-w-7xl flex-1 space-y-8 px-4 py-8">
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
-          </div>
+          // Sin ruleta: el original giraba en bucle y aqui no hay animacion
+          // ninguna. Un rotulo estatico dice lo mismo.
+          <p
+            role="status"
+            className="py-20 text-center text-xs font-bold uppercase tracking-[0.8px] text-dg-text-muted"
+          >
+            Cargando
+          </p>
         ) : (
           <>
-            {/* Summary Cards */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-4">
-              {statsConfig.map((stat, i) => (
-                <motion.div
+            {/* KPIs: filete, esquina viva y la cifra como unico elemento grande */}
+            <div className="grid grid-cols-3 gap-px border border-dg-border bg-dg-border">
+              {statsConfig.map((stat) => (
+                <div
                   key={stat.label}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  // El escalonado era de 0.1 s por tarjeta: 300 ms de espera
-                  // para ver cifras que ya estan en memoria, en una consola
-                  // en vivo. 0.03 s conserva el gesto sin costar latencia.
-                  transition={{ delay: i * 0.03, duration: 0.18 }}
-                  className="cyber-card py-4 px-2 sm:p-4 flex flex-col items-center sm:items-stretch justify-center h-full"
+                  /*
+                    Rejilla de un pixel de separacion sobre fondo de borde:
+                    las tres tarjetas comparten filete en vez de dibujar cada
+                    una el suyo, que es como se compone una tabla plana.
+                  */
+                  className="flex flex-col gap-2 bg-dg-bg p-3 sm:p-4"
                 >
-                  {/* Vista Móvil (Centrado, más espacio vertical) */}
-                  <div className="flex sm:hidden flex-col items-center justify-center gap-1.5">
-                    <stat.icon className={`w-6 h-6 ${stat.color} opacity-90 mb-1`} />
-                    <span className={`text-2xl font-bold leading-none tabular ${stat.color}`}>{stat.value}</span>
-                    <span className="text-2xs uppercase text-dg-text-muted font-bold text-center leading-tight">{stat.label}</span>
-                  </div>
-
-                  {/* Vista Escritorio (Premium Layout) */}
-                  <div className="hidden sm:flex items-center justify-between gap-4">
-                    <div className="flex flex-col">
-                      <span className="text-2xs uppercase text-dg-text-muted font-bold leading-none mb-1.5">{stat.label}</span>
-                      <div className="flex items-baseline gap-2">
-                        <span className={`text-3xl font-bold leading-none tabular ${stat.color}`}>{stat.value}</span>
-                        {stat.sub && <span className="text-2xs text-dg-text-muted font-medium">{stat.sub}</span>}
-                      </div>
+                  {/*
+                    La cifra comparte fila con el icono, y la etiqueta va
+                    debajo a todo el ancho. Al contrario, "Desconocidos" es
+                    una palabra de doce letras que no puede encoger: en una
+                    columna de un tercio de pantalla desbordaba la fila y
+                    empujaba el icono fuera de la tarjeta.
+                  */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className={`tabular text-2xl font-bold leading-none sm:text-3xl ${stat.color}`}>
+                        {stat.value}
+                      </span>
+                      {stat.sub && (
+                        <span className="hidden text-2xs uppercase tracking-[0.8px] text-dg-text-muted sm:inline">
+                          {stat.sub}
+                        </span>
+                      )}
                     </div>
-                    <div className="w-12 h-12 rounded-dg bg-white/5 flex items-center justify-center shrink-0">
-                      <stat.icon className={`w-7 h-7 ${stat.color}`} />
-                    </div>
+                    <stat.icon aria-hidden="true" className={`h-4 w-4 shrink-0 ${stat.color}`} />
                   </div>
-                </motion.div>
+                  {/* break-words es la red de seguridad para pantallas de
+                      320px, donde la etiqueta tampoco cabe entera. */}
+                  <span
+                    // El hueco util de la tarjeta a 390px es de 94px medidos,
+                    // y "DESCONOCIDOS" a 11px ocupa 100 con el interletraje de
+                    // 0.8px: sin el caben los 90 que necesita. A partir de sm
+                    // la columna es ancha y recupera la medida del diseño. Por
+                    // debajo de 360px no cabe de ninguna forma, y ahi parte con
+                    // guion en vez de desbordar.
+                    className="hyphens-auto break-words text-2xs font-bold uppercase tracking-normal text-dg-text-muted sm:tracking-[0.8px]"
+                  >
+                    {stat.label}
+                  </span>
+                </div>
               ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
               {/* Gráficos Analíticos */}
-              <section className="space-y-3 order-2 lg:order-1 flex flex-col">
+              <section className="order-2 flex flex-col space-y-4 lg:order-1">
 
                 {/* Selector de Período */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <CalendarDays className="w-4 h-4 text-dg-text-muted" />
-                  <span className="text-2xs uppercase text-dg-text-muted font-bold">Período</span>
-                  <div className="flex gap-1 ml-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <CalendarDays aria-hidden="true" className="h-4 w-4 text-dg-text-muted" />
+                  <span className="text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">
+                    Período
+                  </span>
+                  <div className="ml-1 flex gap-2">
                     {([7, 30, 90] as const).map((p) => (
                       <button
                         key={p}
                         onClick={() => { setModoFiltro('preset'); setDiasPreset(p); }}
-                        className={`text-2xs font-bold uppercase px-3 py-1.5 rounded-dg-sm transition-all ${modoFiltro === 'preset' && diasPreset === p
-                            ? 'bg-dg-action text-white'
-                            : 'bg-white/5 text-dg-text-muted hover:bg-white/10 hover:text-dg-text'
-                          }`}
+                        aria-pressed={modoFiltro === 'preset' && diasPreset === p}
+                        className={`btn px-3 py-1.5 text-2xs ${modoFiltro === 'preset' && diasPreset === p ? 'btn-on' : ''}`}
                       >
                         {p}d
                       </button>
                     ))}
                     <button
                       onClick={() => setModoFiltro('custom')}
-                      className={`text-2xs font-bold uppercase px-3 py-1.5 rounded-dg-sm transition-all flex items-center gap-1.5 ${modoFiltro === 'custom'
-                          ? 'bg-dg-action text-white'
-                          : 'bg-white/5 text-dg-text-muted hover:bg-white/10 hover:text-dg-text'
-                        }`}
+                      aria-pressed={modoFiltro === 'custom'}
+                      className={`btn flex items-center gap-1.5 px-3 py-1.5 text-2xs ${modoFiltro === 'custom' ? 'btn-on' : ''}`}
                     >
-                      <Calendar className="w-3 h-3" /> Rango
+                      <Calendar aria-hidden="true" className="h-3 w-3" /> Rango
                     </button>
                   </div>
                   {modoFiltro === 'custom' && (
-                    <div className="flex items-center gap-2 ml-auto sm:ml-0">
+                    <div className="ml-auto flex items-center gap-2 sm:ml-0">
                       <input
                         type="date"
                         aria-label="Inicio del período personalizado"
                         value={customDesde}
                         onChange={(e) => setCustomDesde(e.target.value)}
-                        className="bg-white/5 border border-dg-border rounded-dg-sm px-2 py-1 text-2xs text-dg-text-secondary focus:border-dg-focus transition-colors [color-scheme:dark]"
+                        className="input-plano"
                       />
-                      <span className="text-dg-text-muted text-xs">—</span>
+                      <span className="text-xs text-dg-text-muted">—</span>
                       <input
                         type="date"
                         aria-label="Fin del período personalizado"
                         value={customHasta}
                         onChange={(e) => setCustomHasta(e.target.value)}
-                        className="bg-white/5 border border-dg-border rounded-dg-sm px-2 py-1 text-2xs text-dg-text-secondary focus:border-dg-focus transition-colors [color-scheme:dark]"
+                        className="input-plano"
                       />
                     </div>
                   )}
@@ -409,48 +435,56 @@ export default function Dashboard() {
 
                 {/* Chips de filtros activos */}
                 {(filtroDia || filtroHora !== null || filtroMotivo) && (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <FilterX className="w-3.5 h-3.5 text-dg-text-muted" />
-                    <span className="text-2xs uppercase text-dg-text-muted font-bold">Filtros</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <FilterX aria-hidden="true" className="h-3.5 w-3.5 text-dg-text-muted" />
+                    <span className="text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">
+                      Filtros
+                    </span>
                     {filtroDia && (
                       <button
                         onClick={() => { setFiltroDia(null); setOrigenFiltro(null); }}
-                        className="flex items-center gap-1.5 text-2xs font-bold uppercase px-2.5 py-1 rounded-dg-sm bg-dg-action-text/15 text-dg-action-text border border-dg-action-text/30 hover:bg-dg-error/20 hover:text-dg-error hover:border-dg-error/30 transition-all"
+                        className="btn btn-on flex items-center gap-1.5 px-2.5 py-1 text-2xs"
                       >
-                        Día: {filtroDia} <span className="text-2xs opacity-70">✕</span>
+                        Día: {filtroDia} <span aria-hidden="true">✕</span>
                       </button>
                     )}
                     {filtroHora !== null && (
                       <button
                         onClick={() => { setFiltroHora(null); if (!filtroDia) setOrigenFiltro(null); }}
-                        className="flex items-center gap-1.5 text-2xs font-bold uppercase px-2.5 py-1 rounded-dg-sm bg-dg-action-text/15 text-dg-action-text border border-dg-action-text/30 hover:bg-dg-error/20 hover:text-dg-error hover:border-dg-error/30 transition-all"
+                        className="btn btn-on flex items-center gap-1.5 px-2.5 py-1 text-2xs"
                       >
-                        Hora: {filtroHora}:00 <span className="text-2xs opacity-70">✕</span>
+                        Hora: {filtroHora}:00 <span aria-hidden="true">✕</span>
                       </button>
                     )}
                     {filtroMotivo && (
                       <button
                         onClick={() => { setFiltroMotivo(null); setOrigenFiltro(null); }}
-                        className="flex items-center gap-1.5 text-2xs font-bold uppercase px-2.5 py-1 rounded-dg-sm bg-dg-action-text/15 text-dg-action-text border border-dg-action-text/30 hover:bg-dg-error/20 hover:text-dg-error hover:border-dg-error/30 transition-all"
+                        className="btn btn-on flex items-center gap-1.5 px-2.5 py-1 text-2xs"
                       >
-                        {filtroMotivo} <span className="text-2xs opacity-70">✕</span>
+                        {filtroMotivo} <span aria-hidden="true">✕</span>
                       </button>
                     )}
                     <button
-                      onClick={() => { setFiltroDia(null); setFiltroHora(null); setFiltroMotivo(null); setOrigenFiltro(null); }}
-                      className="text-2xs font-bold uppercase px-2.5 py-1 rounded-dg-sm bg-white/5 text-dg-text-muted hover:bg-dg-error/20 hover:text-dg-error transition-all"
+                      onClick={() => { limpiarFiltros(); setOrigenFiltro(null); }}
+                      className="btn px-2.5 py-1 text-2xs"
                     >
                       Limpiar todo
                     </button>
                   </div>
                 )}
 
-                <div className="cyber-card p-4">
-                  <div className="mb-4">
-                    <h2 className="text-xs font-bold uppercase text-dg-text-muted">Tendencia {periodoLabel}</h2>
-                  </div>
+                <div className="card p-4 sm:p-5">
+                  <h2 className="panel-title mb-5">Tendencia {periodoLabel}</h2>
                   <div className="h-48 w-full">
                     <ResponsiveContainer width="100%" height="100%" className="focus:outline-none">
+                      {/*
+                        Sin degradados, sin relleno y con `type="linear"`: tres
+                        polilineas rectas. Con relleno, las tres series se
+                        solapaban en una zona gris que no era de nadie, y un
+                        desvanecido no es propio de este lenguaje visual.
+                        `isAnimationActive={false}` apaga el dibujado
+                        progresivo que Recharts hace por defecto.
+                      */}
                       <AreaChart style={{ outline: 'none' }} data={tendencias} margin={{ top: 5, right: 0, left: -20, bottom: 0 }} onClick={(e: any) => {
                         if (e && e.activeLabel) {
                           setFiltroDia(prev => {
@@ -460,43 +494,29 @@ export default function Dashboard() {
                           });
                         }
                       }}>
-                        <defs>
-                          <linearGradient id="colorAccesos" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--color-dg-success)" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="var(--color-dg-success)" stopOpacity={0} />
-                          </linearGradient>
-                          <linearGradient id="colorFraudes" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--color-dg-error)" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="var(--color-dg-error)" stopOpacity={0} />
-                          </linearGradient>
-                          <linearGradient id="colorDesconocidos" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--color-dg-warning)" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="var(--color-dg-warning)" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
                         <XAxis dataKey="date" tick={{ fill: 'var(--color-dg-text-muted)', fontSize: 10 }} axisLine={false} tickLine={false} />
                         <YAxis tick={{ fill: 'var(--color-dg-text-muted)', fontSize: 10 }} axisLine={false} tickLine={false} />
-                        <Tooltip cursor={false} contentStyle={{ backgroundColor: 'var(--color-dg-card)', border: '1px solid var(--color-dg-border)', borderRadius: '10px', fontSize: '12px' }} />
-                        <Area type="monotone" dataKey="accesos" name="Accesos" stroke="var(--color-dg-success)" fillOpacity={1} fill="url(#colorAccesos)" className="cursor-pointer" activeDot={false} />
-                        <Area type="monotone" dataKey="fraudes" name="Fraudes" stroke="var(--color-dg-error)" fillOpacity={1} fill="url(#colorFraudes)" className="cursor-pointer" activeDot={false} />
-                        <Area type="monotone" dataKey="desconocidos" name="Desconocidos" stroke="var(--color-dg-warning)" fillOpacity={1} fill="url(#colorDesconocidos)" className="cursor-pointer" activeDot={false} />
+                        <Tooltip cursor={false} contentStyle={TOOLTIP_PLANO} />
+                        <Area type="linear" dataKey="accesos" name="Accesos" stroke="var(--color-dg-success)" strokeWidth={2} fill="none" fillOpacity={0} isAnimationActive={false} className="cursor-pointer" activeDot={false} />
+                        <Area type="linear" dataKey="fraudes" name="Fraudes" stroke="var(--color-dg-error)" strokeWidth={2} fill="none" fillOpacity={0} isAnimationActive={false} className="cursor-pointer" activeDot={false} />
+                        <Area type="linear" dataKey="desconocidos" name="Desconocidos" stroke="var(--color-dg-warning)" strokeWidth={2} fill="none" fillOpacity={0} isAnimationActive={false} className="cursor-pointer" activeDot={false} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
 
-                <div className="cyber-card p-4">
-                  <div className="mb-4">
-                    <h2 className="text-xs font-bold uppercase text-dg-text-muted">Patrón de Actividad ({periodoLabel})</h2>
-                  </div>
-                  <div className="w-full overflow-x-auto no-scrollbar pb-2 relative">
+                <div className="card p-4 sm:p-5">
+                  <h2 className="panel-title mb-5">Patrón de Actividad ({periodoLabel})</h2>
+                  <div className="relative w-full overflow-x-auto no-scrollbar pb-2">
                     {heatmapMatrix.matrix.length === 0 ? (
-                      <div className="h-32 flex items-center justify-center text-dg-text-muted text-xs">Sin datos recientes</div>
+                      <div className="flex h-32 items-center justify-center text-xs uppercase tracking-[0.8px] text-dg-text-muted">
+                        Sin datos recientes
+                      </div>
                     ) : (
                       <div
                         role="grid"
                         aria-label="Eventos por día de la semana y hora"
-                        className="min-w-[600px] flex flex-col gap-1"
+                        className="flex min-w-[600px] flex-col gap-1"
                         /*
                           Antes las celdas, las horas y los dias eran <div> y
                           <span> con onClick: sin rol, sin tabIndex y sin
@@ -513,7 +533,7 @@ export default function Dashboard() {
                         onKeyDown={moverFocoRejilla}
                       >
                         {/* Eje X: Horas */}
-                        <div role="row" className="flex pl-8 text-2xs text-dg-text-muted mb-1 font-mono tabular tracking-tighter">
+                        <div role="row" className="mb-1 flex pl-8 font-mono text-2xs tabular tracking-tighter text-dg-text-muted">
                           {[...Array(24)].map((_, i) => {
                             const ampm = i >= 12 ? 'PM' : 'AM';
                             const hora = i % 12 || 12;
@@ -526,7 +546,7 @@ export default function Dashboard() {
                                 aria-pressed={activa}
                                 aria-label={`Filtrar por las ${hora}:00 ${ampm}`}
                                 onClick={() => setFiltroHora(prev => (prev === i ? null : i))}
-                                className={`flex-1 text-center transition-all ${activa ? 'opacity-100 font-bold text-dg-text bg-white/10 rounded-dg-sm' : 'opacity-60 hover:opacity-100'}`}
+                                className={`flex-1 text-center ${activa ? 'bg-dg-text font-bold text-dg-bg' : 'opacity-60 hover:opacity-100'}`}
                               >
                                 {i % 4 === 0 ? `${hora}${ampm}` : <span aria-hidden="true">·</span>}
                               </button>
@@ -536,18 +556,18 @@ export default function Dashboard() {
 
                         {/* Filas: Días */}
                         {heatmapMatrix.matrix.map((row, filaIdx) => (
-                          <div role="row" key={row.dia} className="flex gap-1 items-center">
+                          <div role="row" key={row.dia} className="flex items-center gap-1">
                             <button
                               type="button"
                               role="rowheader"
                               aria-pressed={filtroDia === row.dia}
                               aria-label={`Filtrar por ${row.dia}`}
+                              className={`w-8 pr-1.5 text-right text-2xs font-bold uppercase tracking-[0.8px] hover:text-dg-text ${filtroDia === row.dia ? 'text-dg-text' : 'text-dg-text-muted'}`}
                               onClick={() => setFiltroDia(prev => (prev === row.dia ? null : row.dia))}
-                              className={`w-8 text-2xs text-dg-text-muted font-bold text-right pr-1.5 uppercase hover:text-dg-text transition-colors ${filtroDia === row.dia ? 'text-dg-text' : ''}`}
                             >
                               {row.dia}
                             </button>
-                            <div className="flex-1 flex gap-1">
+                            <div className="flex flex-1 gap-1">
                               {row.horas.map((count, j) => {
                                 const baseOpacity = count === 0 ? 0.05 : Math.max(0.25, count / heatmapMatrix.max);
                                 const ampm = j >= 12 ? 'PM' : 'AM';
@@ -569,10 +589,11 @@ export default function Dashboard() {
                                       setFiltroDia(prev => (prev === row.dia ? null : row.dia));
                                       setFiltroHora(prev => (prev === j ? null : j));
                                     }}
-                                    className={`flex-1 aspect-square rounded-dg-sm bg-dg-info transition-all duration-300 hover:ring-1 hover:ring-white cursor-crosshair relative group ${seleccionada ? 'ring-2 ring-white z-10' : ''}`}
+                                    // Celda cuadrada, sin radio y sin transicion.
+                                    className={`group relative aspect-square flex-1 cursor-crosshair bg-dg-info hover:ring-1 hover:ring-dg-text ${seleccionada ? 'z-10 ring-1 ring-dg-text' : ''}`}
                                     style={{ opacity: baseOpacity }}
                                   >
-                                    <span aria-hidden="true" className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1.5 bg-dg-card border border-dg-border-hi text-dg-text text-2xs rounded-dg-sm shadow-dg-lg opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+                                    <span aria-hidden="true" className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 whitespace-nowrap border border-dg-border-hi bg-dg-card px-2 py-1.5 text-2xs text-dg-text opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100">
                                       <span className="font-bold text-dg-info">{count} Eventos</span> <span className="opacity-50">el</span> {row.dia} <span className="opacity-50">a las</span> {hora}:00 {ampm}
                                     </span>
                                   </button>
@@ -583,22 +604,20 @@ export default function Dashboard() {
                         ))}
                       </div>
                     )}
-                    {/* Indicador de scroll en móvil */}
-                    <div className="absolute right-0 top-0 bottom-2 w-6 bg-gradient-to-l from-dg-card to-transparent pointer-events-none lg:hidden" />
                   </div>
                 </div>
 
                 {/* Donut Chart: Vectores de Ataque */}
-                <div className="cyber-card p-4 flex-1 flex flex-col">
-                  <div className="mb-4">
-                    <h2 className="text-xs font-bold uppercase text-dg-text-muted">Vectores de Ataque ({periodoLabel})</h2>
-                  </div>
-                  <div className="h-auto md:h-40 w-full flex flex-col md:flex-row items-center gap-6 md:gap-0 flex-1 justify-center">
+                <div className="card flex flex-1 flex-col p-4 sm:p-5">
+                  <h2 className="panel-title mb-5">Vectores de Ataque ({periodoLabel})</h2>
+                  <div className="flex h-auto w-full flex-1 flex-col items-center justify-center gap-6 md:h-40 md:flex-row md:gap-0">
                     {motivosFraude.length === 0 ? (
-                      <div className="w-full h-40 md:h-full flex items-center justify-center text-dg-text-muted text-xs">Sin fraudes registrados</div>
+                      <div className="flex h-40 w-full items-center justify-center text-xs uppercase tracking-[0.8px] text-dg-text-muted md:h-full">
+                        Sin fraudes registrados
+                      </div>
                     ) : (
                       <>
-                        <div className="w-full md:w-[45%] h-40 md:h-full relative shrink-0">
+                        <div className="relative h-40 w-full shrink-0 md:h-full md:w-[45%]">
                           <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <Pie
@@ -607,7 +626,10 @@ export default function Dashboard() {
                                 cy="50%"
                                 innerRadius={55}
                                 outerRadius={75}
-                                paddingAngle={5}
+                                // Anillo continuo, sin separacion entre
+                                // tramos ni animacion de entrada.
+                                paddingAngle={0}
+                                isAnimationActive={false}
                                 dataKey="value"
                                 stroke="none"
                                 onClick={(entry) => {
@@ -622,17 +644,19 @@ export default function Dashboard() {
                                   <Cell key={`cell-${index}`} fill={entry.color} opacity={filtroMotivo && filtroMotivo !== entry.name ? 0.3 : 1} />
                                 ))}
                               </Pie>
-                              <Tooltip contentStyle={{ backgroundColor: 'var(--color-dg-card)', border: '1px solid var(--color-dg-border)', borderRadius: '10px', fontSize: '12px' }} />
+                              <Tooltip contentStyle={TOOLTIP_PLANO} />
                             </PieChart>
                           </ResponsiveContainer>
-                          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span className="text-2xl font-bold text-dg-text leading-none">
+                          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                            <span className="tabular text-2xl font-bold leading-none text-dg-text">
                               {motivosFraude.reduce((acc, curr) => acc + curr.value, 0)}
                             </span>
-                            <span className="text-2xs text-dg-text-muted uppercase font-bold mt-1">Total</span>
+                            <span className="mt-1 text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">
+                              Total
+                            </span>
                           </div>
                         </div>
-                        <div className="w-full md:w-[55%] flex flex-col justify-center gap-1 md:pl-6 lg:pl-8 md:pr-6 lg:pr-12">
+                        <div className="flex w-full flex-col justify-center gap-2 md:w-[55%] md:pl-6 md:pr-6 lg:pl-8 lg:pr-12">
                           {motivosFraude.map((m, i) => {
                             const total = motivosFraude.reduce((acc, curr) => acc + curr.value, 0);
                             const porcentaje = total > 0 ? Math.round((m.value / total) * 100) : 0;
@@ -642,15 +666,18 @@ export default function Dashboard() {
                                 type="button"
                                 aria-pressed={filtroMotivo === m.name}
                                 aria-label={`Filtrar por ${m.name}: ${m.value} eventos, ${porcentaje} por ciento`}
+                                className={`-mx-2 flex w-full cursor-pointer flex-col gap-1.5 px-2 py-1 text-left hover:bg-white/5 ${filtroMotivo && filtroMotivo !== m.name ? 'opacity-30' : ''}`}
                                 onClick={() => setFiltroMotivo(prev => (prev === m.name ? null : m.name))}
-                                className={`w-full text-left flex flex-col gap-1 cursor-pointer hover:bg-white/5 py-1 px-2 -mx-2 rounded-dg-sm transition-colors ${filtroMotivo && filtroMotivo !== m.name ? 'opacity-30' : ''}`}
                               >
-                                <div className="flex items-center justify-between">
-                                  <span className="text-2xs text-dg-text-muted font-bold uppercase">{m.name}</span>
-                                  <span className="text-xs font-bold text-dg-text">{m.value} <span className="text-2xs text-dg-text-muted font-normal ml-1">({porcentaje}%)</span></span>
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">{m.name}</span>
+                                  <span className="tabular text-xs font-bold text-dg-text">
+                                    {m.value} <span className="ml-1 text-2xs font-normal text-dg-text-muted">({porcentaje}%)</span>
+                                  </span>
                                 </div>
-                                <div className="w-full bg-white/5 h-1 rounded-full overflow-hidden">
-                                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${porcentaje}%`, backgroundColor: m.color }} />
+                                {/* Barra recta, como las de Skills del portafolio. */}
+                                <div className="h-1 w-full bg-white/5">
+                                  <div className="h-full" style={{ width: `${porcentaje}%`, backgroundColor: m.color }} />
                                 </div>
                               </button>
                             );
@@ -663,22 +690,23 @@ export default function Dashboard() {
               </section>
 
               {/* Status and Latest */}
-              <section className="space-y-3 order-1 lg:order-2 flex flex-col">
+              <section className="order-1 flex flex-col space-y-4 lg:order-2">
                 {/* Spacer para simetría con selector de período */}
-                <div className="h-[28px] hidden lg:block" />
-                <div className="cyber-card overflow-hidden">
-                  <div className="px-4 pt-4 pb-2">
-                    <h2 className="text-xs font-bold uppercase text-dg-text-muted">Estado del Sistema</h2>
+                <div className="hidden h-[30px] lg:block" />
+                <div className="card">
+                  <div className="border-b border-dg-border px-4 py-4 sm:px-5">
+                    <h2 className="panel-title">Estado del Sistema</h2>
                   </div>
                   <div className="divide-y divide-dg-border">
-                    <div className="flex items-center justify-between p-3 px-4">
+                    <div className="flex items-center justify-between px-4 py-3.5 sm:px-5">
                       <div className="flex items-center gap-3">
-                        <Server className="w-5 h-5 text-dg-info" />
-                        <span className="text-sm font-medium">Nodo Edge</span>
+                        <Server aria-hidden="true" className="h-4 w-4 text-dg-text-muted" />
+                        <span className="text-sm text-dg-text">Nodo Edge</span>
                       </div>
-                      <span className={`text-xs font-bold flex items-center gap-1 ${isEdgeOnline(estado?.ultimo_heartbeat ?? null) ? 'text-dg-success' : 'text-dg-error'}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${isEdgeOnline(estado?.ultimo_heartbeat ?? null) ? 'bg-dg-success animate-pulse' : 'bg-dg-error'}`} />
-                        {isEdgeOnline(estado?.ultimo_heartbeat ?? null) ? "ONLINE" : "OFFLINE"}
+                      <span className={`flex items-center gap-2 text-xs font-bold uppercase tracking-[0.8px] ${isEdgeOnline(estado?.ultimo_heartbeat ?? null) ? 'text-dg-success' : 'text-dg-error'}`}>
+                        {/* Punto cuadrado y quieto: el original latia en bucle. */}
+                        <span aria-hidden="true" className={`h-1.5 w-1.5 ${isEdgeOnline(estado?.ultimo_heartbeat ?? null) ? 'bg-dg-success' : 'bg-dg-error'}`} />
+                        {isEdgeOnline(estado?.ultimo_heartbeat ?? null) ? "Online" : "Offline"}
                       </span>
                     </div>
                     {(() => {
@@ -686,89 +714,96 @@ export default function Dashboard() {
                       if (!cam) return null;
                       const activa = isCamaraActiva(cam, estado?.ultimo_heartbeat ?? null);
                       return (
-                        <div className="flex items-center justify-between p-3 px-4">
+                        <div className="flex items-center justify-between px-4 py-3.5 sm:px-5">
                           <div className="flex items-center gap-3">
-                            <Video className="w-5 h-5 text-dg-info" />
-                            <div>
-                              <span className="text-sm font-medium">Cámara</span>
-                              <span className="text-2xs ml-2 px-1.5 py-0.5 rounded-dg-sm bg-white/5 text-dg-text-muted font-bold">{cam.camera_type}</span>
+                            <Video aria-hidden="true" className="h-4 w-4 text-dg-text-muted" />
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-dg-text">Cámara</span>
+                              <span className="border border-dg-border px-1.5 py-0.5 text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">
+                                {cam.camera_type}
+                              </span>
                             </div>
                           </div>
-                          <span className={`text-xs font-bold flex items-center gap-1 ${activa ? 'text-dg-success' : 'text-dg-error'}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${activa ? 'bg-dg-success animate-pulse' : 'bg-dg-error'}`} />
-                            {activa ? "ACTIVA" : "INACTIVA"}
+                          <span className={`flex items-center gap-2 text-xs font-bold uppercase tracking-[0.8px] ${activa ? 'text-dg-success' : 'text-dg-error'}`}>
+                            <span aria-hidden="true" className={`h-1.5 w-1.5 ${activa ? 'bg-dg-success' : 'bg-dg-error'}`} />
+                            {activa ? "Activa" : "Inactiva"}
                           </span>
                         </div>
                       );
                     })()}
-                    <div className="flex items-center justify-between p-3 px-4">
+                    <div className="flex items-center justify-between px-4 py-3.5 sm:px-5">
                       <div className="flex items-center gap-3">
-                        <History className="w-5 h-5 text-dg-info" />
-                        <span className="text-sm font-medium">Último evento</span>
+                        <History aria-hidden="true" className="h-4 w-4 text-dg-text-muted" />
+                        <span className="text-sm text-dg-text">Último evento</span>
                       </div>
-                      <span className="text-xs text-dg-text-muted">{ultimoEvento}</span>
+                      <span className="text-xs uppercase tracking-[0.8px] text-dg-text-muted">{ultimoEvento}</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 px-4">
+                    <div className="flex items-center justify-between px-4 py-3.5 sm:px-5">
                       <div className="flex items-center gap-3">
-                        <Users className="w-5 h-5 text-dg-info" />
-                        <span className="text-sm font-medium">Usuarios registrados</span>
+                        <Users aria-hidden="true" className="h-4 w-4 text-dg-text-muted" />
+                        <span className="text-sm text-dg-text">Usuarios registrados</span>
                       </div>
-                      <span className="text-xs font-bold px-2 py-0.5 rounded-dg-sm bg-dg-input text-dg-text-secondary">{stats.totalUsuarios}</span>
+                      <span className="tabular text-xs font-bold text-dg-text">{stats.totalUsuarios}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Latest Events */}
-                <div className="space-y-4 flex-1 flex flex-col">
+                <div className="flex flex-1 flex-col space-y-4">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xs font-bold uppercase text-dg-text-muted">Últimos Eventos</h2>
+                    <h2 className="panel-title">Últimos Eventos</h2>
                     <button
                       onClick={() => navigate("/history")}
-                      className="text-xs font-bold text-dg-action-text uppercase"
+                      className="border-b border-dg-text-muted pb-0.5 text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted hover:border-dg-text hover:text-dg-text"
                     >
                       Ver todo
                     </button>
                   </div>
-                  <div className="space-y-3 flex-1">
-                    {events.length === 0 ? (
-                      <div className="cyber-card p-8 text-center text-dg-text-muted">
-                        <p className="text-sm">No hay eventos registrados aún</p>
-                      </div>
-                    ) : (
-                      events.map((evento, idx) => {
+                  {events.length === 0 ? (
+                    <div className="card p-8 text-center text-sm uppercase tracking-[0.8px] text-dg-text-muted">
+                      No hay eventos registrados aún
+                    </div>
+                  ) : (
+                    /*
+                      Una sola tarjeta con filas separadas por filete, en vez
+                      de seis tarjetas flotando con hueco entre ellas. Es la
+                      lista plana del portafolio.
+                    */
+                    <div className="card flex-1 divide-y divide-dg-border">
+                      {events.map((evento, idx) => {
                         const config = getEventConfig(evento);
                         return (
-                          <motion.div
+                          <button
                             key={evento.id}
-                            whileTap={{ scale: 0.98 }}
+                            type="button"
                             onClick={() => navigate(`/event/${evento.id}`)}
-                            className={`cyber-card p-4 flex items-center gap-4 cursor-pointer hover:bg-white/5 transition-colors ${idx >= 3 ? 'hidden lg:flex' : ''}`}
+                            className={`w-full items-start gap-4 p-4 text-left hover:bg-white/5 sm:p-5 ${idx >= 3 ? 'hidden lg:flex' : 'flex'}`}
                           >
-                            <div className="w-12 h-12 rounded-dg bg-white/5 flex items-center justify-center shrink-0">
-                              <config.icon className={`w-7 h-7 ${config.color}`} />
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex justify-between items-start">
-                                <p className={`text-base font-semibold ${config.color}`}>{config.title}</p>
-                                <div className="flex items-center gap-2 shrink-0">
+                            <config.icon aria-hidden="true" className={`mt-0.5 h-5 w-5 shrink-0 ${config.color}`} />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-3">
+                                <p className={`text-sm font-bold uppercase tracking-[0.8px] ${config.color}`}>
+                                  {config.title}
+                                </p>
+                                <div className="flex shrink-0 items-center gap-2">
                                   {evento.camera_id && (
-                                    <span className={`text-2xs font-bold uppercase px-1.5 py-0.5 rounded-dg-sm ${evento.camera_type === "3D"
-                                        ? "bg-dg-action-text/10 text-dg-action-text"
-                                        : "bg-dg-info/10 text-dg-info"
+                                    <span className={`border px-1.5 py-0.5 text-2xs font-bold uppercase tracking-[0.8px] ${evento.camera_type === "3D"
+                                        ? "border-dg-action-text/40 text-dg-action-text"
+                                        : "border-dg-info/40 text-dg-info"
                                       }`}>
                                       {evento.camera_id === "entrada_principal" ? "CAM-01" : "CAM-02"} · {evento.camera_type}
                                     </span>
                                   )}
-                                  <span className="text-2xs text-dg-text-muted">{formatTime(evento.timestamp)}</span>
+                                  <span className="tabular text-2xs text-dg-text-muted">{formatTime(evento.timestamp)}</span>
                                 </div>
                               </div>
-                              <p className="text-sm text-dg-text-muted">{config.sub}</p>
+                              <p className="mt-1.5 text-sm text-dg-text-secondary">{config.sub}</p>
                             </div>
-                          </motion.div>
+                          </button>
                         );
-                      })
-                    )}
-                  </div>
+                      })}
+                    </div>
+                  )}
                 </div>
               </section>
             </div>
@@ -776,6 +811,8 @@ export default function Dashboard() {
         )}
       </main>
 
+      {/* La cabecera tambien cambia: variante de texto, alineada a la
+          derecha y con el destino activo invertido. */}
       <Navigation />
     </div>
   );

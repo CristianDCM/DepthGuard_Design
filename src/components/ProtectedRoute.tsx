@@ -137,7 +137,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   if (checking) {
     return (
       <div className="min-h-screen bg-dg-bg flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
+        <p role="status" className="text-xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Cargando</p>
       </div>
     );
   }
@@ -154,19 +154,19 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
       {/* Aviso de inactividad */}
       {showWarning && (
-        <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="cyber-card p-6 max-w-sm w-full text-center space-y-4 animate-in fade-in zoom-in">
-            <div className="w-16 h-16 mx-auto rounded-full bg-dg-warning/10 flex items-center justify-center">
-              <span className="text-3xl font-black text-dg-warning headline">{countdown}</span>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-dg-canvas/80 p-4">
+          <div className="w-full max-w-sm space-y-4 border border-dg-border bg-dg-bg p-6 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center border border-dg-warning/50">
+              <span className="tabular text-3xl font-bold text-dg-warning">{countdown}</span>
             </div>
-            <h2 className="text-lg font-bold headline">Sesión por expirar</h2>
+            <h2 className="text-lg font-bold uppercase tracking-[0.8px]">Sesión por expirar</h2>
             <p className="text-sm text-dg-text-muted">
               Tu sesión se cerrará automáticamente por inactividad.
               Mueve el mouse o presiona una tecla para continuar.
             </p>
             <button
               onClick={resetInactivityTimer}
-              className="btn-primary w-full py-3"
+              className="btn btn-strong w-full py-3 text-sm"
             >
               Continuar sesión
             </button>

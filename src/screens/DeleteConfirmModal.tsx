@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { AlertTriangle, Trash2 } from "lucide-react";
-import { motion } from "motion/react";
 import { getUsuarioPorId, eliminarUsuario, type Usuario } from "../lib/supabase";
 
 export default function DeleteConfirmModal() {
@@ -40,8 +39,8 @@ export default function DeleteConfirmModal() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black/60">
-        <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-dg-canvas/80">
+        <p role="status" className="text-xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Cargando</p>
       </div>
     );
   }
@@ -49,26 +48,16 @@ export default function DeleteConfirmModal() {
   const initials = user?.nombre?.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase() ?? "??";
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm relative overflow-hidden">
-      {/* Background content (simulated) */}
-      <div className="absolute inset-0 opacity-20 blur-sm pointer-events-none">
-        <div className="p-4 space-y-4">
-          <div className="cyber-card h-20 w-full" />
-          <div className="cyber-card h-20 w-full" />
-        </div>
-      </div>
-
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="bg-dg-card w-full max-w-[340px] rounded-dg-lg p-6 border border-dg-border shadow-2xl relative z-50"
-      >
+    <div className="min-h-screen flex items-center justify-center p-6 bg-dg-canvas/80 relative overflow-hidden">
+      {/* Se retira el decorado de fondo: dos tarjetas falsas desenfocadas
+          imitando una lista que no esta ahi. */}
+      <div className="relative z-50 w-full max-w-[340px] border border-dg-border bg-dg-bg p-6">
         <div className="flex flex-col items-center text-center">
-          <div className="w-16 h-16 rounded-full bg-dg-error/10 flex items-center justify-center mb-5">
-            <AlertTriangle className="w-10 h-10 text-dg-error fill-dg-error/10" />
+          <div className="mb-5 flex h-16 w-16 items-center justify-center border border-dg-error/50">
+            <AlertTriangle className="h-9 w-9 text-dg-error" aria-hidden="true" />
           </div>
           
-          <h2 className="text-xl font-bold text-dg-text mb-3 tracking-tight headline">¿Eliminar usuario?</h2>
+          <h1 className="mb-3 text-xl font-bold uppercase tracking-[0.8px] text-dg-text">¿Eliminar usuario?</h1>
           
           <p className="text-dg-text-secondary text-sm leading-relaxed mb-6 px-2">
             Se borrará su plantilla facial y su registro. Dejará de tener acceso
@@ -76,13 +65,13 @@ export default function DeleteConfirmModal() {
             <span className="text-dg-error font-semibold block mt-1">Esta acción no se puede deshacer.</span>
           </p>
 
-          <div className="w-full bg-dg-bg border border-dg-border rounded-dg p-3 flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-full bg-dg-input border border-dg-border flex items-center justify-center shrink-0">
+          <div className="mb-8 flex w-full items-center gap-3 border border-dg-border p-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-dg-border">
               <span className="text-dg-text-secondary font-bold text-sm">{initials}</span>
             </div>
             <div className="text-left overflow-hidden">
               <h3 className="font-bold text-dg-text text-sm truncate">{user?.nombre ?? "—"}</h3>
-              <p className="text-2xs text-dg-text-muted uppercase font-medium">ID #{id?.substring(0, 8)}</p>
+              <p className="text-2xs font-medium uppercase tracking-[0.8px] text-dg-text-muted">ID #{id?.substring(0, 8)}</p>
             </div>
           </div>
 
@@ -90,19 +79,19 @@ export default function DeleteConfirmModal() {
             <button 
               onClick={handleDelete}
               disabled={deleting}
-              className="w-full py-3.5 bg-dg-error text-dg-text font-bold rounded-dg flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 border border-dg-error bg-dg-error py-3.5 text-sm font-bold uppercase tracking-[0.8px] text-dg-bg hover:brightness-110 disabled:opacity-50"
             >
-              <Trash2 className="w-4 h-4" /> {deleting ? "Eliminando..." : "Eliminar"}
+              <Trash2 className="h-4 w-4" aria-hidden="true" /> {deleting ? "Eliminando" : "Eliminar"}
             </button>
             <button 
               onClick={() => navigate(-1)}
-              className="w-full py-3.5 bg-dg-bg text-dg-text-muted font-bold rounded-dg border border-dg-border hover:text-dg-text hover:bg-dg-border transition-all active:scale-95"
+              className="btn w-full py-3.5 text-sm"
             >
               Cancelar
             </button>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

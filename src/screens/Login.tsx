@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Shield, Lock, AlertTriangle } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
 import { loginAdmin } from "../lib/supabase";
 import { getLockoutSeconds, LOCKOUT_THRESHOLDS } from "../lib/loginLockout";
 
@@ -129,35 +128,24 @@ export default function Login() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm flex flex-col items-center">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8 flex flex-col items-center"
-        >
-          <div className="relative mb-4">
-            <img
-              src="/logo.svg"
-              alt="DepthGuard Logo"
-              className="w-24 h-24 object-contain z-10 relative"
-            />
-            {/* Halo del logotipo: la marca solo aparece aqui y en el wordmark. */}
-            <div className="absolute inset-0 bg-dg-brand/10 blur-3xl rounded-full -z-10" />
-          </div>
-          <h1 className="text-4xl font-bold text-dg-text tracking-tight headline">
+        <div className="mb-8 flex flex-col items-center">
+          <img
+            src="/logo.svg"
+            alt="DepthGuard Logo"
+            className="mb-4 h-24 w-24 object-contain"
+          />
+          <h1 className="text-4xl font-bold tracking-[0.8px] text-dg-text">
             Depth<span className="text-dg-brand">Guard</span>
           </h1>
-          <p className="text-dg-text-muted text-sm mt-1">Sistema de Control de Acceso 3D</p>
-        </motion.div>
+          <p className="mt-2 text-xs uppercase tracking-[0.8px] text-dg-text-muted">
+            Sistema de Control de Acceso 3D
+          </p>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1 }}
-          className="w-full cyber-card p-8 shadow-2xl"
-        >
+        <div className="card w-full p-8">
           <form className="space-y-6" onSubmit={handleLogin}>
             <div className="space-y-2">
-              <label htmlFor="login-email" className="block text-sm font-medium text-dg-text-secondary">
+              <label htmlFor="login-email" className="block text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">
                 Correo corporativo
               </label>
               <input
@@ -169,12 +157,12 @@ export default function Login() {
                 required
                 disabled={isLocked}
                 aria-describedby={error ? "login-error" : undefined}
-                className="w-full bg-dg-input border border-dg-border text-dg-text rounded-dg px-4 py-3 text-base placeholder:text-dg-text-muted focus:border-dg-focus transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full border border-dg-border bg-transparent px-4 py-3 text-base text-dg-text placeholder:text-dg-text-muted focus:border-dg-text disabled:cursor-not-allowed disabled:opacity-40"
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="login-password" className="block text-sm font-medium text-dg-text-secondary">
+              <label htmlFor="login-password" className="block text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">
                 Contraseña
               </label>
               <div className="relative">
@@ -187,14 +175,14 @@ export default function Login() {
                   required
                   disabled={isLocked}
                   aria-describedby={error ? "login-error" : undefined}
-                  className="w-full bg-dg-input border border-dg-border text-dg-text rounded-dg px-4 py-3 text-base placeholder:text-dg-text-muted focus:border-dg-focus transition-colors pr-12 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full border border-dg-border bg-transparent px-4 py-3 pr-12 text-base text-dg-text placeholder:text-dg-text-muted focus:border-dg-text disabled:cursor-not-allowed disabled:opacity-40"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   aria-pressed={showPassword}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dg-text-muted hover:text-dg-text transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dg-text-muted hover:text-dg-text"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" aria-hidden="true" /> : <Eye className="w-5 h-5" aria-hidden="true" />}
                 </button>
@@ -202,72 +190,52 @@ export default function Login() {
             </div>
 
             {/* Mensajes de error y bloqueo */}
-            <AnimatePresence>
-              {error && (
-                <motion.div
-                  id="login-error"
-                  role="alert"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className="bg-dg-error/10 border border-dg-error text-dg-error text-sm py-2 px-3 rounded-dg text-center"
-                >
-                  {error}
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {error && (
+              <div
+                id="login-error"
+                role="alert"
+                className="border border-dg-error px-3 py-2 text-center text-sm text-dg-error"
+              >
+                {error}
+              </div>
+            )}
 
             {/* Aviso visual de bloqueo con countdown */}
-            <AnimatePresence>
-              {isLocked && remainingSeconds > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  role="status"
-                  className="bg-dg-warning/5 border border-dg-warning/30 rounded-dg p-4 text-center space-y-2"
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <Lock className="w-4 h-4 text-dg-warning" />
-                    <span className="text-xs font-bold uppercase text-dg-warning">
-                      Acceso bloqueado
-                    </span>
-                  </div>
-                  <div className="text-2xl font-bold text-dg-warning headline tabular">
-                    {formatTime(remainingSeconds)}
-                  </div>
-                  <p className="text-xs text-dg-text-muted">
-                    {attemptState.attempts} intentos fallidos registrados
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {isLocked && remainingSeconds > 0 && (
+              <div role="status" className="space-y-2 border border-dg-warning/50 p-4 text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <Lock className="h-4 w-4 text-dg-warning" aria-hidden="true" />
+                  <span className="text-xs font-bold uppercase tracking-[0.8px] text-dg-warning">
+                    Acceso bloqueado
+                  </span>
+                </div>
+                <div className="tabular text-2xl font-bold text-dg-warning">
+                  {formatTime(remainingSeconds)}
+                </div>
+                <p className="text-xs text-dg-text-muted">
+                  {attemptState.attempts} intentos fallidos registrados
+                </p>
+              </div>
+            )}
 
             {/* Aviso de seguridad cuando hay muchos intentos */}
-            <AnimatePresence>
-              {attemptState.attempts >= 5 && !isLocked && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex items-start gap-2 text-xs text-dg-warning bg-dg-warning/5 border border-dg-warning/20 rounded-dg p-3"
-                >
-                  <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                  <span>Se han registrado múltiples intentos fallidos. Los bloqueos se incrementarán progresivamente.</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {attemptState.attempts >= 5 && !isLocked && (
+              <div className="flex items-start gap-2 border border-dg-warning/50 p-3 text-xs text-dg-warning">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>Se han registrado múltiples intentos fallidos. Los bloqueos se incrementarán progresivamente.</span>
+              </div>
+            )}
 
             <button
               id="btn-login"
               type="submit"
               disabled={isLoading || isLocked}
-              className="btn-primary w-full py-4 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn btn-strong flex w-full items-center justify-center gap-2 py-4 text-sm disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isLoading ? "Verificando..." : isLocked ? "Bloqueado" : "Iniciar Sesión"}
+              {isLoading ? "Verificando" : isLocked ? "Bloqueado" : "Iniciar Sesión"}
             </button>
           </form>
-        </motion.div>
+        </div>
       </div>
     </main>
   );

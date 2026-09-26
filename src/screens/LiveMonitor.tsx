@@ -12,7 +12,6 @@ import {
   VideoOff,
   Image as ImageIcon,
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
 import Navigation from "../components/Navigation";
 import WebRTCPlayer from "../components/WebRTCPlayer";
 import IndicadorFrescura, { useFrescura, ContenidoFrescura } from "../components/IndicadorFrescura";
@@ -192,7 +191,7 @@ export default function LiveMonitor() {
     : false;
 
   return (
-    <div className="h-full pb-16 lg:pb-0 lg:pt-16 flex flex-col overflow-hidden bg-dg-bg">
+    <div className="h-full pb-barra lg:pb-0 lg:pt-16 flex flex-col overflow-hidden bg-dg-bg">
       {/* Sin cabecera de titulo: la barra de navegacion ya dice donde
           estas. El <h1> se conserva para lectores de pantalla. */}
       <h1 className="sr-only">Monitor en vivo</h1>
@@ -219,9 +218,12 @@ export default function LiveMonitor() {
         )}
 
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
-          </div>
+          <p
+            role="status"
+            className="py-20 text-center text-xs font-bold uppercase tracking-[0.8px] text-dg-text-muted"
+          >
+            Cargando
+          </p>
         ) : (
           <ContenidoFrescura estado={frescura} className="lg:flex-1 lg:min-h-0">
           <CameraPanel
@@ -275,24 +277,11 @@ function CameraPanel({
   const [webrtcFailed, setWebrtcFailed] = useState(false);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        delay: cameraId === "entrada_principal" ? 0 : 0.15,
-      }}
-      className="space-y-3 lg:flex lg:h-full lg:flex-col lg:min-h-0"
-    >
+    <div className="space-y-4 lg:flex lg:h-full lg:flex-col lg:min-h-0">
       {/* Camera Header - Siempre arriba ocupando todo el ancho */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div
-            className={`w-10 h-10 rounded-dg flex items-center justify-center ${
-              cameraType === "3D"
-                ? "bg-dg-info/10 border border-dg-info/20"
-                : "bg-dg-info/10 border border-dg-info/20"
-            }`}
-          >
+          <div className="flex h-10 w-10 items-center justify-center border border-dg-border">
             {cameraType === "3D" ? (
               <Shield className="w-5 h-5 text-dg-info" aria-hidden="true" />
             ) : (
@@ -300,30 +289,22 @@ function CameraPanel({
             )}
           </div>
           <div>
-            <h2 className="headline text-base font-bold tracking-tight">
+            <h2 className="text-base font-bold uppercase tracking-[0.8px] text-dg-text">
               {label}
             </h2>
             <div className="flex items-center gap-2 mt-0.5">
-              <span
-                className={`text-2xs font-bold uppercase px-1.5 py-0.5 rounded-dg-sm ${
-                  cameraType === "3D"
-                    ? "bg-dg-info/10 text-dg-info"
-                    : "bg-dg-info/10 text-dg-info"
-                }`}
-              >
+              <span className="border border-dg-info/40 px-1.5 py-0.5 text-2xs font-bold uppercase tracking-[0.8px] text-dg-info">
                 {cameraType === "3D" ? "Anti-spoofing 3D" : "Verificación 2D"}
               </span>
               <span
-                className={`flex items-center gap-1 text-2xs font-bold uppercase ${
+                className={`flex items-center gap-1.5 text-2xs font-bold uppercase tracking-[0.8px] ${
                   camaraActiva ? "text-dg-success" : "text-dg-error"
                 }`}
               >
+                {/* Punto cuadrado y quieto: antes latia en bucle. */}
                 <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    camaraActiva
-                      ? "bg-dg-success animate-pulse"
-                      : "bg-dg-error"
-                  }`}
+                  aria-hidden="true"
+                  className={`h-1.5 w-1.5 ${camaraActiva ? "bg-dg-success" : "bg-dg-error"}`}
                 />
                 {camaraActiva ? "Activa" : "Inactiva"}
               </span>
@@ -364,7 +345,7 @@ function CameraPanel({
         con la etiqueta encima, el sujeto en una caja propia y la hora en su
         propio renglon separado: cuatro bloques apilados para tres datos.
       */}
-      <div className={`cyber-card ${statusConfig.borderClass}`}>
+      <div className={`card ${statusConfig.borderClass}`}>
         <div className="flex items-center gap-3 p-4">
           <statusConfig.icon
             className="h-6 w-6 shrink-0"
@@ -372,11 +353,11 @@ function CameraPanel({
             aria-hidden="true"
           />
           <div className="min-w-0 flex-1">
-            <p className="text-2xs font-bold uppercase text-dg-text-muted">
+            <p className="text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">
               Estatus de seguridad
             </p>
             <h3
-              className="headline truncate text-lg font-bold"
+              className="truncate text-lg font-bold uppercase tracking-[0.8px]"
               style={{ color: statusConfig.accentColor }}
             >
               {statusConfig.title}
@@ -384,9 +365,9 @@ function CameraPanel({
           </div>
           {ultimoEvento?.confianza != null && (
             <div className="shrink-0 text-right">
-              <p className="text-2xs font-bold uppercase text-dg-text-muted">Confianza</p>
+              <p className="text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">Confianza</p>
               <p
-                className="headline text-xl font-bold tabular"
+                className="text-xl font-bold tabular"
                 style={{ color: statusConfig.accentColor }}
               >
                 {Math.round(ultimoEvento.confianza * 100)}%
@@ -424,8 +405,8 @@ function CameraPanel({
       <div className={layout === "expanded" ? "lg:col-span-4 space-y-3 lg:min-h-0 lg:overflow-y-auto custom-scrollbar" : "space-y-4"}>
       {/* Anti-spoofing Metrics (solo si hay evento con métricas) */}
       {ultimoEvento?.metricas_json && (
-        <div className="cyber-card p-4">
-          <h4 className="text-2xs font-bold text-dg-text-muted uppercase mb-4">
+        <div className="card p-4 sm:p-5">
+          <h4 className="panel-title mb-5">
             {cameraType === "3D"
               ? "Métricas Anti-Spoofing"
               : "Métricas de Detección"}
@@ -473,40 +454,36 @@ function CameraPanel({
       )}
 
       {/* Mini Event Log */}
-      <div className="cyber-card overflow-hidden">
-        <div className="px-4 py-3 border-b border-dg-border bg-white/5 flex items-center justify-between">
-          <h4 className="text-2xs font-bold text-dg-text-muted uppercase">
-            Últimos Eventos
-          </h4>
-          <span className="text-2xs text-dg-text-muted font-medium tabular">
+      <div className="card">
+        <div className="flex items-center justify-between border-b border-dg-border px-4 py-3.5">
+          <h4 className="panel-title">Últimos Eventos</h4>
+          <span className="text-2xs font-medium tabular text-dg-text-muted">
             {eventosRecientes.length} registros
           </span>
         </div>
         <div className="divide-y divide-dg-border max-h-[45vh] lg:max-h-[38vh] overflow-y-auto custom-scrollbar">
-          <AnimatePresence mode="popLayout">
-            {eventosRecientes.length === 0 ? (
-              <div className="flex flex-col items-center gap-2 p-8 text-center">
-                <Activity className="h-6 w-6 text-dg-text-off" aria-hidden="true" />
-                <p className="text-xs text-dg-text-muted">
-                  Sin actividad todavía.<br />Los accesos aparecerán aquí en cuanto ocurran.
-                </p>
-              </div>
-            ) : (
-              eventosRecientes.map((evento) => (
-                <MiniEventRow 
-                  key={evento.id} 
-                  evento={evento} 
-                  onClick={() => onEventFocus && onEventFocus(evento)}
-                />
-              ))
-            )}
-          </AnimatePresence>
+          {eventosRecientes.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 p-8 text-center">
+              <Activity className="h-6 w-6 text-dg-text-off" aria-hidden="true" />
+              <p className="text-xs text-dg-text-muted">
+                Sin actividad todavía.<br />Los accesos aparecerán aquí en cuanto ocurran.
+              </p>
+            </div>
+          ) : (
+            eventosRecientes.map((evento) => (
+              <MiniEventRow
+                key={evento.id}
+                evento={evento}
+                onClick={() => onEventFocus && onEventFocus(evento)}
+              />
+            ))
+          )}
         </div>
       </div>
 
       </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -517,25 +494,17 @@ function CameraPanel({
 function MiniEventRow({ evento, onClick }: { key?: React.Key; evento: Evento; onClick?: () => void }) {
   const config = getEventMiniConfig(evento);
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 10 }}
+    <div
       onClick={onClick}
-      className={`flex items-center gap-3 px-4 py-3.5 min-h-[56px] transition-colors ${onClick ? 'cursor-pointer hover:bg-white/5' : ''}`}
+      className={`flex min-h-[56px] items-center gap-3 px-4 py-3.5 ${onClick ? 'cursor-pointer hover:bg-white/5' : ''}`}
     >
-      <div
-        className="w-7 h-7 rounded-dg-sm flex items-center justify-center shrink-0"
-        style={{ backgroundColor: `${config.color}15` }}
-      >
-        <config.icon
-          className="w-4 h-4"
-          style={{ color: config.color }}
-        />
+      {/* Caja cuadrada de filete neutro: el color lo lleva el icono, que ya
+          era el unico portador fiable del estado. */}
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center border border-dg-border">
+        <config.icon className="h-4 w-4" style={{ color: config.color }} aria-hidden="true" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold truncate" style={{ color: config.color }}>
+        <p className="truncate text-xs font-bold uppercase tracking-[0.8px]" style={{ color: config.color }}>
           {config.label}
         </p>
         <p className="text-2xs text-dg-text-muted truncate">
@@ -552,7 +521,7 @@ function MiniEventRow({ evento, onClick }: { key?: React.Key; evento: Evento; on
           </p>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -575,13 +544,9 @@ function MetricBar({
           {value}
         </span>
       </div>
-      <div className="h-1.5 w-full bg-dg-canvas rounded-full overflow-hidden">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${Math.min(progress, 100)}%` }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className={`h-full ${color} rounded-full`}
-        />
+      {/* Recta y quieta: antes crecia desde cero en cada render. */}
+      <div className="h-1 w-full bg-white/5">
+        <div className={`h-full ${color}`} style={{ width: `${Math.min(progress, 100)}%` }} />
       </div>
     </div>
   );
@@ -722,8 +687,8 @@ function LiveSnapshotPreview({
   // Cámara inactiva — placeholder de desconectada
   if (!camaraActiva) {
     return (
-      <div className="cyber-card overflow-hidden">
-        <div className="aspect-video bg-dg-bg flex flex-col items-center justify-center gap-2 text-dg-text-muted" role="status">
+      <div className="card overflow-hidden">
+        <div className="aspect-video bg-dg-canvas flex flex-col items-center justify-center gap-2 text-dg-text-muted" role="status">
           <VideoOff className="w-8 h-8 opacity-40" aria-hidden="true" />
           <span className="text-sm font-medium">Cámara desconectada</span>
           <span className="text-xs text-dg-text-muted">Compruebe el terminal de acceso</span>
@@ -733,7 +698,7 @@ function LiveSnapshotPreview({
   }
 
   return (
-    <div className="cyber-card overflow-hidden relative group">
+    <div className="card relative overflow-hidden">
       {/*
         Cabecera honesta.
 
@@ -744,10 +709,11 @@ function LiveSnapshotPreview({
         en blanco al 40% sobre un degradado. Un operador podia tomar una
         decision de seguridad creyendo que veia la escena en directo.
       */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between gap-2 px-3 py-2 bg-gradient-to-b from-black/80 to-transparent">
-        <div className="flex items-center gap-1.5 rounded-full border border-dg-warning/40 bg-dg-warning/15 px-2 py-0.5 backdrop-blur-sm">
+      {/* Franja solida, no degradado: la superficie es plana. */}
+      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between gap-2 bg-black/70 px-3 py-2">
+        <div className="flex items-center gap-1.5 border border-dg-warning/50 px-2 py-0.5">
           <ImageIcon className="h-3 w-3 text-dg-warning" aria-hidden="true" />
-          <span className="text-2xs font-bold uppercase text-dg-warning">
+          <span className="text-2xs font-bold uppercase tracking-[0.8px] text-dg-warning">
             Vista reducida
           </span>
         </div>
@@ -772,15 +738,14 @@ function LiveSnapshotPreview({
           onError={() => setImgError(true)}
         />
       ) : (
-        <div className="aspect-video bg-dg-bg flex flex-col items-center justify-center gap-2 text-dg-text-muted">
-          <div className="w-6 h-6 border-2 border-dg-info border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-medium">
-            {imgError ? "Sin imagen de la cámara" : "Conectando…"}
+        <div className="aspect-video bg-dg-canvas flex items-center justify-center text-dg-text-muted">
+          <span className="text-xs font-bold uppercase tracking-[0.8px]">
+            {imgError ? "Sin imagen de la cámara" : "Conectando"}
           </span>
         </div>
       )}
 
-      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5 bg-gradient-to-t from-black/75 to-transparent">
+      <div className="absolute bottom-0 left-0 right-0 bg-black/70 px-3 py-1.5">
         <span className="text-2xs font-medium text-white/80">
           No es vídeo en directo · 1 imagen cada 2 s
         </span>

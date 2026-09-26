@@ -1,6 +1,5 @@
 import { Suspense, lazy, type ReactNode } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { MotionConfig } from "motion/react";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 import EstadoPwa from "./components/EstadoPwa";
@@ -54,11 +53,9 @@ function InviteRedirect({ children }: { children: ReactNode }) {
 function PantallaCargando() {
   return (
     <div className="min-h-screen bg-dg-bg flex items-center justify-center">
-      <div
-        role="status"
-        aria-label="Cargando"
-        className="w-8 h-8 border-2 border-dg-info border-t-transparent rounded-full animate-spin"
-      />
+      <p role="status" className="text-xs font-bold uppercase tracking-[0.8px] text-dg-text-muted">
+        Cargando
+      </p>
     </div>
   );
 }
@@ -66,48 +63,46 @@ function PantallaCargando() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <MotionConfig reducedMotion="user">
-        {/* Conexión, versión nueva e instalación. */}
-        <EstadoPwa />
-        <Router>
-          {/*
-            Enlace de salto: el primer elemento enfocable de la pagina.
-            Sin el, llegar al contenido con teclado obliga a recorrer los
-            cinco destinos de la navegacion en CADA pantalla.
-            Solo se ve cuando recibe el foco.
-          */}
-          <a
-            href="#contenido"
-            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-dg focus:bg-dg-action focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
-          >
-            Saltar al contenido
-          </a>
-          <InviteRedirect>
-            <Suspense fallback={<PantallaCargando />}>
-              <Routes>
-                {/* Rutas públicas */}
-                <Route path="/" element={<Login />} />
-                <Route path="/auth/callback" element={<SetPassword />} />
+      {/* Conexión, versión nueva e instalación. */}
+      <EstadoPwa />
+      <Router>
+        {/*
+          Enlace de salto: el primer elemento enfocable de la pagina.
+          Sin el, llegar al contenido con teclado obliga a recorrer los
+          cinco destinos de la navegacion en CADA pantalla.
+          Solo se ve cuando recibe el foco.
+        */}
+        <a
+          href="#contenido"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:bg-dg-text focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:uppercase focus:tracking-[0.8px] focus:text-dg-bg"
+        >
+          Saltar al contenido
+        </a>
+        <InviteRedirect>
+          <Suspense fallback={<PantallaCargando />}>
+            <Routes>
+              {/* Rutas públicas */}
+              <Route path="/" element={<Login />} />
+              <Route path="/auth/callback" element={<SetPassword />} />
 
-                {/* Rutas protegidas — requieren login */}
-                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/live" element={<ProtectedRoute><LiveMonitor /></ProtectedRoute>} />
-                <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
-                <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
-                <Route path="/event/:id" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
-                <Route path="/profile/:id" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
-                <Route path="/users/edit/:id" element={<ProtectedRoute><EditUserModal /></ProtectedRoute>} />
-                <Route path="/users/delete/:id" element={<ProtectedRoute><DeleteConfirmModal /></ProtectedRoute>} />
-                <Route path="/register/start" element={<ProtectedRoute><RegisterStart /></ProtectedRoute>} />
-                <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              {/* Rutas protegidas — requieren login */}
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/live" element={<ProtectedRoute><LiveMonitor /></ProtectedRoute>} />
+              <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+              <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+              <Route path="/event/:id" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
+              <Route path="/profile/:id" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+              <Route path="/users/edit/:id" element={<ProtectedRoute><EditUserModal /></ProtectedRoute>} />
+              <Route path="/users/delete/:id" element={<ProtectedRoute><DeleteConfirmModal /></ProtectedRoute>} />
+              <Route path="/register/start" element={<ProtectedRoute><RegisterStart /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
-                {/* 404 — cualquier ruta no reconocida */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </InviteRedirect>
-        </Router>
-      </MotionConfig>
+              {/* 404 — cualquier ruta no reconocida */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </InviteRedirect>
+      </Router>
     </ErrorBoundary>
   );
 }

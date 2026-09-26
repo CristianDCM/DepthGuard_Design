@@ -36,9 +36,10 @@ export default function IndicadorFrescura({
         ? "text-dg-warning"
         : "text-dg-error";
 
+  // Sin `animate-pulse`: en la variante minimalista nada late en bucle.
   const punto =
     estado.nivel === "fresco"
-      ? "bg-dg-success animate-pulse"
+      ? "bg-dg-success"
       : estado.nivel === "retrasado"
         ? "bg-dg-warning"
         : "bg-dg-error";
@@ -48,9 +49,9 @@ export default function IndicadorFrescura({
       // Solo se anuncia cuando el dato deja de ser de fiar: un lector de
       // pantalla no necesita oir "En directo" cada segundo.
       role={estado.nivel === "obsoleto" ? "alert" : undefined}
-      className={`inline-flex items-center gap-1.5 text-2xs font-semibold ${color} ${className}`}
+      className={`inline-flex items-center gap-1.5 text-2xs font-bold uppercase tracking-[0.8px] ${color} ${className}`}
     >
-      <span aria-hidden="true" className={`h-1.5 w-1.5 shrink-0 rounded-full ${punto}`} />
+      <span aria-hidden="true" className={`h-1.5 w-1.5 shrink-0 ${punto}`} />
       {estado.texto}
     </span>
   );
@@ -73,7 +74,7 @@ export function ContenidoFrescura({
   return (
     <div className={`relative flex flex-col ${className}`}>
       <div
-        className={`flex min-h-0 flex-1 flex-col transition-opacity ${
+        className={`flex min-h-0 flex-1 flex-col ${
           estado.atenuar ? "pointer-events-none opacity-40" : ""
         }`}
       >

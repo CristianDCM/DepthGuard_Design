@@ -13,7 +13,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Wifi, VideoOff, Loader2 } from "lucide-react";
+import { Wifi, VideoOff } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import type { CameraId } from "../lib/supabase";
 
@@ -76,6 +76,9 @@ interface WebRTCPlayerProps {
    * "bare" elimina la tarjeta, la relacion de aspecto y los mensajes de
    * estado propios: el video llena al contenedor y quien manda es el padre.
    * Lo usa BiometricFrame, que dibuja su propio marco encima.
+   *
+   * Por defecto es la tarjeta del monitor: esquina viva, filete de 1px,
+   * franjas solidas en vez de degradados y ninguna animacion.
    */
   variante?: "card" | "bare";
 }
@@ -274,7 +277,7 @@ export default function WebRTCPlayer({
   const bare = variante === "bare";
 
   return (
-    <div className={bare ? "relative h-full w-full" : "cyber-card overflow-hidden relative"}>
+    <div className={bare ? "relative h-full w-full" : "card relative overflow-hidden"}>
       {/* Video element — oculto hasta conectar */}
       <video
         ref={videoRef}
@@ -284,9 +287,7 @@ export default function WebRTCPlayer({
         aria-label="Vídeo en directo de la cámara de acceso"
         className={`${
           bare ? "h-full w-full object-cover" : "w-full aspect-video object-contain"
-        } bg-dg-canvas transition-opacity duration-500 ${
-          status === "conectado" ? "opacity-100" : "opacity-0 absolute"
-        }`}
+        } bg-dg-canvas ${status === "conectado" ? "opacity-100" : "opacity-0 absolute"}`}
       />
 
       {/*
@@ -305,10 +306,9 @@ export default function WebRTCPlayer({
           role="status"
         >
           {status === "iniciando" || status === "conectando" ? (
-            <>
-              <Loader2 className="h-7 w-7 text-dg-info animate-spin" aria-hidden="true" />
-              <span className="text-sm font-medium">Conectando con la cámara…</span>
-            </>
+            <span className="text-xs font-bold uppercase tracking-[0.8px]">
+              Conectando con la cámara
+            </span>
           ) : (
             <>
               <VideoOff className="h-7 w-7 text-dg-text-muted" aria-hidden="true" />
@@ -322,16 +322,16 @@ export default function WebRTCPlayer({
 
       {/* Cabecera del preview — solo con video y fuera de los modos minimal/bare */}
       {status === "conectado" && !minimal && !bare && (
-        <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 py-2 bg-gradient-to-b from-black/70 to-transparent">
+        <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between bg-black/70 px-3 py-2">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-dg-error animate-pulse shadow-[0_0_6px_var(--color-dg-error)]" aria-hidden="true" />
-            <span className="text-2xs font-bold text-white/90 uppercase">
+            <span aria-hidden="true" className="h-2 w-2 bg-dg-error" />
+            <span className="text-2xs font-bold uppercase tracking-[0.8px] text-white/90">
               En Vivo
             </span>
           </div>
-          <div className="flex items-center gap-1.5 bg-black/40 px-2 py-0.5 rounded-full">
+          <div className="flex items-center gap-1.5 border border-dg-success/50 px-2 py-0.5">
             <Wifi className="w-3 h-3 text-dg-success" aria-hidden="true" />
-            <span className="text-2xs font-bold text-dg-success uppercase">
+            <span className="text-2xs font-bold uppercase tracking-[0.8px] text-dg-success">
               Directo
             </span>
           </div>

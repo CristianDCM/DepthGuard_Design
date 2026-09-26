@@ -108,7 +108,7 @@ export default function BiometricFrame({
 
   return (
     <div className="space-y-4">
-      <div className="relative mx-auto w-full max-w-md overflow-hidden rounded-dg-lg border border-dg-border bg-dg-canvas aspect-[3/4] sm:aspect-video">
+      <div className="relative mx-auto w-full max-w-md overflow-hidden border border-dg-border bg-dg-canvas aspect-[3/4] sm:aspect-video">
         {/* Vídeo, ocupando todo el marco */}
         <div
           className={`absolute inset-0 [&_video]:h-full [&_video]:w-full [&_video]:object-cover ${
@@ -138,7 +138,6 @@ export default function BiometricFrame({
               stroke={color}
               strokeOpacity={0.35}
               strokeWidth="2"
-              style={{ transition: "stroke 200ms linear" }}
             />
             {/*
               El arco empieza a las 12 en punto, no a las 3, que es donde
@@ -162,13 +161,12 @@ export default function BiometricFrame({
               pathLength={1}
               strokeDasharray={`${progresoAcotado} ${Math.max(1 - progresoAcotado, 0.0001)}`}
               strokeDashoffset={-0.75}
-              style={{ transition: "stroke-dasharray 400ms ease-out, stroke 200ms linear" }}
             />
           </svg>
 
           {/* Flecha hacia donde debe girar la cara */}
           {Chevron && (
-            <div className={`absolute ${CHEVRON_POS[pose]} rounded-full bg-dg-bg/80 p-1 backdrop-blur-sm`}>
+            <div className={`absolute ${CHEVRON_POS[pose]} bg-dg-bg/80 p-1`}>
               <Chevron className="h-4 w-4" style={{ color }} aria-hidden="true" />
             </div>
           )}
@@ -200,11 +198,11 @@ export default function BiometricFrame({
             <li
               key={i}
               aria-hidden="true"
-              className={`h-1.5 rounded-full transition-all duration-300 ${
+              className={`h-1.5 ${
                 hecho
                   ? "w-8 bg-dg-success"
                   : enCurso
-                    ? "w-8 bg-dg-info/60 animate-pulse"
+                    ? "w-8 bg-dg-info"
                     : "w-4 bg-dg-border"
               }`}
             />
@@ -223,21 +221,21 @@ export default function BiometricFrame({
           {tira.map((ind) => (
             <li
               key={ind.id}
-              className={`flex flex-col items-center gap-1 rounded-dg border px-2 py-2 text-center ${
+              className={`flex flex-col items-center gap-1 border px-2 py-2 text-center ${
                 ind.nivel === "ok"
-                  ? "border-dg-success/25 bg-dg-success/5"
+                  ? "border-dg-success/40"
                   : ind.nivel === "aviso"
-                    ? "border-dg-warning/30 bg-dg-warning/5"
-                    : "border-dg-error/30 bg-dg-error/5"
+                    ? "border-dg-warning/50"
+                    : "border-dg-error/50"
               }`}
             >
               <span
                 aria-hidden="true"
-                className={`h-1.5 w-1.5 rounded-full ${
+                className={`h-1.5 w-1.5 ${
                   ind.nivel === "ok" ? "bg-dg-success" : ind.nivel === "aviso" ? "bg-dg-warning" : "bg-dg-error"
                 }`}
               />
-              <span className="text-2xs font-semibold text-dg-text-secondary">{ind.etiqueta}</span>
+              <span className="text-2xs font-bold uppercase tracking-[0.8px] text-dg-text-secondary">{ind.etiqueta}</span>
               <span
                 className={`text-2xs ${
                   ind.nivel === "ok" ? "text-dg-success" : ind.nivel === "aviso" ? "text-dg-warning" : "text-dg-error"

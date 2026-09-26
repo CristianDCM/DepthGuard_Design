@@ -209,26 +209,70 @@ export async function getHistorial(filtro?: EstadoEvento, busqueda?: string) {
 }
 
 /** Obtener historial con paginación real (Fase 2) */
-export async function getHistorialPaginado(page: number = 0, limit: number = 50, filtro?: EstadoEvento, busqueda?: string, fechaDesde?: string, fechaHasta?: string) {
+export interface FiltrosHistorial {
+  /** Estados a incluir. Vacio o sin definir: todos. */
+  estados?: EstadoEvento[];
+  /** Coincidencia parcial sobre el nombre de la persona. */
+  persona?: string;
+  /** Coincidencia parcial sobre el motivo. */
+  motivo?: string;
+  /** Fechas en formato YYYY-MM-DD, inclusive las dos. */
+  fechaDesde?: string;
+  fechaHasta?: string;
+  /** Confianza en porcentaje (0-100), inclusive las dos. */
+  confianzaMin?: number;
+  confianzaMax?: number;
+}
+
+/**
+ * Historial con paginacion y filtro por campo.
+ *
+ * Los parametros eran seis posicionales y ya no cabia ninguno mas sin
+ * convertir cada llamada en un jeroglifico de `undefined`. Ahora el filtro
+ * viaja en un objeto, con un campo por columna de la tabla.
+ *
+ * La hora NO se filtra aqui: PostgREST no sabe filtrar por una expresion
+ * como `extract(hour from timestamp)`, y hacerlo a mano exigiria una lista
+ * de rangos por cada dia del periodo. La pantalla la aplica sobre lo que ya
+ * tiene cargado y lo dice donde se elige.
+ */
+export async function getHistorialPaginado(
+  page: number = 0,
+  limit: number = 50,
+  filtros: FiltrosHistorial = {}
+) {
   let query = supabase
     .from("historial")
     .select("*", { count: "exact" })
     .order("timestamp", { ascending: false });
 
-  if (filtro) {
-    query = query.eq("estado", filtro);
+  if (filtros.estados && filtros.estados.length > 0) {
+    query = query.in("estado", filtros.estados);
   }
 
-  if (busqueda) {
-    query = query.or(`nombre.ilike.%${busqueda}%,motivo.ilike.%${busqueda}%`);
+  if (filtros.persona) {
+    query = query.ilike("nombre", `%${filtros.persona}%`);
   }
 
-  if (fechaDesde) {
-    query = query.gte("timestamp", `${fechaDesde}T00:00:00`);
+  if (filtros.motivo) {
+    query = query.ilike("motivo", `%${filtros.motivo}%`);
   }
 
-  if (fechaHasta) {
-    query = query.lte("timestamp", `${fechaHasta}T23:59:59`);
+  if (filtros.fechaDesde) {
+    query = query.gte("timestamp", `${filtros.fechaDesde}T00:00:00`);
+  }
+
+  if (filtros.fechaHasta) {
+    query = query.lte("timestamp", `${filtros.fechaHasta}T23:59:59`);
+  }
+
+  // La confianza se guarda de 0 a 1 y se elige de 0 a 100.
+  if (filtros.confianzaMin != null) {
+    query = query.gte("confianza", filtros.confianzaMin / 100);
+  }
+
+  if (filtros.confianzaMax != null) {
+    query = query.lte("confianza", filtros.confianzaMax / 100);
   }
 
   const from = page * limit;
