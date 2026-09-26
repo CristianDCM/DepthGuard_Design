@@ -80,7 +80,9 @@ function BarraSuperior() {
           aria-label="DepthGuard — ir al inicio"
           className="flex shrink-0 items-center"
         >
-          <img src="/logo.svg" alt="" aria-hidden="true" className="h-8 w-8 object-contain" />
+          <span aria-hidden="true" className="text-xl font-bold uppercase tracking-[0.8px] text-dg-text">
+            Depth<span className="text-dg-brand">Guard</span>
+          </span>
         </Link>
 
         <ul className="ml-auto flex items-stretch">
